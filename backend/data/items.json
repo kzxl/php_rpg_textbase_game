@@ -168,6 +168,90 @@
           "value": 15
         }
       ]
+    },
+    {
+      "id": "tui_tru_vat",
+      "name": "Túi Trữ Vật",
+      "baseType": "tru_vat",
+      "slot": "ring",
+      "rarity": "common",
+      "itemLevel": 1,
+      "affixes": [
+        { "type": "flat", "stat": "capacity", "value": 10 }
+      ]
+    },
+    {
+      "id": "nhan_tru_vat_ha_pham",
+      "name": "Nhẫn Trữ Vật (Hạ Phẩm)",
+      "baseType": "tru_vat_nhan",
+      "slot": "ring",
+      "rarity": "rare",
+      "itemLevel": 3,
+      "affixes": [
+        { "type": "flat", "stat": "capacity", "value": 50 }
+      ]
+    },
+    {
+      "id": "nhan_tru_vat_trung_pham",
+      "name": "Nhẫn Trữ Vật (Trung Phẩm)",
+      "baseType": "tru_vat_nhan",
+      "slot": "ring",
+      "rarity": "epic",
+      "itemLevel": 5,
+      "affixes": [
+        { "type": "flat", "stat": "capacity", "value": 150 }
+      ]
+    },
+    {
+      "id": "nhan_tru_vat_thuong_pham",
+      "name": "Nhẫn Càn Khôn",
+      "baseType": "tru_vat_nhan",
+      "slot": "ring",
+      "rarity": "legendary",
+      "itemLevel": 8,
+      "affixes": [
+        { "type": "flat", "stat": "capacity", "value": 500 }
+      ]
+    },
+    {
+      "id": "manual_internal_1",
+      "name": "Thổ Nạp Tâm Pháp",
+      "baseType": "manual_scroll",
+      "slot": "consumable",
+      "rarity": "common",
+      "category": "manual",
+      "itemLevel": 1,
+      "affixes": [ { "type": "manual_unlock", "unlockNodeId": "internal_1" } ]
+    },
+    {
+      "id": "manual_internal_2",
+      "name": "Quy Tức Khí Quyết",
+      "baseType": "manual_scroll",
+      "slot": "consumable",
+      "rarity": "rare",
+      "category": "manual",
+      "itemLevel": 3,
+      "affixes": [ { "type": "manual_unlock", "unlockNodeId": "internal_2" } ]
+    },
+    {
+      "id": "manual_internal_3",
+      "name": "Thiên Ma Bá Thể",
+      "baseType": "manual_scroll",
+      "slot": "consumable",
+      "rarity": "epic",
+      "category": "manual",
+      "itemLevel": 6,
+      "affixes": [ { "type": "manual_unlock", "unlockNodeId": "internal_3" } ]
+    },
+    {
+      "id": "manual_combat_1",
+      "name": "Sơ Cấp Kiếm Thuật",
+      "baseType": "manual_scroll",
+      "slot": "consumable",
+      "rarity": "common",
+      "category": "manual",
+      "itemLevel": 1,
+      "affixes": [ { "type": "manual_unlock", "unlockNodeId": "combat_1" } ]
     }
   ],
   "affixes": [

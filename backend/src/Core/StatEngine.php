@@ -80,7 +80,13 @@ class StatEngine
         // Calculate derived stats
         $final['maxHp'] = self::calcMaxHp($final['strength']);
         $final['maxEnergy'] = self::calcMaxEnergy($final['dexterity']);
-        $final['energyRegen'] = self::calcEnergyRegen($final['speed']);
+        
+        $baseEnergyRegen = self::calcEnergyRegen($final['speed']);
+        $final['energyRegen'] = round(ModifierEngine::apply($baseEnergyRegen, $modifiers, 'energyRegen', $context), 2);
+
+        $baseStaminaRegen = 10; // Cố định 10 Thể lực
+        $final['staminaRegen'] = round(ModifierEngine::apply($baseStaminaRegen, $modifiers, 'staminaRegen', $context), 2);
+
         $final['critChance'] = self::calcCritChance($final['dexterity']);
         $final['critMultiplier'] = self::calcCritMultiplier($modifiers, $context);
 
@@ -172,6 +178,13 @@ class StatEngine
             $base = $baseStats[$stat] ?? 0;
             $breakdown[$stat] = ModifierEngine::applyWithBreakdown($base, $modifiers, $stat, $context);
         }
+        
+        // Add breakdown for regen
+        $baseEnergyRegen = self::calcEnergyRegen($breakdown['speed']['final'] ?? 8);
+        $breakdown['energyRegen'] = ModifierEngine::applyWithBreakdown($baseEnergyRegen, $modifiers, 'energyRegen', $context);
+        
+        $breakdown['staminaRegen'] = ModifierEngine::applyWithBreakdown(10, $modifiers, 'staminaRegen', $context);
+        
         return $breakdown;
     }
 }

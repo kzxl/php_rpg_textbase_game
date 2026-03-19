@@ -1,0 +1,118 @@
+{
+  "dungeons": [
+    {
+      "id": "bi_canh_lam_hai",
+      "name": "Bí Cảnh: Lâm Hải Mê Cung",
+      "description": "Mê cung trong rừng sâu, đầy rẫy yêu thú và bẫy độc.",
+      "tier": 1,
+      "waves": 3,
+      "monsterPool": ["tho_lang", "thanh_xa", "moc_nhan"],
+      "boss": {
+        "id": "lam_hai_nguyet_lang",
+        "name": "Lâm Hải Nguyệt Lang",
+        "description": "Sói trăng cai quản mê cung, sức mạnh vượt xa đồng loại.",
+        "stats": { "hp": 200, "strength": 18, "speed": 14, "dexterity": 12, "defense": 10 },
+        "effects": [{ "type": "crit_bonus", "value": 15 }],
+        "xpReward": 200,
+        "goldReward": [50, 100],
+        "drops": [
+          { "itemId": "mat_huyet_tinh", "chance": 80, "qty": [2, 4] },
+          { "itemId": "mat_noi_dan_trung", "chance": 40, "qty": [1, 2] },
+          { "itemId": "tay_tuy_dan", "chance": 5, "qty": [1, 1], "type": "medicine" }
+        ]
+      },
+      "rewards": { "xpBonus": 1.5, "goldBonus": 1.5 },
+      "requiredRealm": 1
+    },
+    {
+      "id": "bi_canh_co_mo",
+      "name": "Bí Cảnh: Cổ Mộ U Minh",
+      "description": "Cổ mộ ngàn năm chứa đầy vong linh và xác biến. Phần thưởng hậu hĩnh nhưng nguy hiểm.",
+      "tier": 2,
+      "waves": 4,
+      "monsterPool": ["anh_hon", "u_linh", "co_thi"],
+      "boss": {
+        "id": "co_mo_ha_vuong",
+        "name": "Cổ Mộ Hà Vương",
+        "description": "Chúa tể cổ mộ, sở hữu nguyền thuật kinh hoàng.",
+        "stats": { "hp": 400, "strength": 25, "speed": 12, "dexterity": 16, "defense": 20 },
+        "effects": [
+          { "type": "curse", "chance": 50, "stat": "defense", "value": -8, "duration": 3 },
+          { "type": "poison", "chance": 35, "damage": 6, "duration": 3 }
+        ],
+        "xpReward": 400,
+        "goldReward": [100, 200],
+        "drops": [
+          { "itemId": "mat_am_khi", "chance": 90, "qty": [3, 6] },
+          { "itemId": "mat_noi_dan_lon", "chance": 50, "qty": [1, 2] },
+          { "itemId": "tay_tuy_dan", "chance": 10, "qty": [1, 1], "type": "medicine" }
+        ]
+      },
+      "rewards": { "xpBonus": 2.0, "goldBonus": 2.0 },
+      "requiredRealm": 2
+    },
+    {
+      "id": "bi_canh_hoa_nguc",
+      "name": "Bí Cảnh: Hỏa Ngục Thâm Uyên",
+      "description": "Lòng núi lửa, nhiệt độ cực hạn. Quái vật hỏa diệm cường đại.",
+      "tier": 3,
+      "waves": 5,
+      "monsterPool": ["hoa_ho", "thiet_giap_trung", "huyet_lang_vuong"],
+      "boss": {
+        "id": "hoa_nguc_ma_than",
+        "name": "Hỏa Ngục Ma Thần",
+        "description": "Ma thần sinh từ dung nham, sát thương hỏa diệm tuyệt đối.",
+        "stats": { "hp": 800, "strength": 40, "speed": 18, "dexterity": 20, "defense": 25 },
+        "effects": [
+          { "type": "burn", "chance": 60, "damage": 12, "duration": 3 },
+          { "type": "stun", "chance": 20, "duration": 1 }
+        ],
+        "xpReward": 800,
+        "goldReward": [200, 400],
+        "drops": [
+          { "itemId": "mat_tinh_hoa", "chance": 90, "qty": [4, 8] },
+          { "itemId": "mat_noi_dan_cuc", "chance": 40, "qty": [1, 2] },
+          { "itemId": "tay_tuy_dan", "chance": 15, "qty": [1, 1], "type": "medicine" },
+          { "itemId": "hoan_cot_dan", "chance": 5, "qty": [1, 1], "type": "medicine" }
+        ]
+      },
+      "rewards": { "xpBonus": 2.5, "goldBonus": 3.0 },
+      "requiredRealm": 3
+    },
+    {
+      "id": "bi_canh_thien_lao",
+      "name": "Bí Cảnh: Thiên Lao Hư Vô",
+      "description": "Nhà tù từ thượng giới sụp đổ. Quái vật từ vũ trụ khác xâm lấn.",
+      "tier": 4,
+      "waves": 6,
+      "monsterPool": ["ma_nhan", "thien_thach_thu", "loi_dieu"],
+      "boss": {
+        "id": "thien_lao_nguc_chu",
+        "name": "Thiên Lao Ngục Chủ",
+        "description": "Ngục chủ bất tử trấn giữ Thiên Lao từ thượng cổ. Sức mạnh vượt qua nhân giới.",
+        "stats": { "hp": 1500, "strength": 55, "speed": 25, "dexterity": 30, "defense": 40 },
+        "effects": [
+          { "type": "curse", "chance": 40, "stat": "strength", "value": -12, "duration": 3 },
+          { "type": "stun", "chance": 25, "duration": 1 },
+          { "type": "burn", "chance": 30, "damage": 15, "duration": 2 }
+        ],
+        "xpReward": 1500,
+        "goldReward": [400, 800],
+        "drops": [
+          { "itemId": "mat_thien_thach", "chance": 90, "qty": [5, 10] },
+          { "itemId": "mat_noi_dan_cuc", "chance": 60, "qty": [2, 3] },
+          { "itemId": "tay_tuy_dan", "chance": 25, "qty": [1, 1], "type": "medicine" },
+          { "itemId": "hoan_cot_dan", "chance": 10, "qty": [1, 1], "type": "medicine" }
+        ]
+      },
+      "rewards": { "xpBonus": 3.0, "goldBonus": 4.0 },
+      "requiredRealm": 4
+    }
+  ],
+  "mapItems": [
+    { "id": "ngoc_gian_t1", "name": "Ngọc Giản Hạ Phẩm", "tier": 1, "dungeonId": "bi_canh_lam_hai", "dropChance": 8, "icon": "🗺️" },
+    { "id": "ngoc_gian_t2", "name": "Ngọc Giản Trung Phẩm", "tier": 2, "dungeonId": "bi_canh_co_mo", "dropChance": 5, "icon": "🗺️" },
+    { "id": "ngoc_gian_t3", "name": "Ngọc Giản Thượng Phẩm", "tier": 3, "dungeonId": "bi_canh_hoa_nguc", "dropChance": 3, "icon": "🗺️" },
+    { "id": "ngoc_gian_t4", "name": "Ngọc Giản Cực Phẩm", "tier": 4, "dungeonId": "bi_canh_thien_lao", "dropChance": 1, "icon": "🗺️" }
+  ]
+}

@@ -58,9 +58,11 @@ function loadPlayer(string $id): ?Player
 {
     $player = PlayerRepository::load($id);
     if (!$player) return null;
-    // Auto-apply meditation HP regen
-    $healed = $player->applyMeditation();
-    if ($healed > 0) {
+    // Auto-apply HP, Energy, Stamina regen & travel updates
+    $changedRegen = $player->applyRegeneration();
+    $changedTravel = $player->updateTravelStatus();
+
+    if ($changedRegen || $changedTravel) {
         savePlayer($id, $player);
     }
     return $player;

@@ -27,17 +27,23 @@ export function pageCombat(el, ctx) {
       </div>
     </div>
 
-    <div id="exploreResult"></div>
-
-    <!-- DẤU VẾT YÊU THÚ -->
+    <!-- DẤU VẾT YÊU THÚ (tấn công) -->
     <div class="panel mt-md">
-      <div class="panel-title">Bản Địa Yêu Thú <span class="subtitle">(Tối đa 5 con rình rập)</span></div>
+      <div class="panel-title">⚔️ Yêu Thú Đang Rình Rập <span class="subtitle">(Tối đa 5 con)</span></div>
       <div class="panel-body no-pad" id="trackedMonstersList" style="max-height: 400px; overflow-y: auto;">
         <div style="padding: 16px; text-align: center;" class="text-dim">Đang rà soát dấu vết...</div>
       </div>
     </div>
-    
-    <div id="combatResult"></div>`
+
+    <div id="combatResult"></div>
+    <div id="exploreResult"></div>
+
+    <!-- QUẦN THỂ YÊU THÚ -->
+    <div class="panel mt-md">
+      <div class="panel-title">📋 Quần Thể Yêu Thú <span class="subtitle">(Có thể xuất hiện tại đây)</span></div>
+      <div class="panel-body no-pad" id="areaMonstersList" style="max-height: 250px; overflow-y: auto;">
+      </div>
+    </div>`
 
   // Phase 5: Fetch active tracked monsters and render with Sương Mù
   // Progressive Info Disclosure: monster insight from Thiên Cơ
@@ -137,6 +143,44 @@ export function pageCombat(el, ctx) {
 
   loadTrackedMonsters();
 
+  // Render Area Monsters from Backend (GameDataRepository::getMonstersByArea)
+  const loadAreaMonsters = async () => {
+    const listEl = document.getElementById('areaMonstersList')
+    if (!listEl) return
+    try {
+      const res = await api.getAreaMonsters(p.id)
+      // The area-monsters endpoint returns tracked + area monsters 
+      // Use state.monsters filtered by tier matching area  
+      const areaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
+      const am = (state.monsters || []).filter(m => !m.isWorldBoss && !m.is_world_boss)
+      // Show all non-boss monsters as "possible encounters" for this area
+      const displayMonsters = am.length > 0 ? am : []
+
+      if (displayMonsters.length === 0) {
+        listEl.innerHTML = `<div style="padding: 16px; text-align: center;" class="text-dim">Không rõ quần thể yêu thú nơi đây.</div>`
+        return
+      }
+
+      listEl.innerHTML = displayMonsters.map(m => {
+        let descHtml = '<div class="item-desc text-sm text-dim mb-sm">Thông tin mờ ảo...</div>'
+        if (mi >= 1) descHtml = `<div class="item-desc text-sm text-dim mb-sm">${m.description || 'Yêu thú sinh sống tại vùng này.'}</div>`
+
+        return `
+          <div class="list-item flex flex-col items-start gap-4" style="opacity: 0.8;">
+            <div class="item-info" style="width: 100%;">
+              <div class="item-name text-md text-gold">${m.name} <span class="text-xs text-dim ml-sm">${m.tierName || ''}</span></div>
+              ${descHtml}
+            </div>
+          </div>
+        `
+      }).join('')
+    } catch (e) {
+      console.error('Lỗi tải quần thể:', e)
+    }
+  }
+  
+  loadAreaMonsters();
+
   // Attach Explore Event
   const btnExplore = document.getElementById('btnExplore')
   if (btnExplore) {
@@ -208,6 +252,16 @@ async function doExplore(ctx) {
       html += `</div></div>`
       // NPC quest modal placeholder
       html += `<div id="npcQuestModal"></div>`
+    } else if (ev.type === 'player_encounter' && ev.player) {
+      html += `
+        <div style="font-size: 48px; margin-bottom: 8px;">👤</div>
+        <div class="text-lg text-gold bold mb-sm">${ev.message}</div>
+        <div class="text-sm text-dim mb-md">Âm thầm lướt qua hay chủ động giao hảo?</div>
+        <div class="flex gap-2 justify-center mt-md w-full">
+          <button class="btn btn--blue flex-1" id="btnInteractFriend" data-pid="${ev.player.id}">🤝 Kết Giao</button>
+          <button class="btn btn--gold flex-1" id="btnInteractGift" data-pid="${ev.player.id}">💎 Tặng 100 LT</button>
+        </div>
+      `
     } else if (ev.type === 'npc') {
       html += `
         <div style="font-size: 32px; margin-bottom: 8px;">👴</div>
@@ -232,13 +286,35 @@ async function doExplore(ctx) {
     }
 
     if (ev.type !== 'monster' && ev.type !== 'worldBoss' && !(ev.type === 'npc' && ev.npcId)) {
-      html += `<button class="btn btn--blue mt-sm" id="btnExploreContinue">Tiếp tục tìm kiếm</button>`
+      html += `<button class="btn btn--blue mt-sm" id="btnExploreContinue">Tiếp tục hành trình</button>`
     }
 
     if (!(ev.type === 'npc' && ev.npcId)) {
       html += `</div></div>`
     }
     rEl.innerHTML = html
+
+    if (ev.type === 'player_encounter' && ev.player) {
+      document.getElementById('btnInteractFriend').addEventListener('click', async (e) => {
+        try {
+          const res = await api.addFriend(state.playerId, e.target.dataset.pid);
+          if (res.success || res.message) notify(res.message || 'Đã gửi lời mời!', 'success');
+        } catch (err) { notify(err.message, 'error'); }
+      });
+      document.getElementById('btnInteractGift').addEventListener('click', async (e) => {
+        try {
+          const res = await api.interactPlayer(state.playerId, e.target.dataset.pid, 'gift', 100);
+          if (res.player) {
+            state.player = res.player;
+            updateSidebar();
+            notify(res.message, 'success');
+            const pbody = e.target.closest('.panel-body');
+            if(pbody) pbody.innerHTML = `<div class="text-green text-lg mb-md">Đã bồi đắp hảo cảm!</div><button class="btn btn--blue" id="btnExploreContinueAfterGift">Rời đi</button>`;
+            document.getElementById('btnExploreContinueAfterGift')?.addEventListener('click', () => { rEl.innerHTML = ''; });
+          }
+        } catch (err) { notify(err.message, 'error'); }
+      });
+    }
 
     if (ev.type === 'monster' || ev.type === 'worldBoss') {
       document.getElementById('btnExploreCombat').addEventListener('click', (e) => {

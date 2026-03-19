@@ -2,6 +2,7 @@
   "thanh_lam_tran": {
     "name": "Thanh Lam Trấn",
     "staminaCost": 10,
+    "mapX": 50, "mapY": 85,
     "rates": [
       { "type": "monster", "weight": 40 },
       { "type": "material", "weight": 25, "pools": ["mat_thit_tho", "mat_da_tho", "linh_thao", "huyet_thao", "doc_thao"] },
@@ -14,6 +15,7 @@
   "hac_phong_lam": {
     "name": "Hắc Phong Lâm",
     "staminaCost": 12,
+    "mapX": 35, "mapY": 75,
     "rates": [
       { "type": "monster", "weight": 50 },
       { "type": "material", "weight": 20, "pools": ["mat_go_linh", "mat_nhua_cay", "mat_da_ran", "thanh_linh_thao", "hoa_linh_chi", "bang_linh_thao"] },
@@ -26,6 +28,7 @@
   "vong_linh_coc": {
     "name": "Vong Linh Cốc",
     "staminaCost": 15,
+    "mapX": 65, "mapY": 70,
     "rates": [
       { "type": "monster", "weight": 55 },
       { "type": "material", "weight": 15, "pools": ["mat_hon_tan", "mat_manh_ky_uc", "mat_xuong_vun", "kim_linh_thao", "mat_noi_dan_nho"] },
@@ -37,6 +40,7 @@
   "thiet_huyet_son": {
     "name": "Thiết Huyết Sơn",
     "staminaCost": 20,
+    "mapX": 80, "mapY": 55,
     "rates": [
       { "type": "monster", "weight": 60 },
       { "type": "material", "weight": 15, "pools": ["mat_tinh_thach", "mat_tinh_hoa", "mat_loi_tinh", "kim_linh_thao", "mat_huyet_tinh"] },
@@ -49,6 +53,7 @@
   "thien_kiep_uyen": {
     "name": "Thiên Kiếp Uyên",
     "staminaCost": 25,
+    "mapX": 85, "mapY": 30,
     "rates": [
       { "type": "monster", "weight": 70 },
       { "type": "material", "weight": 10, "pools": ["mat_ma_nhan", "mat_hac_tinh", "mat_thien_thach", "thien_linh_thao", "mat_linh_hon_di_bien"] },
@@ -61,6 +66,7 @@
   "bac_suong_canh": {
     "name": "Bắc Sương Cảnh",
     "staminaCost": 18,
+    "mapX": 15, "mapY": 45,
     "rates": [
       { "type": "monster", "weight": 55 },
       { "type": "material", "weight": 20, "pools": ["bang_linh_thao", "mat_huyen_bang_hoa", "mat_xuong_vun", "mat_noi_dan_trung"] },
@@ -72,6 +78,7 @@
   "am_sat_hoang": {
     "name": "Ám Sát Hoang",
     "staminaCost": 22,
+    "mapX": 30, "mapY": 40,
     "rates": [
       { "type": "monster", "weight": 60 },
       { "type": "material", "weight": 15, "pools": ["doc_thao", "mat_am_hon_thao", "mat_huyet_tinh", "mat_noi_dan_trung"] },
@@ -83,6 +90,7 @@
   "co_moc_linh_vien": {
     "name": "Cổ Mộc Linh Viên",
     "staminaCost": 20,
+    "mapX": 50, "mapY": 50,
     "rates": [
       { "type": "monster", "weight": 50 },
       { "type": "material", "weight": 25, "pools": ["mat_go_linh", "mat_nhua_cay", "thanh_linh_thao", "mat_huyen_thien_hoa"] },
@@ -94,6 +102,7 @@
   "huyet_ma_chien_truong": {
     "name": "Huyết Ma Chiến Trường",
     "staminaCost": 28,
+    "mapX": 70, "mapY": 25,
     "rates": [
       { "type": "monster", "weight": 65 },
       { "type": "material", "weight": 15, "pools": ["mat_huyet_tinh", "mat_am_khi", "mat_loi_tinh", "mat_noi_dan_lon"] },
@@ -106,6 +115,7 @@
   "thien_hoa_linh_dia": {
     "name": "Thiên Hỏa Linh Địa",
     "staminaCost": 30,
+    "mapX": 80, "mapY": 15,
     "rates": [
       { "type": "monster", "weight": 65 },
       { "type": "material", "weight": 15, "pools": ["hoa_linh_chi", "mat_tinh_hoa", "mat_huyen_thien_hoa", "mat_loi_tinh"] },
@@ -117,6 +127,7 @@
   "u_minh_quy_vuc": {
     "name": "U Minh Quỷ Vực",
     "staminaCost": 32,
+    "mapX": 30, "mapY": 15,
     "rates": [
       { "type": "monster", "weight": 70 },
       { "type": "material", "weight": 15, "pools": ["mat_ma_nhan", "mat_linh_hon_di_bien", "mat_tan_phach", "mat_noi_dan_cuc"] },
@@ -128,6 +139,7 @@
   "thien_dao_tan_tich": {
     "name": "Thiên Đạo Tàn Tích",
     "staminaCost": 35,
+    "mapX": 50, "mapY": 20,
     "rates": [
       { "type": "monster", "weight": 75 },
       { "type": "material", "weight": 10, "pools": ["thien_linh_thao", "ban_nguyen_tinh", "mat_hac_tinh", "mat_thien_thach"] },
@@ -139,6 +151,7 @@
   "vo_tan_hu_khong": {
     "name": "Vô Tận Hư Không",
     "staminaCost": 40,
+    "mapX": 50, "mapY": 5,
     "rates": [
       { "type": "monster", "weight": 80 },
       { "type": "material", "weight": 10, "pools": ["mat_hu_khong", "ban_nguyen_tinh", "mat_linh_hon_di_bien"] },

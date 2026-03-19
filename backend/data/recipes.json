@@ -140,6 +140,66 @@
       "cost": 2000,
       "successRate": 20,
       "craftTime": 300
+    },
+    {
+      "id": "recipe_tui_tru_vat",
+      "target": "tui_tru_vat",
+      "type": "item",
+      "name": "Công thức: Túi Trữ Vật",
+      "tier": 1,
+      "requirements": { "skill": "tinh_che", "level": 2 },
+      "materials": [
+        { "id": "mat_da_tho", "amount": 5 },
+        { "id": "mat_khong_gian_manh", "amount": 1 }
+      ],
+      "cost": 100,
+      "successRate": 60,
+      "craftTime": 30
+    },
+    {
+      "id": "recipe_nhan_tru_vat_ha_pham",
+      "target": "nhan_tru_vat_ha_pham",
+      "type": "item",
+      "name": "Công thức: Nhẫn Trữ Vật (Hạ Phẩm)",
+      "tier": 2,
+      "requirements": { "skill": "tinh_che", "level": 5 },
+      "materials": [
+        { "id": "mat_kim_loai_linh", "amount": 5 },
+        { "id": "mat_khong_gian_thach", "amount": 1 }
+      ],
+      "cost": 500,
+      "successRate": 40,
+      "craftTime": 120
+    },
+    {
+      "id": "recipe_nhan_tru_vat_trung_pham",
+      "target": "nhan_tru_vat_trung_pham",
+      "type": "item",
+      "name": "Công thức: Nhẫn Trữ Vật (Trung Phẩm)",
+      "tier": 3,
+      "requirements": { "skill": "tinh_che", "level": 10 },
+      "materials": [
+        { "id": "mat_loi_vu", "amount": 5 },
+        { "id": "mat_hu_khong_tinh", "amount": 1 }
+      ],
+      "cost": 2000,
+      "successRate": 25,
+      "craftTime": 300
+    },
+    {
+      "id": "recipe_nhan_tru_vat_thuong_pham",
+      "target": "nhan_tru_vat_thuong_pham",
+      "type": "item",
+      "name": "Công thức: Nhẫn Càn Khôn",
+      "tier": 4,
+      "requirements": { "skill": "tinh_che", "level": 18 },
+      "materials": [
+        { "id": "mat_thien_thach", "amount": 10 },
+        { "id": "mat_gioi_tu_thach", "amount": 1 }
+      ],
+      "cost": 10000,
+      "successRate": 10,
+      "craftTime": 1200
     }
   ]
 }

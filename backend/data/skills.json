@@ -212,6 +212,78 @@
               "tags": ["crafting", "alchemy"],
               "tier": 1,
               "requirements": []
+         },
+         {
+              "id": "tieu_chu_thien",
+              "name": "Tiểu Chu Thiên",
+              "description": "Khí hành chu thiên, giúp cơ thể phục hồi Linh Lực liên tục.",
+              "type": "passive",
+              "tags": ["buff", "energy"],
+              "tier": 2,
+              "requirements": ["Cảnh giới Luyện Khí", "Linh Lực Tối Đa > 60"],
+              "modifiers": [
+                  { "type": "flat", "stat": "energyRegen", "value": 15, "source": "skill" }
+              ]
+         },
+         {
+              "id": "cuu_nguu_nhi_ho",
+              "name": "Cửu Ngưu Nhị Hổ Lực",
+              "description": "Cơ thể như trâu như hổ, dồi dào sinh cơ, thể lực phục hồi kinh người.",
+              "type": "passive",
+              "tags": ["buff", "stamina"],
+              "tier": 3,
+              "requirements": ["Sức Mạnh > 30"],
+              "modifiers": [
+                  { "type": "increase", "stat": "staminaRegen", "value": 50, "source": "skill" }
+              ]
+         },
+         {
+              "id": "tinh_che",
+              "name": "Tinh Chế Thuật",
+              "description": "Nắm vững cách tinh chế nguyên liệu, tăng tỷ lệ luyện đan thành công.",
+              "type": "passive",
+              "tags": ["buff", "crafting"],
+              "tier": 2,
+              "requirements": ["Cấp độ 10"],
+              "modifiers": [
+                  { "type": "increase", "stat": "craftSuccessRate", "value": 2, "source": "skill" }
+              ]
+         },
+         {
+              "id": "phu_an_thuat",
+              "name": "Phù Ấn Thuật",
+              "description": "Thông thạo Phù Văn, giảm chi phí Linh thạch khi sử dụng Phù.",
+              "type": "passive",
+              "tags": ["buff", "crafting"],
+              "tier": 3,
+              "requirements": ["Cấp độ 20", "Tinh Chế Thuật Lv2"],
+              "modifiers": [
+                  { "type": "increase", "stat": "currencyCostReduction", "value": 5, "source": "skill" }
+              ]
+         },
+         {
+              "id": "linh_kiem_thuat",
+              "name": "Linh Kiếm Thuật",
+              "description": "Hiểu sâu linh khí chảy trong pháp khí. Khi dùng Phù Văn, affix chất lượng cao hơn.",
+              "type": "passive",
+              "tags": ["buff", "crafting"],
+              "tier": 4,
+              "requirements": ["Cấp độ 35", "Phù Ấn Thuật Lv2"],
+              "modifiers": [
+                  { "type": "increase", "stat": "affixQualityBonus", "value": 10, "source": "skill" }
+              ]
+         },
+         {
+              "id": "cuong_hoa_thuat",
+              "name": "Cường Hóa Thuật",
+              "description": "Khi dùng Thăng Cấp Phù, có cơ hội tăng 2 cấp thay vì 1.",
+              "type": "passive",
+              "tags": ["buff", "crafting"],
+              "tier": 5,
+              "requirements": ["Cấp độ 50", "Linh Kiếm Thuật Lv1"],
+              "modifiers": [
+                  { "type": "increase", "stat": "doubleUpgradeChance", "value": 15, "source": "skill" }
+              ]
          }
     ],
     "tagDescriptions": {

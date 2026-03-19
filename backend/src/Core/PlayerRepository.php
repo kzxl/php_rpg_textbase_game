@@ -23,17 +23,19 @@ class PlayerRepository
         $sql = "INSERT INTO players (
             id, username, password_hash, name, gender, level, xp, xp_to_next,
             current_hp, max_hp, current_energy, max_energy, current_stamina, max_stamina, stat_points,
-            allocated_stats, hospital_until, med_cooldown_until, last_hp_regen,
+            allocated_stats, hospital_until, med_cooldown_until, mug_cooldown_until, last_hp_regen,
             gold, nerve, max_nerve, crime_exp, crime_skills, jail_until,
-            studying_node, study_ends_at, unlocked_nodes, tree_progress, current_area,
-            traveling_to, travel_arrives_at, role
+            studying_node, study_ends_at, unlocked_nodes, tree_progress,
+            skill_progress, discovered_nodes,
+            current_area, traveling_to, travel_arrives_at, role, realm_tier, talents
         ) VALUES (
             :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
             :current_hp, :max_hp, :current_energy, :max_energy, :current_stamina, :max_stamina, :stat_points,
-            :allocated_stats, :hospital_until, :med_cooldown_until, :last_hp_regen,
+            :allocated_stats, :hospital_until, :med_cooldown_until, :mug_cooldown_until, :last_hp_regen,
             :gold, :nerve, :max_nerve, :crime_exp, :crime_skills, :jail_until,
-            :studying_node, :study_ends_at, :unlocked_nodes, :tree_progress, :current_area,
-            :traveling_to, :travel_arrives_at, :role
+            :studying_node, :study_ends_at, :unlocked_nodes, :tree_progress,
+            :skill_progress, :discovered_nodes,
+            :current_area, :traveling_to, :travel_arrives_at, :role, :realm_tier, :talents
         ) ON DUPLICATE KEY UPDATE
             name = VALUES(name), gender = VALUES(gender),
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
@@ -41,17 +43,20 @@ class PlayerRepository
             current_energy = VALUES(current_energy), max_energy = VALUES(max_energy),
             current_stamina = VALUES(current_stamina), max_stamina = VALUES(max_stamina),
             stat_points = VALUES(stat_points), allocated_stats = VALUES(allocated_stats),
-            hospital_until = VALUES(hospital_until), med_cooldown_until = VALUES(med_cooldown_until),
+            hospital_until = VALUES(hospital_until), med_cooldown_until = VALUES(med_cooldown_until), mug_cooldown_until = VALUES(mug_cooldown_until),
             last_hp_regen = VALUES(last_hp_regen),
             gold = VALUES(gold), nerve = VALUES(nerve), max_nerve = VALUES(max_nerve),
             crime_exp = VALUES(crime_exp), crime_skills = VALUES(crime_skills),
             jail_until = VALUES(jail_until),
             studying_node = VALUES(studying_node), study_ends_at = VALUES(study_ends_at),
             unlocked_nodes = VALUES(unlocked_nodes), tree_progress = VALUES(tree_progress),
+            skill_progress = VALUES(skill_progress), discovered_nodes = VALUES(discovered_nodes),
             current_area = VALUES(current_area),
             traveling_to = VALUES(traveling_to),
             travel_arrives_at = VALUES(travel_arrives_at),
-            role = VALUES(role)";
+            role = VALUES(role),
+            realm_tier = VALUES(realm_tier),
+            talents = VALUES(talents)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -73,6 +78,7 @@ class PlayerRepository
             'allocated_stats' => json_encode($data['allocatedStats'] ?? []),
             'hospital_until' => $data['hospitalUntil'] ?? 0,
             'med_cooldown_until' => $data['medCooldownUntil'] ?? 0,
+            'mug_cooldown_until' => $data['mugCooldownUntil'] ?? 0,
             'last_hp_regen' => $data['lastHpRegen'] ?? 0,
             'gold' => $data['gold'] ?? 0,
             'nerve' => $data['nerve'] ?? 15,
@@ -84,10 +90,14 @@ class PlayerRepository
             'study_ends_at' => $data['studyEndsAt'] ?? 0,
             'unlocked_nodes' => json_encode($data['unlockedNodes'] ?? []),
             'tree_progress' => json_encode($data['treeProgress'] ?? []),
+            'skill_progress' => json_encode($data['skillProgress'] ?? []),
+            'discovered_nodes' => json_encode($data['discoveredNodes'] ?? []),
             'current_area' => $data['currentArea'] ?? 'thanh_lam_tran',
-            'traveling_to' => $data['travelingTo'] ?? null,
-            'travel_arrives_at' => $data['travelArrivesAt'] ?? 0,
+            'traveling_to' => $data['travelDestination'] ?? null,
+            'travel_arrives_at' => $data['travelEndTime'] ?? 0,
             'role' => $data['role'] ?? 'player',
+            'realm_tier' => $data['realmTier'] ?? 1,
+            'talents' => json_encode($data['talents'] ?? null),
         ]);
 
         // Phase 5: Normalized Tracking Tables
@@ -119,6 +129,9 @@ class PlayerRepository
 
         // Convert DB row (snake_case) to Player array format (camelCase)
         $data = [
+            'id' => $id,
+            'username' => $row['username'] ?? '',
+            'passwordHash' => $row['password_hash'] ?? '',
             'name' => $row['name'],
             'gender' => $row['gender'],
             'level' => (int) $row['level'],
@@ -134,6 +147,7 @@ class PlayerRepository
             'allocatedStats' => json_decode($row['allocated_stats'] ?? '{}', true) ?: [],
             'hospitalUntil' => (int) $row['hospital_until'],
             'medCooldownUntil' => (int) $row['med_cooldown_until'],
+            'mugCooldownUntil' => (int) ($row['mug_cooldown_until'] ?? 0),
             'lastHpRegen' => (int) $row['last_hp_regen'],
             'gold' => (int) $row['gold'],
             'nerve' => (int) $row['nerve'],
@@ -145,8 +159,12 @@ class PlayerRepository
             'studyEndsAt' => (int) $row['study_ends_at'],
             'unlockedNodes' => json_decode($row['unlocked_nodes'] ?? '[]', true) ?: [],
             'treeProgress' => json_decode($row['tree_progress'] ?? '{}', true) ?: [],
+            'skillProgress' => json_decode($row['skill_progress'] ?? '{}', true) ?: [],
+            'discoveredNodes' => json_decode($row['discovered_nodes'] ?? '[]', true) ?: [],
             'currentArea' => $row['current_area'] ?? 'thanh_lam_tran',
             'role' => $row['role'] ?? 'player',
+            'realmTier' => (int)($row['realm_tier'] ?? 1),
+            'talents' => json_decode($row['talents'] ?? 'null', true),
             // skills loaded from player_skills table below
             'skills' => [],
             // equipment/inventory loaded from player_items table

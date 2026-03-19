@@ -57,7 +57,7 @@ export function pageAdmin(el, ctx) {
     container.innerHTML = '<div class="loading-spinner">⏳ Đang tải...</div>'
 
     try {
-      const data = await api.request(`/admin/${tabId}`)
+      const data = await api.request(`/admin/${tabId}?adminId=${state.playerId}`)
       renderTabContent(tabId, data, container)
     } catch (e) {
       container.innerHTML = `<div class="panel"><div class="panel-body text-red">Lỗi: ${e.message}</div></div>`
@@ -218,9 +218,9 @@ export function pageAdmin(el, ctx) {
       try {
         const val = document.getElementById('modalEditor').value
         const parsed = JSON.parse(val)
-        await api.request(`/admin/${apiPath}`, {
+        await api.request(`/admin/${apiPath}?adminId=${state.playerId}`, {
           method: 'PUT',
-          body: JSON.stringify(parsed),
+          body: JSON.stringify({ data: parsed }),
         })
         notify('✅ Đã lưu!', 'success')
         modal.remove()

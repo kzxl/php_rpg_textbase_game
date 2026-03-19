@@ -124,6 +124,30 @@ class ItemSystem
         return $selected;
     }
 
+    /**
+     * Public: Generate affixes for a given rarity and slot.
+     */
+    public function generateAffixes(string $rarity, string $slot, int $itemLevel = 1): array
+    {
+        $maxAffixes = match ($rarity) {
+            'common'    => 1,
+            'rare'      => 3,
+            'epic'      => 5,
+            'legendary' => 6,
+            default     => 1,
+        };
+        return $this->rollAffixes($maxAffixes, $itemLevel);
+    }
+
+    /**
+     * Public: Generate a single random affix, avoiding duplicates.
+     */
+    public function generateSingleAffix(string $slot, array $existingAffixes = [], int $itemLevel = 1): array
+    {
+        $result = $this->rollAffixes(1, $itemLevel);
+        return $result[0] ?? ['type' => 'flat', 'stat' => 'strength', 'value' => 1, 'name' => 'Cường Hóa', 'tier' => 1];
+    }
+
     private function randomSlot(): string
     {
         $slots = ['weapon', 'body', 'shield', 'feet', 'ring'];
@@ -148,5 +172,33 @@ class ItemSystem
         };
 
         return $prefixes[array_rand($prefixes)] . ' ' . $types[array_rand($types)];
+    }
+
+    /**
+     * Generate a random item for gacha/loot
+     */
+    public function generateItem(int $playerLevel, string $rarity = 'common', string $slot = 'weapon'): Item
+    {
+        $name = $this->generateName($rarity, $slot);
+        $affixCount = match($rarity) {
+            'legendary' => rand(3, 4),
+            'rare' => rand(2, 3),
+            'uncommon' => rand(1, 2),
+            default => rand(0, 1),
+        };
+        $affixes = $this->generateAffixes($rarity, $slot);
+        if (count($affixes) > $affixCount) $affixes = array_slice($affixes, 0, $affixCount);
+
+        $id = $slot . '_' . substr(md5(uniqid()), 0, 8);
+        $item = Item::fromArray([
+            'id' => $id,
+            'name' => $name,
+            'slot' => $slot,
+            'baseType' => $slot,
+            'rarity' => $rarity,
+            'itemLevel' => $playerLevel + rand(0, 5),
+            'affixes' => $affixes,
+        ]);
+        return $item;
     }
 }

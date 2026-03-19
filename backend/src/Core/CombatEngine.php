@@ -405,7 +405,10 @@ class CombatEngine
         if ($player->isAlive() && $monster->isAlive() && $turn >= self::MAX_TURNS) {
             $outcome = 'stalemate';
             $allLogs[] = "⏰ Hết {$maxTurns} lượt! Cả hai đều kiệt sức.";
-        }
+        } // -> Stalemate if max turns hit
+
+        // End of combat — tick buff durations
+        $player->tickCombatBuffs();
 
         // Calculate rewards based on outcome
         $rewards = null;
@@ -421,6 +424,35 @@ class CombatEngine
                 $player->gold += $goldReward;
                 $allLogs[] = "🏆 Chiến thắng!";
                 $allLogs[] = "💰 +{$goldReward} Linh Thạch";
+
+                // Phase 9: Boss / Monster Drops (Items & Manuals)
+                $dropRarity = null;
+                if (($monster->getRawData()['isBoss'] ?? false) || $monster->level >= 10) {
+                    $dropRoll = mt_rand(1, 100);
+                    if ($dropRoll <= 50) $dropRarity = 'epic'; // 50% rớt hàng Epic
+                    else if ($dropRoll <= 90) $dropRarity = 'legendary'; // 40%
+                } else if (mt_rand(1, 100) <= 5) {
+                    $dropRarity = 'rare'; // 5% quái thường rớt Rare
+                }
+
+                if ($dropRarity) {
+                    $itemSys = new \App\Systems\ItemSystem();
+                    $isManual = mt_rand(1, 100) <= 20; // 20% rớt Bí Tịch
+                    $item = null;
+                    if ($isManual) {
+                        $manuals = array_filter($itemSys->getAll(), fn($i) => ($i['category'] ?? '') === 'manual' && ($i['rarity'] ?? 'common') === $dropRarity);
+                        if (!empty($manuals)) {
+                            $chosen = $manuals[array_rand($manuals)];
+                            $item = $itemSys->createItem($chosen['id']);
+                        }
+                    }
+                    if (!$item) {
+                        $item = $itemSys->generateRandomItem($dropRarity, null, $monster->level);
+                    }
+                    $player->inventory[] = $item;
+                    $allLogs[] = "🎁 Nhận chiến lợi phẩm: {$item->name} ({$dropRarity})";
+                }
+
                 if ($player->level > $prevLevel) {
                     $allLogs[] = "🎉 Đột phá! Cấp {$player->level}!";
                 }
@@ -530,5 +562,55 @@ class CombatEngine
             'targetAlive' => $target->isAlive(),
             'log' => $this->log,
         ];
+    }
+
+    /**
+     * Simulate PvP combat between two players (no real damage applied, stat-based only)
+     */
+    public function simulatePvP(Player $attacker, Player $defender): array
+    {
+        $aStr = $attacker->stats['strength'] ?? 10;
+        $aSpd = $attacker->stats['speed'] ?? 10;
+        $aDex = $attacker->stats['dexterity'] ?? 10;
+        $aDef = $attacker->stats['defense'] ?? 10;
+        $aHp = $attacker->currentHp;
+
+        $dStr = $defender->stats['strength'] ?? 10;
+        $dSpd = $defender->stats['speed'] ?? 10;
+        $dDex = $defender->stats['dexterity'] ?? 10;
+        $dDef = $defender->stats['defense'] ?? 10;
+        $dHp = $defender->currentHp;
+
+        $log = [];
+        $maxTurns = 15;
+
+        for ($turn = 1; $turn <= $maxTurns; $turn++) {
+            // Attacker attacks
+            $aDmg = max(1, (int)(($aStr * 2 + $aDex) * rand(80, 120) / 100 - $dDef * 0.5));
+            $dodge = rand(1, 100) <= min(30, $dSpd - $aSpd + 10);
+            if ($dodge) {
+                $log[] = "Turn {$turn}: {$defender->name} né tránh!";
+            } else {
+                $dHp -= $aDmg;
+                $log[] = "Turn {$turn}: {$attacker->name} gây {$aDmg} sát thương";
+            }
+            if ($dHp <= 0) { return ['winner' => 'attacker', 'log' => $log]; }
+
+            // Defender attacks
+            $dDmg = max(1, (int)(($dStr * 2 + $dDex) * rand(80, 120) / 100 - $aDef * 0.5));
+            $dodge2 = rand(1, 100) <= min(30, $aSpd - $dSpd + 10);
+            if ($dodge2) {
+                $log[] = "Turn {$turn}: {$attacker->name} né tránh!";
+            } else {
+                $aHp -= $dDmg;
+                $log[] = "Turn {$turn}: {$defender->name} gây {$dDmg} sát thương";
+            }
+            if ($aHp <= 0) { return ['winner' => 'defender', 'log' => $log]; }
+        }
+
+        // Stalemate → higher HP ratio wins
+        $aRatio = $aHp / max(1, $attacker->maxHp);
+        $dRatio = $dHp / max(1, $defender->maxHp);
+        return ['winner' => $aRatio >= $dRatio ? 'attacker' : 'defender', 'log' => $log];
     }
 }

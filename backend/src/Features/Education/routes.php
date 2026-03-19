@@ -15,7 +15,7 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        $completed = $player->checkEducation();
+        $player->checkEducation();
 
         $body = $request->getParsedBody();
         $nodeId = $body['nodeId'] ?? '';
@@ -56,15 +56,24 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        $completedNodeId = $player->checkEducation();
-        if ($completedNodeId) {
+        $res = $player->checkEducation();
+        if ($res['finished']) {
+            if ($res['isLevelUp']) {
+                $lvl = $res['currentLevel'];
+                \App\Core\GameDataRepository::addEvent($id, 'education', "Kỳ ngộ tu tiên! Pháp quyết của bạn đã đột phá bình cảnh, đạt đến Tầng thứ {$lvl}!");
+            }
             savePlayer($id, $player);
         }
 
+        $msg = 'Chưa thu hoạch được gì.';
+        if ($res['finished']) {
+            $msg = $res['isLevelUp'] ? "Đột phá Cảnh giới tầng {$res['currentLevel']}!" : "Lĩnh ngộ thành công, tăng {$res['expGained']} độ hiểu thấu.";
+        }
+
         return jsonResponse($response, [
-            'completed' => $completedNodeId !== null,
-            'completedNodeId' => $completedNodeId,
-            'message' => $completedNodeId ? "Trần kiến tăng tiến!" : 'Chưa thu hoạch được gì.',
+            'completed' => $res['finished'],
+            'completedNodeId' => $res['nodeId'] ?? null,
+            'message' => $msg,
             'player' => $player->toArray(),
         ]);
     });

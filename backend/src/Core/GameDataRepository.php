@@ -271,6 +271,56 @@ class GameDataRepository
     }
 
     // ============================================
+    // PLAYER EVENTS
+    // ============================================
+    public static function addEvent(string $playerId, string $type, string $message): void
+    {
+        // Don't add events for missing players
+        if (!$playerId) return;
+
+        $stmt = Database::pdo()->prepare("
+            INSERT INTO player_events (player_id, type, message, is_read, created_at)
+            VALUES (?, ?, ?, 0, ?)
+        ");
+        $stmt->execute([$playerId, $type, $message, time()]);
+    }
+
+    public static function getEvents(string $playerId, int $limit = 50): array
+    {
+        $stmt = Database::pdo()->prepare("
+            SELECT * FROM player_events
+            WHERE player_id = ?
+            ORDER BY created_at DESC
+            LIMIT ?
+        ");
+        // PDO bindValue because LIMIT needs INT
+        $stmt->bindValue(1, $playerId);
+        $stmt->bindValue(2, $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public static function getUnreadEventsCount(string $playerId): int
+    {
+        $stmt = Database::pdo()->prepare("
+            SELECT COUNT(*) FROM player_events
+            WHERE player_id = ? AND is_read = 0
+        ");
+        $stmt->execute([$playerId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public static function markEventsAsRead(string $playerId): void
+    {
+        $stmt = Database::pdo()->prepare("
+            UPDATE player_events
+            SET is_read = 1
+            WHERE player_id = ? AND is_read = 0
+        ");
+        $stmt->execute([$playerId]);
+    }
+
+    // ============================================
     // EDUCATION TREES
     // ============================================
     public static function getEducationTrees(): array

@@ -72,6 +72,17 @@ return function ($app) {
                     $result['questNotifications'] = $questNotifs;
                 }
                 \App\Core\PlayerRepository::saveQuests($playerId, $player->activeQuests);
+
+                // Ngọc Giản (Map Item) drop chance after combat win
+                $dungeonData = json_decode(file_get_contents(__DIR__ . '/../../../data/dungeons.json'), true);
+                $mapItems = $dungeonData['mapItems'] ?? [];
+                foreach ($mapItems as $mi) {
+                    if (mt_rand(1, 100) <= ($mi['dropChance'] ?? 0)) {
+                        $player->materials[$mi['id']] = ($player->materials[$mi['id']] ?? 0) + 1;
+                        $result['mapDrop'] = ['id' => $mi['id'], 'name' => $mi['name'], 'icon' => $mi['icon']];
+                        break; // Only one map drop per fight
+                    }
+                }
             } else {
                 // Flee / Stalemate -> update HP
                 $pdo->prepare("UPDATE player_tracked_monsters SET current_hp = ? WHERE id = ?")->execute([$monster->currentHp, $trackedMonsterId]);

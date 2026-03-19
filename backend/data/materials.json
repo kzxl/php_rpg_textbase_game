@@ -51,7 +51,12 @@
         { "id": "mat_linh_hon_di_bien", "name": "Linh Hồn Dị Biến", "tier": 4, "category": "rare", "description": "Linh hồn đã dị biến, craft trang bị huyền thoại.", "stackable": true, "sellPrice": 150 },
         { "id": "mat_thien_thach", "name": "Thiên Thạch", "tier": 4, "category": "elemental", "description": "Mảnh thiên thạch từ ngoài vũ trụ.", "stackable": true, "sellPrice": 90 },
         { "id": "mat_tinh_thach_lon", "name": "Tinh Thạch Lớn", "tier": 4, "category": "spirit", "description": "Tinh thạch khổng lồ chứa linh lực dồi dào.", "stackable": true, "sellPrice": 100 },
-        { "id": "mat_loi_dia", "name": "Lõi Địa", "tier": 4, "category": "rare", "description": "Lõi năng lượng từ lòng đất, cực hiếm.", "stackable": true, "sellPrice": 200 }
+        { "id": "mat_loi_dia", "name": "Lõi Địa", "tier": 4, "category": "rare", "description": "Lõi năng lượng từ lòng đất, cực hiếm.", "stackable": true, "sellPrice": 200 },
+        
+        { "id": "mat_khong_gian_manh", "name": "Mảnh Vỡ Không Gian", "tier": 1, "category": "rare", "description": "Mảnh vụn không gian, chứa năng lượng trữ vật.", "stackable": true, "sellPrice": 80 },
+        { "id": "mat_khong_gian_thach", "name": "Không Gian Thạch", "tier": 2, "category": "rare", "description": "Đá không gian hoàn chỉnh, dùng luyện nhẫn.", "stackable": true, "sellPrice": 250 },
+        { "id": "mat_hu_khong_tinh", "name": "Hư Không Tinh", "tier": 3, "category": "rare", "description": "Tinh thể hư không, chứa khoảng không lớn.", "stackable": true, "sellPrice": 800 },
+        { "id": "mat_gioi_tu_thach", "name": "Giới Tử Thạch", "tier": 4, "category": "rare", "description": "Hòn đá có thể chứa cả thế giới bên trong.", "stackable": true, "sellPrice": 3000 }
     ],
     "categories": {
         "basic": { "name": "Cơ bản", "color": "#8e8e8e" },

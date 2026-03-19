@@ -17,17 +17,77 @@ return function ($app) {
         $body = $request->getParsedBody();
         $itemId = $body['itemId'] ?? '';
 
-        $itemSystem = new ItemSystem();
-        $item = $itemSystem->createItem($itemId);
-        if (!$item) return jsonResponse($response, ['error' => 'Item not found'], 404);
+        $item = null;
+        foreach ($player->inventory as $inv) {
+            if ($inv->id === $itemId) {
+                $item = $inv;
+                break;
+            }
+        }
+        if (!$item) return jsonResponse($response, ['error' => 'Không tìm thấy trang bị trong túi'], 404);
 
-        $player->equipItem($item);
-        savePlayer($id, $player);
+        try {
+            $player->equipItem($item);
+            savePlayer($id, $player);
+        } catch (\Exception $e) {
+            return jsonResponse($response, ['error' => $e->getMessage()], 400);
+        }
 
         return jsonResponse($response, [
             'message' => "Đã trang bị {$item->name}",
             'player' => $player->toArray(),
         ]);
+    });
+
+    // === USE ITEM (MANUALS, CONSUMABLES) ===
+    $app->post('/api/player/{id}/use', function (Request $request, Response $response, array $args) {
+        $id = $args['id'];
+        $player = loadPlayer($id);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        $body = $request->getParsedBody();
+        $itemId = $body['itemId'] ?? '';
+
+        $invIndex = -1;
+        foreach ($player->inventory as $i => $inv) {
+            if ($inv->id === $itemId) { $invIndex = $i; break; }
+        }
+        if ($invIndex === -1) return jsonResponse($response, ['error' => 'Không tìm thấy vật phẩm'], 404);
+
+        $itemObj = $player->inventory[$invIndex];
+        $arr = $itemObj->toArray();
+        $affixes = $arr['affixes'] ?? [];
+
+        $nodeId = null;
+        foreach ($affixes as $aff) {
+            if (isset($aff['unlockNodeId'])) {
+                $nodeId = $aff['unlockNodeId'];
+                break;
+            }
+        }
+
+        // Check if manual
+        if ($nodeId) {
+            if (in_array($nodeId, $player->discoveredNodes)) {
+                return jsonResponse($response, ['error' => 'Đã thấu hiểu phương pháp tu luyện này rồi!']);
+            }
+
+            $player->discoveredNodes[] = $nodeId;
+            
+            // Consume the item
+            array_splice($player->inventory, $invIndex, 1);
+
+            \App\Core\GameDataRepository::addEvent($id, 'education', "Cơ duyên xảo hợp, lĩnh ngộ thành công bí pháp ẩn chứa trong {$itemObj->name}!");
+            savePlayer($id, $player);
+
+            return jsonResponse($response, [
+                'success' => true,
+                'message' => "Lĩnh ngộ thành công {$itemObj->name}!",
+                'player' => $player->toArray(),
+            ]);
+        }
+        
+        return jsonResponse($response, ['error' => 'Vật phẩm này không thể sử dụng trực tiếp.'], 400);
     });
 
     // Torn-style stacking cooldown medicine

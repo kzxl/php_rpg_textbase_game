@@ -60,7 +60,15 @@ return function ($app) {
             $mid = $m['id'];
             $mamt = $m['amount'];
             if (($player->materials[$mid] ?? 0) < $mamt) {
-                return jsonResponse($response, ['error' => "Không đủ linh thảo nguyên liệu!"], 400);
+                return jsonResponse($response, ['error' => "Không đủ linh tinh nguyên liệu!"], 400);
+            }
+        }
+
+        // PRE-CHECK Inventory limits for Item recipes
+        $isItem = ($recipe['type'] ?? 'medicine') === 'item';
+        if ($isItem) {
+            if (count($player->inventory) >= $player->getMaxInventorySize()) {
+                return jsonResponse($response, ['error' => "Túi đồ đã đầy, không thể chứa thêm sản phẩm luyện chế!"], 400);
             }
         }
 
@@ -99,13 +107,26 @@ return function ($app) {
 
         // Success!
         $targetId = $recipe['target'];
-        $player->medicines[$targetId] = ($player->medicines[$targetId] ?? 0) + 1;
+        $msg = 'Luyện đan thành công! Thu được 1 viên Đan Dược mới.';
+
+        if ($isItem) {
+            $itemSystem = new \App\Systems\ItemSystem();
+            $item = $itemSystem->createItem($targetId);
+            if ($item) {
+                $player->addToInventory($item);
+                $msg = "Chế tác thành công! Thu được {$item->name}.";
+            } else {
+                return jsonResponse($response, ['error' => 'Lỗi khởi tạo Item System'], 500);
+            }
+        } else {
+            $player->medicines[$targetId] = ($player->medicines[$targetId] ?? 0) + 1;
+        }
         
         savePlayer($id, $player);
 
         return jsonResponse($response, [
             'success' => true,
-            'message' => 'Luyện đan thành công! Thu được 1 viên Đan Dược mới.',
+            'message' => $msg,
             'player' => $player->toArray()
         ]);
     });

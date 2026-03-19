@@ -6,16 +6,33 @@
 import './style.css'
 import { api } from './services/api.js'
 import { pageCombat } from './pages/combat.js'
+import { pageLibrary } from './pages/library.js'
 import { pageStats } from './pages/stats.js'
 import { pageSkills } from './pages/skills.js'
 import { pageInventory } from './pages/inventory.js'
-import { pageGym } from './pages/gym.js'
 import { pageCrimes } from './pages/crimes.js'
 import { pageEducation } from './pages/education.js'
 import { pageTravel } from './pages/travel.js'
 import { pageAlchemy } from './pages/alchemy.js'
 import { pageQuests } from './pages/quests.js'
 import { pageAdmin } from './pages/admin.js'
+import { pageSocial } from './pages/social.js'
+import { pageChat } from './pages/chat.js'
+import { pageMarket } from './pages/market.js'
+import { pageRealm } from './pages/realm.js'
+import { pageEvents } from './pages/events.js'
+import { pageDungeon } from './pages/dungeon.js'
+import { pageHousing } from './pages/housing.js'
+import { pageWiki } from './pages/wiki.js'
+import { pageNpcShop } from './pages/npcshop.js'
+import { pageGuild } from './pages/guild.js'
+import { pageProfile } from './pages/profile.js'
+import { pageArena } from './pages/arena.js'
+import { pageAuction } from './pages/auction.js'
+import { pageDailyQuest } from './pages/dailyquest.js'
+import { pageWorldBoss } from './pages/worldboss.js'
+import { pageGacha } from './pages/gacha.js'
+import { pageLeaderboard } from './pages/leaderboard.js'
 
 // ===== STATE =====
 const state = {
@@ -188,16 +205,36 @@ function renderPlayerBuffs(p) {
     html += `<span style="cursor:help; background:rgba(255,255,255,0.08); padding:1px 4px; border-radius:4px; font-size:12px; border:1px solid rgba(255,255,255,0.1);" title="${env.tooltip}">${env.icon} Cảnh Vực</span>`;
   }
   
-  // Đan dược
+  // Đan dược / Buff chiến đấu
   if (p.combatBuffs && p.combatBuffs.length > 0) {
     p.combatBuffs.forEach(b => {
-      let icon = '💊 Cường Hóa';
-      let title = `Buff Hóa Tố: ${b.stat} +${b.value}`;
+      let icon = '💊';
+      let label = 'Buff';
+      
       if (b.type === 'status' && b.stat === 'poison') {
-        icon = '☠️ Phản Phệ';
-        title = `Tẩu hỏa nhập ma! Độc tính phá hoại cơ thể over-time, duy trì ${b.duration} trận`;
+        icon = '☠️';
+        label = 'Trúng Độc';
+      } else if (b.type === 'status' && b.stat === 'confuse') {
+        icon = '👹';
+        label = 'Ma Hóa';
+      } else if (b.stat === 'allStats' || b.stat === 'hp' || b.stat === 'damage') {
+        icon = '🔥';
+        label = 'Cuồng Nộ';
+      } else if (b.stat === 'defense' || b.stat === 'resist') {
+        icon = '🛡️';
+        label = 'Kiên Cố';
+      } else if (b.stat === 'speed' || b.stat === 'dexterity') {
+        icon = '💨';
+        label = 'Thân Pháp';
+      } else {
+        icon = '✨';
+        label = 'Cường Hóa';
       }
-      html += `<span style="cursor:help; background:rgba(255,255,255,0.08); padding:1px 4px; border-radius:4px; font-size:12px; border:1px solid rgba(255,255,255,0.1);" title="${title}">${icon}</span>`;
+
+      let durText = b.duration ? ` (-${b.duration} Trận)` : '';
+      let title = `Hiệu ứng: ${b.stat} (${b.type} ${b.value})${b.duration ? ` - Còn lại: ${b.duration} Trận đấu` : ''}`;
+      
+      html += `<span style="cursor:help; background:rgba(255,255,255,0.08); padding:1px 4px; border-radius:4px; font-size:12px; border:1px solid rgba(255,255,255,0.1); display:flex; gap:4px; align-items:center;" title="${title}">${icon} ${label}${durText}</span>`;
     })
   }
 
@@ -227,78 +264,150 @@ function renderGame() {
 
         <div class="sidebar-player">
           <div class="player-name">${p.name}</div>
-          <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
+          <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
           ${renderPlayerBuffs(p)}
           <div class="sidebar-bar" style="margin-top:8px">
-            <div class="bar-label"><span>❤️ Khí Huyết</span><span>${p.currentHp}/${p.maxHp}</span></div>
+            <div class="bar-label">
+              <span>❤️ Khí Huyết</span>
+              <span>
+                ${p.currentHp}/${p.maxHp}
+                ${p.currentHp < p.maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '(Không tự hồi)'}</span>` : ''}
+              </span>
+            </div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
-            <div class="bar-label"><span>🏃 Thể Lực</span><span>${p.currentStamina ?? 100}/${p.maxStamina ?? 100}</span></div>
+            <div class="bar-label">
+              <span>🏃 Thể Lực</span>
+              <span>
+                ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
+                ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 10}/10s</span>` : ''}
+              </span>
+            </div>
             <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
-            <div class="bar-label"><span>🔮 Linh Lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
+            <div class="bar-label">
+              <span>🔮 Linh Lực</span>
+              <span>
+                ${p.currentEnergy}/${p.maxEnergy}
+                ${p.currentEnergy < p.maxEnergy ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.energyRegen ?? 5}/10s</span>` : ''}
+              </span>
+            </div>
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}</span></div>
             <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
           </div>
-          <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>
+          <div class="sidebar-gold" style="padding-bottom:12px">
+            <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:8px">💎 ${p.gold ?? 0} Linh Thạch</div>
+            <div style="display:flex; gap:6px; width:100%">
+              <button class="btn btn--dark nav-item ${state.currentPage === 'events' ? 'active' : ''}" data-page="events" style="flex:1; padding:6px; font-size:14px; position:relative" title="Sự Kiện">
+                📜
+                ${(p.unreadEventsCount ?? 0) > 0 ? `<span class="badge" style="position:absolute; top:-4px; right:-4px; background:var(--red); width:8px; height:8px; padding:0; border-radius:50%"></span>` : ''}
+              </button>
+              <button class="btn btn--dark" style="flex:1; padding:6px; font-size:14px; opacity:0.3; cursor:default" disabled></button>
+              <button class="btn btn--dark" style="flex:1; padding:6px; font-size:14px; opacity:0.3; cursor:default" disabled></button>
+            </div>
+          </div>
         </div>
 
-        <ul class="nav">
-          <li class="nav-section">CHIẾN ĐẤU</li>
-          <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
-            <span class="icon">🗺️</span> ${areaName}
-          </li>
-          <li class="nav-item ${state.currentPage === 'gym' ? 'active' : ''}" data-page="gym">
-            <span class="icon">🏋</span> Rèn Luyện
-          </li>
-
-          <li class="nav-section">NGHỊCH THIÊN</li>
-          <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
-            <span class="icon">💀</span> Phá Luật
-          </li>
-          <li class="nav-item ${state.currentPage === 'library' ? 'active' : ''}" data-page="library">
-            <span class="icon">📚</span> Tàng Kinh Các
-          </li>
-          <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
-            <span class="icon">📜</span> Tu Luyện
-          </li>
-          <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
-            <span class="icon">⚗️</span> Lò Luyện Đan
-          </li>
-          <li class="nav-item ${state.currentPage === 'quests' ? 'active' : ''}" data-page="quests">
-            <span class="icon">🏷️</span> Nhiệm Vụ
-            ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
-          </li>
-          ${p.role === 'admin' ? `
-          <li class="nav-item ${state.currentPage === 'admin' ? 'active' : ''}" data-page="admin">
-            <span class="icon">🛠</span> Thiên Đạo Đài
-          </li>` : ''}
-          <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
-            <span class="icon">🗺️</span> Ngao Du
-            ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">🚶</span>` : ''}
-          </li>
-
-          <li class="nav-section">NHÂN VẬT</li>
+        <ul class="nav" style="${(p.travelRemaining || 0) > 0 ? 'pointer-events:none; opacity:0.6;' : ''}">
+          <li class="nav-section">TỰ THÂN</li>
           <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
-            <span class="icon">📊</span> Căn Cốt
-            ${p.statPoints > 0 ? `<span class="badge">${p.statPoints}</span>` : ''}
-          </li>
-          <li class="nav-item ${state.currentPage === 'skills' ? 'active' : ''}" data-page="skills">
-            <span class="icon">⚡</span> Thần Thông
+            <span class="icon">🏋</span> Rèn Luyện
+            ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>' : ''}
           </li>
           <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
-            <span class="icon">🎒</span> Pháp Bảo
+            <span class="icon">🎒</span> Túi Đồ
             ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--orange)">⏳</span>` : ''}
           </li>
+          <li class="nav-item ${state.currentPage === 'skills' ? 'active' : ''}" data-page="skills">
+            <span class="icon">⚡</span> Kỹ Năng
+          </li>
+          <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
+            <span class="icon">🧘</span> Tu Luyện
+          </li>
+
           ${(p.hospitalRemaining ?? 0) > 0 ? `
           <li class="nav-section" style="color:var(--red)">⚠ Đang bị thương</li>
           <li class="nav-item" style="color:var(--red);pointer-events:none">
             <span class="icon">🏥</span> Tịnh dưỡng ${p.hospitalRemaining}s
+          </li>` : ''}
+
+          <li class="nav-section">HÀNH TRÌNH</li>
+          <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
+            <span class="icon">🚶</span> Ngao Du
+            ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
+          </li>
+          <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
+            <span class="icon">🔍</span> Khám Phá (${areaName})
+          </li>
+          <li class="nav-item ${state.currentPage === 'quests' ? 'active' : ''}" data-page="quests">
+            <span class="icon">📜</span> Nhiệm Vụ
+            ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
+          </li>
+          <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
+            <span class="icon">💀</span> Ác Nghiệp
+          </li>
+
+          <li class="nav-item ${state.currentPage === 'profile' ? 'active' : ''}" data-page="profile">
+            <span class="icon">🔍</span> Tìm Người
+          </li>
+
+          <li class="nav-section">THẾ GIỚI</li>
+          <li class="nav-item ${state.currentPage === 'dungeon' ? 'active' : ''}" data-page="dungeon">
+            <span class="icon">🗺️</span> Bí Cảnh
+          </li>
+          <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
+            <span class="icon">🏠</span> Động Phủ
+          </li>
+          <li class="nav-item ${state.currentPage === 'market' ? 'active' : ''}" data-page="market">
+            <span class="icon">🏪</span> Giao Dịch Đài
+          </li>
+          <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
+            <span class="icon">🧓</span> Thương Nhân
+          </li>
+          <li class="nav-item ${state.currentPage === 'guild' ? 'active' : ''}" data-page="guild">
+            <span class="icon">🏯</span> Tông Môn
+          </li>
+          <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
+            <span class="icon">⚒️</span> Chế Tác
+          </li>
+          <li class="nav-item ${state.currentPage === 'library' ? 'active' : ''}" data-page="library">
+            <span class="icon">📚</span> Tàng Kinh Các
+          </li>
+          <li class="nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki">
+            <span class="icon">📜</span> Wiki
+          </li>
+          <li class="nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard">
+            <span class="icon">🏆</span> Xếp Hạng
+          </li>
+
+          <li class="nav-section">CHIẾN ĐẤU</li>
+          <li class="nav-item ${state.currentPage === 'arena' ? 'active' : ''}" data-page="arena">
+            <span class="icon">⚔️</span> Đấu Trường
+          </li>
+          <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
+            <span class="icon">🐉</span> Boss TG
+          </li>
+
+          <li class="nav-section">KINH TẾ</li>
+          <li class="nav-item ${state.currentPage === 'auction' ? 'active' : ''}" data-page="auction">
+            <span class="icon">🏪</span> Đấu Giá
+          </li>
+          <li class="nav-item ${state.currentPage === 'gacha' ? 'active' : ''}" data-page="gacha">
+            <span class="icon">🎰</span> Thiên Cơ Đài
+          </li>
+          <li class="nav-item ${state.currentPage === 'dailyquest' ? 'active' : ''}" data-page="dailyquest">
+            <span class="icon">📋</span> Nhật Nhiệm
+          </li>
+
+          ${p.role === 'admin' ? `
+          <li class="nav-section">VÔ THƯỢNG</li>
+          <li class="nav-item ${state.currentPage === 'admin' ? 'active' : ''}" data-page="admin">
+            <span class="icon">⚙️</span> Admin
           </li>` : ''}
         </ul>
       </aside>
@@ -307,23 +416,79 @@ function renderGame() {
       <main class="main-content">
         <div id="pageContent"></div>
       </main>
+      
+      <!-- POPUP WIDGET (Chat / Social) -->
+      <div class="floating-popup-container" id="popupContainer" style="${state.popupOpen ? 'display:flex;' : 'display:none;'}">
+        <div class="popup-header">
+          <div class="popup-tabs">
+            <button class="popup-tab ${state.popupPage === 'chat' ? 'active' : ''}" data-popup="chat">💬 Truyền Âm</button>
+            <button class="popup-tab ${state.popupPage === 'social' ? 'active' : ''}" data-popup="social">🤝 Đạo Hữu</button>
+          </div>
+          <button class="popup-close" id="btnPopupClose">✖</button>
+        </div>
+        <div id="popupContent" class="popup-body"></div>
+      </div>
+      
+      <!-- FLOATING BUTTONS -->
+      <div class="floating-actions">
+        <button class="btn-fab bg-blue" id="btnFabChat" title="Truyền Âm"><span class="icon">💬</span></button>
+        <button class="btn-fab bg-green" id="btnFabSocial" title="Đạo Hữu"><span class="icon">🤝</span></button>
+      </div>
     </div>`
 
   // Sidebar nav events
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => {
+      // Close popup if moving to other main pages? (Optional, here we keep it independent)
       state.currentPage = item.dataset.page
       renderGame()
     })
   })
 
+  // Popup logic
+  document.getElementById('btnFabChat')?.addEventListener('click', () => openPopup('chat'))
+  document.getElementById('btnFabSocial')?.addEventListener('click', () => openPopup('social'))
+  
+  // Custom navigation for Events (since it's also inside the 3-button row)
+  const evBtn = document.querySelector('.sidebar-gold .nav-item[data-page="events"]')
+  if (evBtn) {
+    evBtn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      state.currentPage = 'events'
+      state.popupOpen = false
+      renderGame()
+    })
+  }
+
+  document.getElementById('btnPopupClose')?.addEventListener('click', () => {
+    state.popupOpen = false
+    renderGame()
+  })
+  document.querySelectorAll('.popup-tab[data-popup]').forEach(btn => {
+    btn.addEventListener('click', () => openPopup(btn.dataset.popup))
+  })
+
   renderPage()
+  if (state.popupOpen) renderPopupContent()
+}
+
+function openPopup(page) {
+  state.popupOpen = true
+  state.popupPage = page
+  renderGame()
+}
+
+// ===== POPUP DISPATCHER =====
+function renderPopupContent() {
+  const el = document.getElementById('popupContent')
+  if (!el) return
+  if (state.popupPage === 'chat') pageChat(el, ctx)
+  else if (state.popupPage === 'social') pageSocial(el, ctx)
 }
 
 // ===== PAGE DISPATCHER =====
 const pageMap = {
   combat: pageCombat,
-  gym: pageGym,
   crimes: pageCrimes,
   education: pageEducation,
   stats: pageStats,
@@ -333,6 +498,24 @@ const pageMap = {
   alchemy: pageAlchemy,
   quests: pageQuests,
   admin: pageAdmin,
+  social: pageSocial,
+  chat: pageChat,
+  market: pageMarket,
+  realm: pageRealm,
+  events: pageEvents,
+  dungeon: pageDungeon,
+  housing: pageHousing,
+  wiki: pageWiki,
+  npcshop: pageNpcShop,
+  guild: pageGuild,
+  library: pageLibrary,
+  profile: pageProfile,
+  arena: pageArena,
+  auction: pageAuction,
+  dailyquest: pageDailyQuest,
+  worldboss: pageWorldBoss,
+  gacha: pageGacha,
+  leaderboard: pageLeaderboard,
 }
 
 function renderPage() {
@@ -354,18 +537,36 @@ function updateSidebar() {
     const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
-      <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
+      <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
       ${renderPlayerBuffs(p)}
       <div class="sidebar-bar" style="margin-top:8px">
-        <div class="bar-label"><span>❤️ Khí Huyết</span><span>${p.currentHp}/${p.maxHp}</span></div>
+        <div class="bar-label">
+          <span>❤️ Khí Huyết</span>
+          <span>
+            ${p.currentHp}/${p.maxHp}
+            ${p.currentHp < p.maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '(Không tự hồi)'}</span>` : ''}
+          </span>
+        </div>
         <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
-        <div class="bar-label"><span>🏃 Thể Lực</span><span>${p.currentStamina ?? 100}/${p.maxStamina ?? 100}</span></div>
+        <div class="bar-label">
+          <span>🏃 Thể Lực</span>
+          <span>
+            ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
+            ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 10}/10s</span>` : ''}
+          </span>
+        </div>
         <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
-        <div class="bar-label"><span>🔮 Linh Lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
+        <div class="bar-label">
+          <span>🔮 Linh Lực</span>
+          <span>
+            ${p.currentEnergy}/${p.maxEnergy}
+            ${p.currentEnergy < p.maxEnergy ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.energyRegen ?? 5}/10s</span>` : ''}
+          </span>
+        </div>
         <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
@@ -377,13 +578,13 @@ function updateSidebar() {
 
   const statNav = document.querySelector('.nav-item[data-page="stats"]')
   if (statNav) {
-    const badge = statNav.querySelector('.badge')
-    if (p.statPoints > 0) {
-      if (badge) badge.textContent = p.statPoints
-      else statNav.insertAdjacentHTML('beforeend', `<span class="badge">${p.statPoints}</span>`)
-    } else if (badge) {
-      badge.remove()
-    }
+    let badgesHtml = ''
+    if (p.statPoints > 0) badgesHtml += `<span class="badge">${p.statPoints}</span>`
+    if (p.realmInfo?.canBreakthrough) badgesHtml += `<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>`
+    
+    // Remove existing badges
+    statNav.querySelectorAll('.badge').forEach(b => b.remove())
+    statNav.insertAdjacentHTML('beforeend', badgesHtml)
   }
 }
 
@@ -399,8 +600,7 @@ async function loadGameData() {
     state.items = id.items || []
     state.medicines = medsD.medicines || []
     state.crimes = crimesD.crimes || []
-    state.courses = eduD.courses || []
-    state.education = (await api.getEducation())
+    state.educationTrees = eduD.trees || []
     state.exploration = (await api.getExploration())
     state.recipes = (await api.getRecipes()).recipes
     state.npcs = (await api.getNpcs()).npcs || []

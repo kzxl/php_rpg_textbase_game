@@ -9,8 +9,10 @@ export function pageEducation(el, ctx) {
   const unlocked = p.unlockedNodes || []
   const studyingFull = p.studyingNode || '' // e.g. "internal_1|internal_cultivation"
   const studyingNodeId = studyingFull ? studyingFull.split('|')[0] : ''
-  const remaining = p.studyRemaining ?? 0
+  const endsAt = p.studyEndsAt || 0
+  const remaining = Math.max(0, endsAt - Math.floor(Date.now() / 1000))
   const treeProgress = p.treeProgress || {}
+  const skillProgress = p.skillProgress || {}
 
   // Current Active Tab
   let activeTabId = localStorage.getItem('eduActiveTree') || trees[0]?.id
@@ -48,7 +50,7 @@ export function pageEducation(el, ctx) {
             <div class="panel-body text-center">
               <div class="text-sm text-dim mb-xs">Đang lãnh ngộ: ${sTree.name}</div>
               <div class="text-gold text-lg bold">${sNode.name}</div>
-              <div class="edu-timer mt-sm">⏳ Còn lại: <strong>${remaining}s</strong></div>
+              <div class="edu-timer mt-sm">⏳ Còn lại: <strong id="eduCounter">${remaining}s</strong></div>
               <button class="btn btn--green btn--lg mt-md w-full" id="btnCheckEdu" ${remaining > 0 ? 'disabled' : ''}>
                 ${remaining > 0 ? 'Đang Lãnh Ngộ...' : '✨ Đột Phá!'}
               </button>
@@ -60,37 +62,71 @@ export function pageEducation(el, ctx) {
 
     // --- MILESTONES BUIlDER ---
     const currentPts = treeProgress[activeTree.id] || 0
-    const milestonesHtml = (activeTree.milestones || []).map(ms => {
-      const isReached = currentPts >= ms.require
-      return `
-        <div class="edu-milestone ${isReached ? 'reached' : 'locked'}">
+    let nextMilestone = null;
+    for (const ms of (activeTree.milestones || [])) {
+      if (currentPts < ms.require) {
+        nextMilestone = ms;
+        break;
+      }
+    }
+    
+    let milestonesHtml = '';
+    if (nextMilestone) {
+      milestonesHtml = `
+        <div class="edu-milestone locked">
           <div class="ms-header">
-            <span class="ms-pts">${ms.require} Điểm</span>
-            ${isReached ? '<span class="ms-status">✅ Đã Đạt</span>' : '<span class="ms-status">🔒 Chưa Đạt</span>'}
+            <span class="ms-pts">Cảnh giới kế tiếp: Cần ${nextMilestone.require} Điểm</span>
+            <span class="ms-status" style="color:var(--gold)">Trúc cơ chờ đợi</span>
           </div>
-          <div class="ms-desc">${ms.description}</div>
+          <div class="ms-desc">${nextMilestone.description}</div>
         </div>
-      `
-    }).join('')
+      `;
+    } else {
+      milestonesHtml = `<div class="text-green text-sm flex items-center gap-2"><div style="font-size:24px">🌟</div> Cảnh giới đã viên mãn! Không còn chướng ngại.</div>`;
+    }
 
     // --- NODES BUIlDER ---
+    const discovered = p.discoveredNodes || []
     const nodesHtml = (activeTree.nodes || []).map(n => {
       const isDone = unlocked.includes(n.id)
       const isStudying = studyingNodeId === n.id
       const prereqsMet = (n.prerequisites || []).every(req => unlocked.includes(req))
-      const canLearn = !isDone && !studyingNodeId && prereqsMet
+      const hasChild = activeTree.nodes.some(child => (child.prerequisites || []).includes(n.id))
+      
+      // Tự động discover các node cấp 1 (không có prereq)
+      const isDiscovered = discovered.includes(n.id) || isDone || !(n.prerequisites && n.prerequisites.length > 0)
+
+      // HIDE LOGIC FOR COMPACTNESS:
+      // - Chưa có Bí Tịch (Manual) thì Ẩn lặn không sủi tăm.
+      if (!isDiscovered) return ''
+      
+      // - Bị đè lên bởi mốc tiếp theo để gọn danh sách (chỉ áp dụng nếu node kế tiếp cùng nhánh đã được discover).
+      if (isDone && hasChild) return ''
       
       let stateClass = ''
-      if (isDone) stateClass = 'done'
-      else if (isStudying) stateClass = 'studying'
-      else if (!prereqsMet) stateClass = 'locked'
+      if (isStudying) stateClass = 'studying'
+      else if (isDone) stateClass = 'done'
       else stateClass = 'available'
 
       let btnHtml = ''
-      if (isDone) btnHtml = `<button class="btn btn--sm" disabled>Đã Hiểu</button>`
-      else if (isStudying) btnHtml = `<button class="btn btn--sm" disabled>Đang Lãnh Ngộ...</button>`
-      else if (!prereqsMet) btnHtml = `<div class="text-dim text-xs">Cần: ${n.prerequisites.join(', ')}</div>`
-      else btnHtml = `<button class="btn btn--sm btn--blue btn-learn" data-node="${n.id}">Bắt Đầu (${n.duration}s)</button>`
+      if (isStudying) {
+        btnHtml = `<button class="btn btn--sm" disabled>Đang Lãnh Ngộ...</button>`
+      } else if (studyingNodeId) {
+        btnHtml = `<button class="btn btn--sm" disabled>Tâm trí bận rộn</button>`
+      } else if (isDone) {
+        btnHtml = `<button class="btn btn--sm btn--gold btn-learn" data-node="${n.id}">Tiếp Tục Lãnh Ngộ (${n.duration}s)</button>`
+      } else if (!prereqsMet) {
+        btnHtml = `<button class="btn btn--sm" disabled>Chưa đả thông kinh mạch</button>`
+      } else {
+        btnHtml = `<button class="btn btn--sm btn--blue btn-learn" data-node="${n.id}">Bắt Đầu (${n.duration}s)</button>`
+      }
+
+      const sp = skillProgress[n.id] || { level: 1, exp: 0 }
+      const maxExp = sp.level * 100
+      let lvlHtml = ''
+      if (isDone) {
+        lvlHtml = `<div class="text-xs text-gold mt-xs">Cảnh giới: ${sp.level} | Độ hiểu thấu: ${sp.exp}/${maxExp}</div>`
+      }
 
       return `
         <div class="edu-node ${stateClass}">
@@ -98,6 +134,7 @@ export function pageEducation(el, ctx) {
             <div class="edu-node-title">${n.name}</div>
             <div class="edu-node-desc">${n.description}</div>
             <div class="edu-node-bonus text-green text-sm mt-xs">${n.bonusDescription}</div>
+            ${lvlHtml}
           </div>
           <div class="edu-node-action">
             ${btnHtml}
@@ -150,6 +187,27 @@ export function pageEducation(el, ctx) {
         render()
       })
     })
+
+    // Timer Logic for Countdown
+    if (window.eduTimer) clearInterval(window.eduTimer)
+    if (studyingNodeId && endsAt > 0) {
+      window.eduTimer = setInterval(() => {
+        const now = Math.floor(Date.now() / 1000);
+        let currentRem = Math.max(0, endsAt - now);
+        
+        const counter = document.getElementById('eduCounter');
+        if (counter) counter.innerText = currentRem + 's';
+        
+        if (currentRem <= 0) {
+          clearInterval(window.eduTimer);
+          const btn = document.getElementById('btnCheckEdu');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '✨ Đột Phá!';
+          }
+        }
+      }, 1000);
+    }
 
     const btnCheck = el.querySelector('#btnCheckEdu')
     if (btnCheck) {

@@ -220,5 +220,31 @@
       "hidden": true
     },
     "icon": "🌌"
+  },
+  {
+    "id": "tay_tuy_dan",
+    "name": "Tẩy Tủy Đan",
+    "description": "Đan dược cực phẩm, có thể cải tạo căn cốt. Tăng 1 bậc Căn Cốt cho một chỉ số NGẪU NHIÊN.",
+    "tier": 5,
+    "effects": [
+      { "type": "talent_upgrade" }
+    ],
+    "requirements": {
+      "realm": 3
+    },
+    "icon": "🧬"
+  },
+  {
+    "id": "hoan_cot_dan",
+    "name": "Hoán Cốt Đan",
+    "description": "Đan dược bí ẩn, tiêu hủy toàn bộ căn cốt hiện tại và reroll lại từ đầu. Rủi ro cực cao!",
+    "tier": 5,
+    "effects": [
+      { "type": "talent_reroll" }
+    ],
+    "requirements": {
+      "realm": 2
+    },
+    "icon": "🔮"
   }
 ]

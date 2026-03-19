@@ -63,19 +63,26 @@ export function pageCrimes(el, ctx) {
     legendary_drop: '💎 Cổ vật truyền thuyết',
   }
 
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>💀 Nghịch Thiên – Phá Luật</h1>
-      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Linh Thạch · 🏴 CE: ${p.crimeExp ?? 0}</span></div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Hành động <span class="subtitle">${crimes.length} loại</span></div>
+  const grouped = crimes.reduce((acc, c) => {
+    const cat = c.category || 'theft'
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(c)
+    return acc
+  }, {})
+
+  const panelsHtml = Object.keys(categoryMap).map(catKey => {
+    const catCrimes = grouped[catKey]
+    if (!catCrimes || catCrimes.length === 0) return ''
+    const cat = categoryMap[catKey]
+
+    return `
+    <div class="panel mt-md" style="border-color: ${cat.color}40;">
+      <div class="panel-title" style="color: ${cat.color};">${cat.label} <span class="subtitle text-dim">${catCrimes.length} loại</span></div>
       <div class="panel-body no-pad">
-        ${crimes.map(c => {
+        ${catCrimes.map(c => {
           const cs = p.crimeSkills?.[c.id] ?? 0
           const locked = cs < (c.minSkill ?? 0)
           const canDo = !locked && (p.nerve ?? 0) >= c.nerveCost
-          const cat = categoryMap[c.category] || categoryMap.theft
           const specials = c.special || []
           const successEst = Math.min(95, c.baseSuccessRate + cs * 0.5)
           return `
@@ -85,7 +92,6 @@ export function pageCrimes(el, ctx) {
                   <span style="font-size:18px">${c.icon}</span>
                   <span>${c.name}</span>
                   ${locked ? '<span style="opacity:0.5">🔒</span>' : ''}
-                  <span class="badge" style="background:${cat.color};font-size:10px;padding:1px 6px;">${cat.label}</span>
                 </div>
                 <div class="item-desc">${c.description}</div>
                 <div class="item-meta" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
@@ -107,6 +113,36 @@ export function pageCrimes(el, ctx) {
         }).join('')}
       </div>
     </div>`
+  }).join('')
+
+  const ce = p.crimeExp || 0
+  const currentLevel = Math.floor(ce / 50)
+  const ceCurrentLevel = ce % 50
+  const ceNeeded = 50
+  const cePct = (ceCurrentLevel / ceNeeded) * 100
+
+  const ceHtml = `
+    <div class="panel mb-md" style="border-color: var(--gold)40; margin-bottom: 16px;">
+      <div class="panel-body">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+          <strong>Danh vọng Hắc Đạo: Cấp ${currentLevel}</strong>
+          <span class="text-dim">${ceCurrentLevel} / ${ceNeeded} EXP</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${cePct}%; background:var(--gold);"></div>
+        </div>
+        <div class="text-dim mt-sm" style="font-size:12px;">Cần <strong>${ceNeeded - ceCurrentLevel} EXP</strong> nữa để tăng giới hạn Nghịch Khí. (Giới hạn hiện tại: ${p.maxNerve || 15})</div>
+      </div>
+    </div>
+  `
+
+  el.innerHTML = `
+    <div class="page-header">
+      <h1>💀 Nghịch Thiên – Phá Luật</h1>
+      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Linh Thạch</span></div>
+    </div>
+    ${ceHtml}
+    ${panelsHtml}`
 
   el.querySelectorAll('[data-crime]').forEach(btn => {
     btn.addEventListener('click', async () => {

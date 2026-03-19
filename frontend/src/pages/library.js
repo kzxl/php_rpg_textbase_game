@@ -10,71 +10,100 @@ export function pageLibrary(el, ctx) {
   const allSkills = [...state.skills].sort((a, b) => (a.tier || 1) - (b.tier || 1));
   const learnedIds = (p.skills || []).map(s => typeof s === 'string' ? s : s.id);
 
-  const romanTiers = { 1: 'Nhất', 2: 'Nhị', 3: 'Tam', 4: 'Tứ', 5: 'Ngũ' };
+  const romanTiers = { 1: 'Nhất', 2: 'Nhị', 3: 'Tam', 4: 'Tứ', 5: 'Ngũ', 6: 'Lục', 7: 'Thất', 8: 'Bát', 9: 'Cửu' };
 
   el.innerHTML = `
     <div class="page-header">
       <h1>📚 Tàng Kinh Các</h1>
-      <div class="text-sm text-dim">Kho tàng tuyệt học của nhân gian. Ngộ tính hiện tại: Tầng ${perceptionLevel}</div>
+      <div class="text-sm text-dim">Kho tàng tuyệt học của nhân gian. Ngộ tính hiện tại: Nhãn Thuật Tầng ${perceptionLevel}</div>
     </div>
-    <div class="skills-grid" style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+    <div class="panel">
+      <div class="panel-body no-pad" id="libraryList">
         ${allSkills.map(s => {
-          const isLearned = learnedIds.includes(s.id);
-          const tier = s.tier || 1;
-          const isHidden = tier > perceptionLevel + 1; // Can see +1 tier above current perception
-          const canReadReqs = tier <= perceptionLevel; // Can read reqs if perception >= tier
+          const isLearned = learnedIds.includes(s.id)
+          const tier = s.tier || 1
+          const isHidden = tier > perceptionLevel + 1 // Can see +1 tier above current perception
+          const canReadReqs = tier <= perceptionLevel // Can read reqs if perception >= tier
 
-          let reqsHtml = '';
+          let reqsHtml = ''
           if (s.requirements && s.requirements.length > 0) {
             if (canReadReqs || isLearned) {
-               reqsHtml = `<div class="mt-sm text-xs text-orange">Điều kiện lĩnh hội: ${s.requirements.map(req => `<br>- ${req}`).join('')}</div>`;
+               reqsHtml = `<div class="mt-sm text-xs text-orange">Điều kiện: ${s.requirements.map(req => `<br>• ${req}`).join('')}</div>`
             } else if (isHidden) {
-               reqsHtml = `<div class="mt-sm text-xs text-dim" style="font-style: italic;">[???] Khẩu quyết bị mờ đi. Ngộ tính quá thấp để lĩnh hội. Cần Nhãn Thuật Tầng ${tier}</div>`;
+               reqsHtml = `<div class="mt-sm text-xs text-dim" style="font-style: italic;">[???] Khẩu quyết bị sương mù che khuất. Cần Nhãn Thuật Tầng ${tier}.</div>`
             } else {
-               reqsHtml = `<div class="mt-sm text-xs text-dim">[???] Có cảm giác mờ ảo về điều kiện học.</div>`;
+               reqsHtml = `<div class="mt-sm text-xs text-dim">[???] Đạo hạnh thấp kém, linh hồn hoa mắt chóng mặt.</div>`
             }
           } else {
-             reqsHtml = `<div class="mt-sm text-xs text-green">Điều kiện lĩnh hội: Sẵn sàng</div>`;
+             reqsHtml = `<div class="mt-sm text-xs text-green">Điều kiện: Phàm nhân cũng có thể luyện</div>`
           }
 
           return `
-            <div class="panel" style="border-color: ${isLearned ? 'var(--blue)' : 'var(--bg-lighter)'}">
-              <div class="panel-body flex flex-col items-start gap-4">
-                <div class="w-full">
-                  <div class="flex justify-between items-center mb-xs">
-                    <div class="item-name text-lg ${isLearned ? 'text-blue' : ''}">${s.name}</div>
-                    <div class="badge" style="background:var(--gold)">Bậc ${romanTiers[tier] || tier}</div>
+            <div class="list-item" style="flex-direction:column; padding:0; align-items:stretch">
+              <!-- Accordion Header -->
+              <div class="accordion-header" style="display:flex; justify-content:space-between; align-items:center; padding:14px; cursor:pointer">
+                <div>
+                  <div style="color:${isLearned ? 'var(--blue)' : 'var(--text-light)'}; font-size:16px; font-weight:bold; margin-bottom:4px">
+                    ${s.name} ${isLearned ? ' <span style="font-size:12px; color:var(--text-dim)">(Đã Lĩnh Hội)</span>' : ''}
                   </div>
-                  <div class="item-meta mb-sm">${s.type === 'passive' ? '🔮 Nội công' : `⚡ Chiêu thức · 🔵${s.cost || 0} linh lực`}</div>
-                  <div class="text-sm text-dim mb-md">${canReadReqs || isLearned ? s.description : 'Sách cổ không thể nhìn thấu công dụng.'}</div>
-                  
-                  ${reqsHtml}
+                  <div class="flex gap-2 items-center">
+                    <span class="badge" style="background:${isLearned ? 'rgba(59,130,246,0.2)' : 'var(--gold)'}">Bậc ${romanTiers[tier] || tier}</span>
+                    <span class="text-xs text-dim">${s.type === 'passive' ? '🔮 Nội công' : '⚡ Chiêu thức'}</span>
+                  </div>
+                </div>
+                <div class="text-dim" style="font-size:12px">▼</div>
+              </div>
+              
+              <!-- Accordion Body -->
+              <div class="accordion-body" style="display:none; padding:14px; background:rgba(0,0,0,0.2); border-top:1px solid rgba(255,255,255,0.05)">
+                <div class="text-sm text-dim mb-md italic" style="line-height:1.5">
+                  "${canReadReqs || isLearned ? s.description : 'Sách cổ không thể nhìn thấu công dụng.'}"
+                </div>
+                ${s.type !== 'passive' && s.cost ? `<div class="text-xs text-blue mb-sm">Tiêu hao: 🔵 ${s.cost} linh lực</div>` : ''}
+                
+                ${reqsHtml}
 
-                  <div class="mt-md flex justify-end">
-                    ${isLearned 
-                        ? `<button class="btn btn--sm" disabled style="opacity: 0.5">Đã Lĩnh Hội</button>`
-                        : `<button class="btn btn--gold btn--sm btn-learn" data-sid="${s.id}">Lĩnh Hội</button>`}
-                  </div>
+                <div class="mt-md" style="display:flex; justify-content:flex-end">
+                  ${isLearned 
+                      ? `<button class="btn btn--sm" disabled style="opacity: 0.5">Đã Lĩnh Hội</button>`
+                      : `<button class="btn ${isHidden ? 'btn--dark' : 'btn--gold'} btn--sm btn-learn" ${isHidden ? 'disabled title="Ngộ tính chưa đủ"' : ''} data-sid="${s.id}">Lĩnh Hội 📜</button>`}
                 </div>
               </div>
             </div>
-          `;
+          `
         }).join('')}
+      </div>
     </div>
   `
 
-  el.querySelectorAll('.btn-learn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      try {
-        const data = await api.learnSkill(p.id, btn.dataset.sid);
-        if (data.error) {
-            notify(data.error, 'error');
-        } else {
-            state.player = data.player;
-            notify(data.message, 'success');
-            pageLibrary(el, ctx); // Refresh component
-        }
-      } catch (e) { notify('Lỗi học kỹ năng: ' + e.message, 'error') }
+  // Accordion Expand Logic
+  el.querySelectorAll('.accordion-header').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const body = hdr.nextElementSibling
+      if (body.style.display === 'none') {
+        body.style.display = 'block'
+        hdr.querySelector('div:last-child').textContent = '▲'
+      } else {
+        body.style.display = 'none'
+        hdr.querySelector('div:last-child').textContent = '▼'
+      }
     })
-  });
+  })
+
+  // Learn Skill Logic
+  el.querySelectorAll('.btn-learn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation()
+      try {
+        const data = await api.learnSkill(p.id, btn.dataset.sid)
+        if (data.error) {
+            notify(data.error, 'error')
+        } else {
+            state.player = data.player
+            notify(data.message, 'success')
+            pageLibrary(el, ctx) // Refresh component
+        }
+      } catch (err) { notify('Lỗi học kỹ năng: ' + err.message, 'error') }
+    })
+  })
 }

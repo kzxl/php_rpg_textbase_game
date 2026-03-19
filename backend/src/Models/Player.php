@@ -10,6 +10,7 @@ use App\Core\ModifierEngine;
  */
 class Player
 {
+    public string $id = '';
     public string $name;
     public string $username = '';
     public string $passwordHash = '';
@@ -29,11 +30,13 @@ class Player
     public int $hospitalUntil = 0;
     /** @var int Unix timestamp when shared med cooldown expires (Torn-style stacking) */
     public int $medCooldownUntil = 0;
+    /** @var int Unix timestamp when mugging cooldown expires */
+    public int $mugCooldownUntil = 0;
     /** @var int Max med cooldown cap in seconds */
     private const MED_COOLDOWN_CAP = 300; // 5 minutes
     /** @var int Last HP regen timestamp (meditation) */
     public int $lastHpRegen = 0;
-
+    
     // --- Phase 1: Crimes + Jail + Education ---
     public int $gold = 0;
     public int $nerve = 15;
@@ -45,6 +48,8 @@ class Player
     public int $studyEndsAt = 0; // unix timestamp
     public array $unlockedNodes = []; // array of learned node ids
     public array $treeProgress = []; // points per tree, e.g. ['internal_cultivation' => 5]
+    public array $skillProgress = []; // {nodeId: {level: 1, exp: 0}}
+    public array $discoveredNodes = []; // manually unlocked nodes via items
     public array $trackedMonsters = []; // [{instance_id, monster_id, hp_current}]
     public int $lastMonsterSpawn = 0; // unix
     public string $currentArea = 'thanh_lam_tran'; // Ngao Du — current area
@@ -52,6 +57,7 @@ class Player
     public int $travelArrivesAt = 0; // Unix timestamp when travel completes
     public array $activeQuests = []; // Phase 9: [{npc_id, quest_id, status, progress, accepted_at}]
     public string $role = 'player'; // Phase 10: 'player' | 'admin'
+    public int $realmTier = 1; // Cảnh giới hiện tại (1-8), cần đột phá để lên tier
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -76,6 +82,20 @@ class Player
     /** @var array Active/passive skills */
     public array $skills = [];
 
+    /** @var array Talent/Aptitude multipliers per stat {strength: 1.0, speed: 0.5, ...} */
+    public array $talents = [
+        'strength' => 1.0, 'speed' => 1.0, 'dexterity' => 1.0, 'defense' => 1.0
+    ];
+
+    /** Talent tier definitions */
+    private const TALENT_TIERS = [
+        ['value' => 0.5, 'weight' => 20, 'name' => 'Phế Mạch',  'icon' => '❌', 'color' => '#888'],
+        ['value' => 1.0, 'weight' => 40, 'name' => 'Phàm Cốt',  'icon' => '⚪', 'color' => '#ccc'],
+        ['value' => 1.5, 'weight' => 25, 'name' => 'Lương Cốt',  'icon' => '🟢', 'color' => '#4ade80'],
+        ['value' => 2.0, 'weight' => 12, 'name' => 'Linh Cốt',  'icon' => '🔵', 'color' => '#60a5fa'],
+        ['value' => 3.0, 'weight' => 3,  'name' => 'Thiên Cốt',  'icon' => '🟡', 'color' => '#fbbf24'],
+    ];
+
     /** @var array Temporary buffs from pills e.g. [{id, type, stat, value, duration}] */
     public array $combatBuffs = [];
 
@@ -87,9 +107,60 @@ class Player
         $this->name = $name;
         $this->gender = $gender;
         $this->baseStats = StatEngine::getBaseStats($gender);
+        $this->talents = self::generateRandomTalents();
         $this->recalcDerived();
         $this->currentHp = $this->maxHp;
         $this->currentEnergy = $this->maxEnergy;
+    }
+
+    /**
+     * Roll random talent tier for each stat based on weighted probability.
+     */
+    public static function generateRandomTalents(): array
+    {
+        $talents = [];
+        foreach (['strength', 'speed', 'dexterity', 'defense'] as $stat) {
+            $roll = mt_rand(1, 100);
+            $cum = 0;
+            foreach (self::TALENT_TIERS as $tier) {
+                $cum += $tier['weight'];
+                if ($roll <= $cum) {
+                    $talents[$stat] = $tier['value'];
+                    break;
+                }
+            }
+        }
+        return $talents;
+    }
+
+    /**
+     * Get talent tier info for a given stat.
+     */
+    public function getTalentInfo(string $stat): array
+    {
+        $val = $this->talents[$stat] ?? 1.0;
+        foreach (self::TALENT_TIERS as $tier) {
+            if (abs($tier['value'] - $val) < 0.01) return $tier;
+        }
+        return self::TALENT_TIERS[1]; // default Phàm Cốt
+    }
+
+    /**
+     * Get all talent info for frontend display.
+     */
+    public function getTalentDisplay(): array
+    {
+        $result = [];
+        foreach ($this->talents as $stat => $val) {
+            $info = $this->getTalentInfo($stat);
+            $result[$stat] = [
+                'value' => $val,
+                'name' => $info['name'],
+                'icon' => $info['icon'],
+                'color' => $info['color'],
+            ];
+        }
+        return $result;
     }
 
     /**
@@ -219,12 +290,44 @@ class Player
     }
 
     /**
-     * Equip an item.
+     * Equip an item from inventory.
      */
     public function equipItem(Item $item): void
     {
+        // Remove from inventory
+        foreach ($this->inventory as $idx => $invItem) {
+            if ($invItem->id === $item->id) {
+                unset($this->inventory[$idx]);
+                $this->inventory = array_values($this->inventory);
+                break;
+            }
+        }
+
+        // Unequip current item in slot if possible
+        if (isset($this->equipment[$item->slot])) {
+            $oldItem = $this->equipment[$item->slot];
+            unset($this->equipment[$item->slot]);
+            $this->addToInventory($oldItem);
+        }
+
         $this->equipment[$item->slot] = $item;
         $this->recalcDerived();
+    }
+
+    /**
+     * Get current max capacity
+     */
+    public function getMaxInventorySize(): int
+    {
+        $cap = 20;
+        foreach (['ring1', 'ring2'] as $slot) {
+            $r = $this->equipment[$slot] ?? null;
+            if ($r && (strpos($r->baseType, 'tru_vat') !== false || $r->id === 'tui_tru_vat')) {
+                // capacity is stored in the 1st mod's value
+                $cap += (int)($r->getModifiers()[0]->value ?? 10);
+            }
+        }
+        return $cap;
     }
 
     /**
@@ -234,6 +337,16 @@ class Player
     {
         $item = $this->equipment[$slot] ?? null;
         if ($item) {
+            if ($slot === 'ring1' || $slot === 'ring2') {
+                $loss = (int)($item->getModifiers()[0]->value ?? 10);
+                if (count($this->inventory) + 1 > $this->getMaxInventorySize() - $loss) {
+                    throw new \Exception("Túi đồ sẽ quá tải nếu tháo giới chỉ này!");
+                }
+            } else {
+                if (count($this->inventory) >= $this->getMaxInventorySize()) {
+                    throw new \Exception("Túi đồ đã đầy, không thể tháo thêm!");
+                }
+            }
             unset($this->equipment[$slot]);
             $this->inventory[] = $item;
             $this->recalcDerived();
@@ -246,6 +359,9 @@ class Player
      */
     public function addToInventory(Item $item): void
     {
+        if (count($this->inventory) >= $this->getMaxInventorySize()) {
+            throw new \Exception("Túi đồ đã đầy!");
+        }
         $this->inventory[] = $item;
     }
 
@@ -318,9 +434,9 @@ class Player
 
         $this->currentEnergy -= $energyCost;
 
-        // Gain = 1 + random(0-1) based on stat level  
-        $currentStat = $this->allocatedStats[$stat] ?? 0;
-        $gain = 1; // base gain per train
+        // Gain = base 1, multiplied by talent aptitude
+        $talentMul = $this->talents[$stat] ?? 1.0;
+        $gain = max(1, (int)round(1 * $talentMul));
         $this->allocatedStats[$stat] = ($this->allocatedStats[$stat] ?? 0) + $gain;
         $this->recalcDerived();
 
@@ -375,14 +491,19 @@ class Player
     }
 
     /**
-     * Get Xianxia Realm based on level.
+     * Get Xianxia Realm tier (uses RealmSystem).
      */
     public function getRealm(): int
     {
-        if ($this->level >= 15) return 4; // Nguyên Anh
-        if ($this->level >= 10) return 3; // Kim Đan
-        if ($this->level >= 5) return 2;  // Trúc Cơ
-        return 1; // Luyện Khí
+        return $this->realmTier;
+    }
+
+    /**
+     * Get full realm info from RealmSystem.
+     */
+    public function getRealmInfo(): array
+    {
+        return \App\Systems\RealmSystem::getRealmInfo($this->level, $this->realmTier);
     }
 
     /**
@@ -441,6 +562,34 @@ class Player
             
             if ($type === 'flat' && $stat === 'hp') {
                 $this->currentHp = min($this->maxHp, $this->currentHp + $val);
+            } elseif ($type === 'talent_upgrade') {
+                // Tẩy Tủy Đan: Upgrade a random stat's talent by 1 tier
+                $upgradableStats = [];
+                $tierValues = array_column(self::TALENT_TIERS, 'value');
+                $maxTier = max($tierValues);
+                foreach ($this->talents as $s => $v) {
+                    if ($v < $maxTier) $upgradableStats[] = $s;
+                }
+                if (empty($upgradableStats)) {
+                    return "Căn cốt đã đạt cực hạn, không thể cải tạo thêm!";
+                }
+                $chosenStat = $upgradableStats[array_rand($upgradableStats)];
+                $currentVal = $this->talents[$chosenStat];
+                // Find next tier
+                $nextVal = $currentVal;
+                foreach (self::TALENT_TIERS as $tier) {
+                    if ($tier['value'] > $currentVal) {
+                        $nextVal = $tier['value'];
+                        break;
+                    }
+                }
+                $this->talents[$chosenStat] = $nextVal;
+                $info = $this->getTalentInfo($chosenStat);
+                $this->recalcDerived();
+            } elseif ($type === 'talent_reroll') {
+                // Hoán Cốt Đan: Completely reroll all talents
+                $this->talents = self::generateRandomTalents();
+                $this->recalcDerived();
             } elseif ($type === 'increase' || $type === 'more') {
                 // Add as combat buff
                 $this->combatBuffs[] = [
@@ -480,26 +629,75 @@ class Player
     }
 
     /**
-     * Apply meditation HP regen (1% maxHP per 10s) if player has Toa Thien skill.
+     * Giảm thời lượng (duration) của các Buff sau mỗi trận đấu.
+     * Xoá Buff nếu hết hạn.
      */
-    public function applyMeditation(): int
+    public function tickCombatBuffs(): void
     {
-        $hasMeditation = in_array('toa_thien', array_column($this->skills, 'id'));
-        if (!$hasMeditation) return 0;
-        if ($this->currentHp >= $this->maxHp) return 0;
-
-        $now = time();
-        $elapsed = $now - $this->lastHpRegen;
-        if ($elapsed < 10) return 0;
-
-        $ticks = (int) floor($elapsed / 10);
-        $healPerTick = max(1, (int) round($this->maxHp * 0.01));
-        $totalHeal = $healPerTick * $ticks;
-        $this->currentHp = min($this->maxHp, $this->currentHp + $totalHeal);
-        $this->lastHpRegen = $now;
-        return $totalHeal;
+        $activeBuffs = [];
+        foreach ($this->combatBuffs as $buff) {
+            $buff['duration'] -= 1;
+            if ($buff['duration'] > 0) {
+                $activeBuffs[] = $buff;
+            }
+        }
+        $this->combatBuffs = $activeBuffs;
+        $this->recalcDerived(); // Recalculate stats as buffs might have dropped
     }
 
+    /**
+     * Tự động hồi phục HP, Energy, Stamina theo thời gian thực (tick 10s)
+     */
+    public function applyRegeneration(): bool
+    {
+        $now = time();
+        $elapsed = $now - $this->lastHpRegen;
+        if ($elapsed < 10) return false;
+
+        $ticks = (int) floor($elapsed / 10);
+        $this->lastHpRegen = $now - ($elapsed % 10); // Giữ lại phần dư
+
+        $stats = $this->getFinalStats();
+        $changed = false;
+
+        // HP Regen
+        $hasMeditation = in_array('toa_thien', array_column($this->skills, 'id'));
+        if ($this->currentHp < $this->maxHp && $hasMeditation) {
+            $healPerTick = max(1, (int) round($this->maxHp * 0.01));
+            $this->currentHp = min($this->maxHp, $this->currentHp + $healPerTick * $ticks);
+            $changed = true;
+        }
+
+        // Energy Regen
+        if ($this->currentEnergy < $this->maxEnergy) {
+            $energyRegenStat = $stats['energyRegen'] ?? 5; 
+            $this->currentEnergy = min($this->maxEnergy, $this->currentEnergy + $energyRegenStat * $ticks);
+            $changed = true;
+        }
+
+        // Stamina Regen
+        if ($this->currentStamina < $this->maxStamina) {
+            $staminaRegenStat = $stats['staminaRegen'] ?? 10;
+            $this->currentStamina = min($this->maxStamina, $this->currentStamina + $staminaRegenStat * $ticks);
+            $changed = true;
+        }
+
+        return $changed;
+    }
+
+    /**
+     * Tự động hoàn thành chuyến đi nếu hết thời gian
+     * @return bool True nếu có thay đổi cần lưu
+     */
+    public function updateTravelStatus(): bool
+    {
+        if ($this->isTraveling() && $this->travelRemaining() <= 0) {
+            $this->completeTravelIfReady();
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * Spend energy for an action. Returns false if not enough.
      */
@@ -523,19 +721,26 @@ class Player
     }
 
     /**
-     * Gain XP and handle level up.
+     * Gain XP, handle level up. Level cap is removed!
      */
     public function gainXp(int $amount): void
     {
         $this->xp += $amount;
+        
         while ($this->xp >= $this->xpToNext) {
             $this->xp -= $this->xpToNext;
             $this->level++;
-            $this->statPoints += 3;
-            $this->xpToNext = (int) ($this->xpToNext * 1.5);
+            
+            // Phần thưởng cơ bản khi lên cấp (áp dụng cho mọi cấp)
+            // Chỉ số (STR/SPD/DEX/DEF) tăng qua Rèn Luyện (linh lực) + Căn Cốt, không cộng điểm tự do
+            $this->maxNerve += 1;         // Tăng max nghịch khí
+            // Nâng độ khó: Công thức cày cuốc RPG (Level^2.2 * 100)
+            $this->xpToNext = (int) (100 * pow($this->level, 2.2));
+            
             $this->recalcDerived();
             $this->currentHp = $this->maxHp;
             $this->currentEnergy = $this->maxEnergy;
+            $this->nerve = $this->maxNerve; // Phục hồi full nghịch khí
         }
     }
 
@@ -549,6 +754,10 @@ class Player
         $stats = $this->getFinalStats();
         $this->maxHp = $stats['maxHp'];
         $this->maxEnergy = $stats['maxEnergy'] ?? 50;
+        
+        // Luôn luôn đảm bảo xpToNext chuẩn với công thức cày cuốc mới nhất 
+        // (Sửa lỗi cho các account cũ đang bị số xpToNext lệch)
+        $this->xpToNext = (int) (100 * pow($this->level, 2.2));
     }
 
     public function toArray(): array
@@ -594,6 +803,8 @@ class Player
             'studyRemaining' => max(0, $this->studyEndsAt - time()),
             'unlockedNodes' => $this->unlockedNodes,
             'treeProgress' => $this->treeProgress,
+            'skillProgress' => $this->skillProgress,
+            'discoveredNodes' => $this->discoveredNodes,
             'trackedMonsters' => $this->trackedMonsters,
             'combatBuffs' => $this->combatBuffs,
             'lastMonsterSpawn' => $this->lastMonsterSpawn,
@@ -603,7 +814,13 @@ class Player
             'travelRemaining' => $this->travelRemaining(),
             'activeQuests' => $this->activeQuests,
             'role' => $this->role,
+            'unreadEventsCount' => \App\Core\GameDataRepository::getUnreadEventsCount($this->id),
             'insightLevels' => $this->getInsightLevels(),
+            'realmTier' => $this->realmTier,
+            'realmInfo' => $this->getRealmInfo(),
+            'talents' => $this->talents,
+            'talentDisplay' => $this->getTalentDisplay(),
+            'mugCooldownUntil' => $this->mugCooldownUntil,
         ];
     }
 
@@ -651,6 +868,7 @@ class Player
     public static function fromArray(array $data): self
     {
         $player = new self($data['name'], $data['gender']);
+        $player->id = $data['id'] ?? ''; // Added this line
         $player->level = $data['level'] ?? 1;
         $player->xp = $data['xp'] ?? 0;
         $player->xpToNext = $data['xpToNext'] ?? 100;
@@ -689,6 +907,7 @@ class Player
         $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
         $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
         $player->lastHpRegen = $data['lastHpRegen'] ?? time();
+
         // Phase 1
         $player->gold = $data['gold'] ?? 0;
         $player->nerve = $data['nerve'] ?? 15;
@@ -700,6 +919,8 @@ class Player
         $player->studyEndsAt = $data['studyEndsAt'] ?? 0;
         $player->unlockedNodes = $data['unlockedNodes'] ?? [];
         $player->treeProgress = $data['treeProgress'] ?? [];
+        $player->skillProgress = $data['skillProgress'] ?? [];
+        $player->discoveredNodes = $data['discoveredNodes'] ?? [];
         $player->trackedMonsters = $data['trackedMonsters'] ?? [];
         $player->combatBuffs = $data['combatBuffs'] ?? [];
         $player->lastMonsterSpawn = $data['lastMonsterSpawn'] ?? 0;
@@ -710,6 +931,9 @@ class Player
         $player->passwordHash = $data['passwordHash'] ?? '';
         $player->activeQuests = $data['activeQuests'] ?? [];
         $player->role = $data['role'] ?? 'player';
+        $player->realmTier = $data['realmTier'] ?? \App\Systems\RealmSystem::getRealmTier($player->level);
+        $player->talents = $data['talents'] ?? self::generateRandomTalents();
+        $player->mugCooldownUntil = $data['mugCooldownUntil'] ?? 0;
 
         return $player;
     }
@@ -931,9 +1155,8 @@ class Player
     {
         if ($this->isJailed()) return 'Đang bị giam!';
         if ($this->studyingNode !== '') return 'Đang tu luyện môn khác!';
-        if (in_array($node['id'], $this->unlockedNodes)) return 'Đã lĩnh ngộ thành công môn này!';
 
-        // Check prereqs
+        // Check prerequisites
         foreach (($node['prerequisites'] ?? []) as $prereq) {
             if (!in_array($prereq, $this->unlockedNodes)) {
                 return "Cần lĩnh ngộ cơ sở trước!";
@@ -945,23 +1168,52 @@ class Player
         return null; // success
     }
 
-    /**
-     * Check/complete education. Returns completed node ID or null.
-     */
-    public function checkEducation(): ?string
+    public function checkEducation(): array
     {
-        if ($this->studyingNode === '' || $this->studyEndsAt > time()) return null;
+        if ($this->studyingNode === '' || $this->studyEndsAt > time()) return ['finished' => false];
 
         $parts = explode('|', $this->studyingNode);
         $nodeId = $parts[0];
         $treeId = $parts[1] ?? 'unknown';
 
-        $this->unlockedNodes[] = $nodeId;
-        $this->treeProgress[$treeId] = ($this->treeProgress[$treeId] ?? 0) + 1;
-        
         $this->studyingNode = '';
         $this->studyEndsAt = 0;
-        return $nodeId;
+
+        $isLevelUp = false;
+        $expGained = 100; // Base flat EXP for simplicity 
+
+        if (!isset($this->skillProgress)) {
+            $this->skillProgress = [];
+        }
+
+        if (!in_array($nodeId, $this->unlockedNodes)) {
+            $this->unlockedNodes[] = $nodeId;
+            $this->treeProgress[$treeId] = ($this->treeProgress[$treeId] ?? 0) + 1;
+            // Initialize progress
+            $this->skillProgress[$nodeId] = ['level' => 1, 'exp' => 0];
+            $isLevelUp = true;
+        } else {
+            // Already unlocked -> Gain EXP
+            $sp = $this->skillProgress[$nodeId] ?? ['level' => 1, 'exp' => 0];
+            $sp['exp'] += $expGained;
+            
+            $maxExp = $sp['level'] * 100;
+            if ($sp['exp'] >= $maxExp) {
+                // Breakthrough to next level!
+                $sp['level'] += 1;
+                $sp['exp'] -= $maxExp;
+                $isLevelUp = true;
+            }
+            $this->skillProgress[$nodeId] = $sp;
+        }
+
+        return [
+            'finished' => true,
+            'nodeId' => $nodeId,
+            'isLevelUp' => $isLevelUp,
+            'expGained' => $expGained,
+            'currentLevel' => $this->skillProgress[$nodeId]['level'] ?? 1
+        ];
     }
 
     /**

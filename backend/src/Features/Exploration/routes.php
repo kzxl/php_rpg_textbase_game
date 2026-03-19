@@ -70,9 +70,8 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        if (count($player->trackedMonsters) >= 5) {
-            return jsonResponse($response, ['error' => 'Danh sách truy vết đã đầy (Tối đa 5 con)!'], 400);
-        }
+        // Không giới hạn khi thêm thủ công từ khám phá
+        // maxMonsters = 5 chỉ áp dụng cho auto-spawn theo thời gian
 
         $base = GameDataRepository::getMonsterById($monsterId);
         if (!$base) return jsonResponse($response, ['error' => 'Invalid monster'], 400);
@@ -133,6 +132,52 @@ return function ($app) {
 
         $eventResult = ['type' => 'nothing', 'message' => 'Bạn dạo quanh một vòng nhưng chỉ thấy gió lùa.'];
         
+        // ========================================
+        // GLOBAL SKILL DISCOVERY (Cơ duyên Thần Thông)
+        // Rate: 0.5% (Trung bình khó - game lâu dài)
+        // ========================================
+        $skillRoll = mt_rand(1, 1000);
+        if ($skillRoll <= 5) {
+            $allSkills = GameDataRepository::getSkills();
+            if (!empty($allSkills)) {
+                $foundSkill = $allSkills[array_rand($allSkills)];
+                // Ktra xem đã học chưa
+                $learnedIds = array_map(fn($s) => is_array($s) ? $s['id'] : $s, $player->skills);
+                if (!in_array($foundSkill['id'], $learnedIds)) {
+                    $player->learnSkill($foundSkill);
+                    $eventResult = [
+                        'type' => 'skill',
+                        'message' => '✨ Cơ duyên tề thiên! Bạn vô tình nhặt được tàn quyển [' . $foundSkill['name'] . '] và giác ngộ thần thông!',
+                        'skillId' => $foundSkill['id']
+                    ];
+                    // Skip regular area event
+                    $selectedEvent = null; 
+                }
+            }
+        }
+
+        // ========================================
+        // PLAYER ENCOUNTER (Đụng độ Người chơi)
+        // Rate: 15%
+        // ========================================
+        if ($selectedEvent !== null) { // Chỉ lọt vào đây nếu chưa trúng Skill
+            $playerRoll = mt_rand(1, 100);
+            if ($playerRoll <= 15) {
+                $pdo = \App\Core\Database::pdo();
+                $stmt = $pdo->prepare("SELECT id, name, gender, level, current_hp, max_hp FROM players WHERE current_area = ? AND id != ? AND current_hp > 0 ORDER BY RAND() LIMIT 1");
+                $stmt->execute([$player->currentArea, $player->id]);
+                $otherPlayer = $stmt->fetch(\PDO::FETCH_ASSOC);
+                if ($otherPlayer) {
+                    $eventResult = [
+                        'type' => 'player_encounter',
+                        'message' => 'Ngọa hổ tàng long! Bạn giật mình nhận ra Đạo hữu [' . $otherPlayer['name'] . '] (Lv. ' . $otherPlayer['level'] . ') cũng đang ở đây.',
+                        'player' => $otherPlayer
+                    ];
+                    $selectedEvent = null; // Skip regular area event
+                }
+            }
+        }
+        
         if ($selectedEvent) {
             $type = $selectedEvent['type'];
 
@@ -182,9 +227,27 @@ return function ($app) {
                 $eventResult = ['type' => 'material', 'message' => 'Bạn thu thập được ' . $matName . '.', 'itemId' => $matId, 'questNotifications' => $questNotifs];
 
             } elseif ($type === 'item' && !empty($selectedEvent['rarities'])) {
-                $eventResult = ['type' => 'item', 'message' => 'Khám phá bí địa thấy một pháp bảo lấp lánh!'];
+                $rarities = $selectedEvent['rarities'];
+                $rarity = $rarities[array_rand($rarities)];
+                $itemSys = new \App\Systems\ItemSystem();
+                $item = null;
+                $isManual = mt_rand(1, 100) <= 30; // 30% bí tịch
 
-            } elseif ($type === 'npc' && !empty($selectedEvent['events'])) {
+                if ($isManual) {
+                    $manuals = array_filter($itemSys->getAll(), fn($i) => ($i['category'] ?? '') === 'manual' && ($i['rarity'] ?? 'common') === $rarity);
+                    if (!empty($manuals)) {
+                        $chosen = $manuals[array_rand($manuals)];
+                        $item = $itemSys->createItem($chosen['id']);
+                        $player->inventory[] = $item;
+                        $eventResult = ['type' => 'item', 'message' => "Tuyệt vời! Tìm được một cuốn yếu quyết phủ bụi: {$item->name} ({$rarity}). Vui lòng xem ở Túi Đồ.", 'itemId' => $item->id];
+                    }
+                }
+
+                if (!$item) {
+                    $item = $itemSys->generateRandomItem($rarity);
+                    $player->inventory[] = $item;
+                    $eventResult = ['type' => 'item', 'message' => "Khám phá bí địa thấy một pháp bảo lấp lánh: {$item->name} ({$rarity}).", 'itemId' => $item->id];
+                }
                 // Phase 9+: NPC Encounter — pick a real NPC matching this area
                 $areaNpcs = GameDataRepository::getNpcsByArea($player->currentArea);
                 
@@ -196,19 +259,20 @@ return function ($app) {
                     // ========================================
                     $studyEffect = null;
                     if (!empty($player->studyingNode) && $player->studyEndsAt > time()) {
-                        $kyNgoRoll = mt_rand(1, 100);
+                        $kyNgoRoll = mt_rand(1, 1000); // Base 1000 for finer control
                         $remaining = $player->studyEndsAt - time();
 
-                        if ($kyNgoRoll <= 8) {
-                            // 🧓 Cao nhân chỉ điểm — giảm 30% study time
-                            $reduce = (int)($remaining * 0.3);
+                        // Điều chỉnh xuống mức cực khó (Game lâu dài)
+                        if ($kyNgoRoll <= 20) { // 2%
+                            // 🧓 Cao nhân chỉ điểm — giảm 20% study time
+                            $reduce = (int)($remaining * 0.2);
                             $player->studyEndsAt -= $reduce;
                             $studyEffect = [
                                 'type' => 'master_guidance',
-                                'message' => '🧓 Cao nhân chỉ điểm! Tu luyện nhanh hơn 30%!',
+                                'message' => '🧓 Cao nhân chỉ điểm! Tu luyện nhanh hơn 20%!',
                                 'timeReduced' => $reduce
                             ];
-                        } elseif ($kyNgoRoll <= 12) {
+                        } elseif ($kyNgoRoll <= 25) { // 0.5%
                             // 📜 Nhặt được bí tịch — hoàn thành ngay
                             $player->studyEndsAt = time();
                             $studyEffect = [
@@ -216,16 +280,16 @@ return function ($app) {
                                 'message' => '📜 Nhặt được bí tịch! Tu luyện hoàn thành ngay lập tức!',
                                 'instantComplete' => true
                             ];
-                        } elseif ($kyNgoRoll <= 20) {
-                            // 🧠 Đột phá ngộ đạo — gấp đôi tốc (giảm 50%)
-                            $reduce = (int)($remaining * 0.5);
+                        } elseif ($kyNgoRoll <= 50) { // 2.5%
+                            // 🧠 Đột phá ngộ đạo — giảm 30%
+                            $reduce = (int)($remaining * 0.3);
                             $player->studyEndsAt -= $reduce;
                             $studyEffect = [
                                 'type' => 'enlightenment',
-                                'message' => '🧠 Đột phá ngộ đạo! Tốc độ tu luyện x2!',
+                                'message' => '🧠 Đột phá ngộ đạo! Tốc độ tu luyện tiến triển 30%!',
                                 'timeReduced' => $reduce
                             ];
-                        } elseif ($kyNgoRoll <= 28) {
+                        } elseif ($kyNgoRoll <= 100) { // 5%
                             // ⚠️ Tẩu hỏa nhập ma — +50% time
                             $penalty = (int)($remaining * 0.5);
                             $player->studyEndsAt += $penalty;

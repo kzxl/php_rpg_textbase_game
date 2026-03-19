@@ -54,6 +54,15 @@ class Item
         return $mods;
     }
 
+    public function getId(): string { return $this->id; }
+    public function getRarity(): string { return $this->rarity; }
+    public function getSlot(): string { return $this->slot; }
+    public function getAffixes(): array { return $this->affixes; }
+    public function setAffixes(array $affixes): void { $this->affixes = $affixes; }
+    public function getItemLevel(): int { return $this->itemLevel; }
+    public function setItemLevel(int $level): void { $this->itemLevel = $level; }
+    public function getBaseItemLevel(): int { return $this->itemLevel; } // baseline
+
     public function toArray(): array
     {
         return [
