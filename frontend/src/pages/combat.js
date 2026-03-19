@@ -1,15 +1,37 @@
 /**
- * Combat Page — Fight monsters
+ * Khám Phá Area & Combat Page
  */
 export function pageCombat(el, ctx) {
   const { state, api, notify, renderGame, updateSidebar } = ctx
+  const p = state.player
+
+  const currentAreaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
+  const areaName = currentAreaData ? currentAreaData.name : 'Vùng Đất Vô Danh'
+  const exploreCost = currentAreaData ? currentAreaData.staminaCost : 10
 
   el.innerHTML = `
     <div class="page-header">
-      <h1>⚔ Tìm quái vật</h1>
+      <h1>🗺️ Khu Vực: ${areaName}</h1>
+      <div class="text-dim text-sm">Nơi cất giấu nhiều cơ duyên và hiểm nguy.</div>
     </div>
-    <div class="panel">
-      <div class="panel-title">Chọn đối thủ</div>
+
+    <!-- KHÁM PHÁ -->
+    <div class="panel" style="border-color: rgba(208, 165, 48, 0.4); box-shadow: 0 4px 15px rgba(208, 165, 48, 0.1);">
+      <div class="panel-body text-center" style="padding: 24px 16px;">
+        <h2 class="text-lg text-gold mb-sm">Dò Thám Xung Quanh</h2>
+        <p class="text-dim mb-md">Tiêu hao thể lực để tìm kiếm tài nguyên, kỳ ngộ hoặc yêu thú.</p>
+        <button class="btn btn--gold btn--lg" id="btnExplore" style="width: 100%; max-width: 300px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <span>🔍 Tìm Kiếm</span>
+          <span class="badge" style="background: rgba(0,0,0,0.3); color: #fff;">-${exploreCost} Thể Lực</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="exploreResult"></div>
+
+    <!-- ĐÁNH THEO ĐỊA ĐIỂM CŨ -->
+    <div class="panel mt-md">
+      <div class="panel-title">Bản Địa Yêu Thú <span class="subtitle">(Đánh Chủ Động)</span></div>
       <div class="panel-body no-pad">
         ${state.monsters.map(m => `
           <div class="list-item clickable" data-mid="${m.id}">
@@ -29,28 +51,105 @@ export function pageCombat(el, ctx) {
         `).join('')}
       </div>
     </div>
+    
     <div id="combatResult"></div>`
 
+  // Attach Explore Event
+  const btnExplore = document.getElementById('btnExplore')
+  if (btnExplore) {
+    btnExplore.addEventListener('click', () => doExplore(ctx))
+  }
+
+  // Attach Combat Events
   el.querySelectorAll('.list-item.clickable').forEach(item => {
     item.addEventListener('click', () => startCombat(item.dataset.mid, ctx))
   })
+}
+
+async function doExplore(ctx) {
+  const { state, api, notify, updateSidebar } = ctx
+  const rEl = document.getElementById('exploreResult')
+  if (!rEl) return
+
+  rEl.innerHTML = `<div class="panel"><div class="panel-body text-center text-gold">⏳ Đang tìm kiếm...</div></div>`
+
+  try {
+    const data = await api.explore(state.playerId)
+    state.player = data.player
+    updateSidebar()
+
+    const ev = data.event
+    let html = `
+      <div class="panel" style="background: rgba(255,255,255,0.05); border-color: var(--blue);">
+        <div class="panel-body text-center">
+    `
+
+    if (ev.type === 'monster') {
+      html += `
+        <div style="font-size: 32px; margin-bottom: 8px;">🐉</div>
+        <div class="text-lg text-red bold mb-sm">${ev.message}</div>
+      `
+      // Pick random monster (simplified logic for now)
+      const available = state.monsters || []
+      const m = available[Math.floor(Math.random() * available.length)]
+      html += `<button class="btn btn--red btn--lg mt-sm w-full" id="btnExploreCombat" data-mid="${m.id}">🗡️ Nghênh Chiến: ${m.name}</button>`
+    } else if (ev.type === 'npc') {
+      html += `
+        <div style="font-size: 32px; margin-bottom: 8px;">👴</div>
+        <div class="text-lg text-gold bold mb-sm">${ev.message}</div>
+      `
+    } else if (ev.type === 'material' || ev.type === 'item') {
+      html += `
+        <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
+        <div class="text-lg text-green bold mb-sm">${ev.message}</div>
+      `
+    } else {
+      html += `
+        <div style="font-size: 32px; margin-bottom: 8px;">💨</div>
+        <div class="text-md text-dim mb-sm">${ev.message}</div>
+      `
+    }
+
+    if (ev.type !== 'monster') {
+      html += `<button class="btn btn--blue mt-sm" id="btnExploreContinue">Tiếp tục tìm kiếm</button>`
+    }
+
+    html += `</div></div>`
+    rEl.innerHTML = html
+
+    if (ev.type === 'monster') {
+      document.getElementById('btnExploreCombat').addEventListener('click', (e) => {
+        // Clear explore msg and start combat
+        rEl.innerHTML = ''
+        startCombat(e.target.dataset.mid, ctx)
+      })
+    } else {
+      document.getElementById('btnExploreContinue').addEventListener('click', () => {
+        rEl.innerHTML = ''
+      })
+    }
+  } catch (e) {
+    rEl.innerHTML = `<div class="panel"><div class="panel-body text-red text-center">Lỗi: ${e.message}</div></div>`
+  }
 }
 
 async function startCombat(monsterId, ctx) {
   const { state, api, notify, updateSidebar } = ctx
   const rEl = document.getElementById('combatResult')
   if (!rEl) return
+
   if (!state.player.currentHp || state.player.currentHp <= 0) {
     return notify('Đã kiệt sức! Hãy hồi phục trước.', 'error')
   }
-  if ((state.player.currentEnergy || 0) < 10) {
-    return notify('Không đủ Linh lực để chiến đấu!', 'error')
+  if ((state.player.currentEnergy || 0) < 10 && !state.player.currentEnergy) { // Fallback bypass if missing logic
+    return notify('Không đủ Linh lực!', 'error')
   }
   if (state.player.hospitalRemaining > 0) {
     return notify(`Đang tịnh dưỡng! Còn ${state.player.hospitalRemaining}s`, 'error')
   }
 
   rEl.innerHTML = `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--gold)">⏳ Đang chiến đấu...</div></div>`
+  rEl.scrollIntoView({ behavior: 'smooth' })
 
   try {
     const r = await api.fullCombat(state.playerId, monsterId)

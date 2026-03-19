@@ -22,14 +22,14 @@ class PlayerRepository
 
         $sql = "INSERT INTO players (
             id, username, password_hash, name, gender, level, xp, xp_to_next,
-            current_hp, max_hp, current_energy, max_energy, stat_points,
+            current_hp, max_hp, current_energy, max_energy, current_stamina, max_stamina, stat_points,
             allocated_stats, hospital_until, med_cooldown_until, last_hp_regen,
             gold, nerve, max_nerve, crime_exp, crime_skills, jail_until,
             studying_node, study_ends_at, unlocked_nodes, tree_progress, current_area,
             traveling_to, travel_arrives_at
         ) VALUES (
             :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
-            :current_hp, :max_hp, :current_energy, :max_energy, :stat_points,
+            :current_hp, :max_hp, :current_energy, :max_energy, :current_stamina, :max_stamina, :stat_points,
             :allocated_stats, :hospital_until, :med_cooldown_until, :last_hp_regen,
             :gold, :nerve, :max_nerve, :crime_exp, :crime_skills, :jail_until,
             :studying_node, :study_ends_at, :unlocked_nodes, :tree_progress, :current_area,
@@ -39,6 +39,7 @@ class PlayerRepository
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
             current_hp = VALUES(current_hp), max_hp = VALUES(max_hp),
             current_energy = VALUES(current_energy), max_energy = VALUES(max_energy),
+            current_stamina = VALUES(current_stamina), max_stamina = VALUES(max_stamina),
             stat_points = VALUES(stat_points), allocated_stats = VALUES(allocated_stats),
             hospital_until = VALUES(hospital_until), med_cooldown_until = VALUES(med_cooldown_until),
             last_hp_regen = VALUES(last_hp_regen),
@@ -65,6 +66,8 @@ class PlayerRepository
             'max_hp' => $data['maxHp'],
             'current_energy' => $data['currentEnergy'],
             'max_energy' => $data['maxEnergy'],
+            'current_stamina' => $data['currentStamina'] ?? $data['maxStamina'] ?? 100,
+            'max_stamina' => $data['maxStamina'] ?? 100,
             'stat_points' => $data['statPoints'],
             'allocated_stats' => json_encode($data['allocatedStats'] ?? []),
             'hospital_until' => $data['hospitalUntil'] ?? 0,
@@ -109,6 +112,8 @@ class PlayerRepository
             'maxHp' => (int) $row['max_hp'],
             'currentEnergy' => (int) $row['current_energy'],
             'maxEnergy' => (int) $row['max_energy'],
+            'currentStamina' => (int) $row['current_stamina'],
+            'maxStamina' => (int) $row['max_stamina'],
             'statPoints' => (int) $row['stat_points'],
             'allocatedStats' => json_decode($row['allocated_stats'] ?? '{}', true) ?: [],
             'hospitalUntil' => (int) $row['hospital_until'],

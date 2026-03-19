@@ -21,6 +21,8 @@ class Player
     public int $maxHp = 100;
     public int $currentEnergy = 50;
     public int $maxEnergy = 50;
+    public int $currentStamina = 100; // Thể Lực
+    public int $maxStamina = 100;
     public int $statPoints = 0;
 
     /** @var int Unix timestamp when hospital ends (0 = not hospitalized) */
@@ -113,6 +115,26 @@ class Player
         $mods = array_merge($mods, $this->extraModifiers);
 
         return $mods;
+    }
+
+    /**
+     * Heal stamina fully.
+     */
+    public function healStamina(): void
+    {
+        $this->currentStamina = $this->maxStamina;
+    }
+
+    /**
+     * Spend stamina. Returns true if successful.
+     */
+    public function spendStamina(int $amount): bool
+    {
+        if ($this->currentStamina < $amount) {
+            return false;
+        }
+        $this->currentStamina -= $amount;
+        return true;
     }
 
     /**
@@ -400,6 +422,8 @@ class Player
             'maxHp' => $this->maxHp,
             'currentEnergy' => $this->currentEnergy,
             'maxEnergy' => $this->maxEnergy,
+            'currentStamina' => $this->currentStamina,
+            'maxStamina' => $this->maxStamina,
             'statPoints' => $this->statPoints,
             'hospitalUntil' => $this->hospitalUntil,
             'hospitalRemaining' => $this->hospitalRemaining(),

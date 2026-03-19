@@ -100,6 +100,7 @@ class GameAPI {
   getMedicines() { return this.request('/data/medicines') }
   getCrimes() { return this.request('/data/crimes') }
   getEducation() { return this.request('/data/education') }
+  getExploration() { return this.request('/data/exploration') }
 
   // Crimes
   commitCrime(id, crimeId) {
@@ -131,6 +132,11 @@ class GameAPI {
       method: 'POST',
       body: JSON.stringify({ rarity, slot }),
     })
+  }
+
+  // Exploration
+  explore(id) {
+    return this.request(`/player/${id}/explore`, { method: 'POST' })
   }
 }
 

@@ -167,8 +167,12 @@ function renderGame() {
   const p = state.player
   if (!p) return
   const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
+  const stPct = p.maxStamina > 0 ? Math.max(0, (p.currentStamina / p.maxStamina) * 100) : 0
   const enPct = p.maxEnergy > 0 ? Math.max(0, (p.currentEnergy / p.maxEnergy) * 100) : 0
   const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
+
+  const currentAreaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
+  const areaName = currentAreaData ? currentAreaData.name : 'Khám Phá'
 
   app.innerHTML = `
     <div class="game-layout">
@@ -183,11 +187,15 @@ function renderGame() {
           <div class="player-name">${p.name}</div>
           <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
           <div class="sidebar-bar">
-            <div class="bar-label"><span>HP</span><span>${p.currentHp}/${p.maxHp}</span></div>
+            <div class="bar-label"><span>❤️ Khí Huyết</span><span>${p.currentHp}/${p.maxHp}</span></div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
-            <div class="bar-label"><span>🔮 Linh lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
+            <div class="bar-label"><span>🏃 Thể Lực</span><span>${p.currentStamina ?? 100}/${p.maxStamina ?? 100}</span></div>
+            <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
+          </div>
+          <div class="sidebar-bar" style="margin-top:4px">
+            <div class="bar-label"><span>🔮 Linh Lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
@@ -200,7 +208,7 @@ function renderGame() {
         <ul class="nav">
           <li class="nav-section">CHIẾN ĐẤU</li>
           <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
-            <span class="icon">⚔</span> Tìm quái
+            <span class="icon">🗺️</span> ${areaName}
           </li>
           <li class="nav-item ${state.currentPage === 'gym' ? 'active' : ''}" data-page="gym">
             <span class="icon">🏋</span> Rèn Luyện
@@ -282,16 +290,21 @@ function updateSidebar() {
 
   const sp = document.querySelector('.sidebar-player')
   if (sp) {
+    const stPct = p.maxStamina > 0 ? Math.max(0, (p.currentStamina / p.maxStamina) * 100) : 0
     const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
       <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
       <div class="sidebar-bar">
-        <div class="bar-label"><span>HP</span><span>${p.currentHp}/${p.maxHp}</span></div>
+        <div class="bar-label"><span>❤️ Khí Huyết</span><span>${p.currentHp}/${p.maxHp}</span></div>
         <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
-        <div class="bar-label"><span>🔮 Linh lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
+        <div class="bar-label"><span>🏃 Thể Lực</span><span>${p.currentStamina ?? 100}/${p.maxStamina ?? 100}</span></div>
+        <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
+      </div>
+      <div class="sidebar-bar" style="margin-top:4px">
+        <div class="bar-label"><span>🔮 Linh Lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
         <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
       </div>
       <div class="sidebar-bar" style="margin-top:4px">

@@ -1,0 +1,57 @@
+{
+  "thanh_lam_tran": {
+    "name": "Thanh Lam Trấn",
+    "staminaCost": 10,
+    "rates": [
+      { "type": "monster", "weight": 40 },
+      { "type": "material", "weight": 25, "pools": ["thit_tho", "da_tho", "duoc_thao"] },
+      { "type": "item", "weight": 10, "rarities": ["common"] },
+      { "type": "npc", "weight": 5, "events": ["old_man_buff", "merchant", "found_gold"] },
+      { "type": "nothing", "weight": 20 }
+    ]
+  },
+  "hac_phong_lam": {
+    "name": "Hắc Phong Lâm",
+    "staminaCost": 12,
+    "rates": [
+      { "type": "monster", "weight": 50 },
+      { "type": "material", "weight": 20, "pools": ["go_tieu_linh", "doc_nhan", "da_ran"] },
+      { "type": "item", "weight": 10, "rarities": ["common", "uncommon"] },
+      { "type": "npc", "weight": 5, "events": ["trap_damage", "hidden_chest"] },
+      { "type": "nothing", "weight": 15 }
+    ]
+  },
+  "vong_linh_coc": {
+    "name": "Vong Linh Cốc",
+    "staminaCost": 15,
+    "rates": [
+      { "type": "monster", "weight": 55 },
+      { "type": "material", "weight": 15, "pools": ["hon_tan_1", "manh_ky_uc", "xuong_vun"] },
+      { "type": "item", "weight": 15, "rarities": ["uncommon", "rare"] },
+      { "type": "npc", "weight": 5, "events": ["ghost_encounter", "ancient_shrine"] },
+      { "type": "nothing", "weight": 10 }
+    ]
+  },
+  "thiet_huyet_son": {
+    "name": "Thiết Huyết Sơn",
+    "staminaCost": 20,
+    "rates": [
+      { "type": "monster", "weight": 60 },
+      { "type": "material", "weight": 15, "pools": ["quang_thiet_huyet", "hoa_tinh", "loi_quang"] },
+      { "type": "item", "weight": 15, "rarities": ["uncommon", "rare"] },
+      { "type": "npc", "weight": 5, "events": ["lava_burn", "volcano_eruption_loot"] },
+      { "type": "nothing", "weight": 5 }
+    ]
+  },
+  "thien_kiep_uyen": {
+    "name": "Thiên Kiếp Uyên",
+    "staminaCost": 25,
+    "rates": [
+      { "type": "monster", "weight": 70 },
+      { "type": "material", "weight": 10, "pools": ["ma_thach", "loi_quang_thach", "thien_thach_van"] },
+      { "type": "item", "weight": 10, "rarities": ["rare", "epic"] },
+      { "type": "npc", "weight": 5, "events": ["lightning_strike", "demonic_whisper"] },
+      { "type": "nothing", "weight": 5 }
+    ]
+  }
+}
