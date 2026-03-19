@@ -333,6 +333,9 @@ class CombatEngine
         $outcome = 'loss';
         $canFlee = false;
 
+        // Auto-discover monster for Sương Mù wiki
+        $player->discoverMonster($monster->id);
+
         $maxTurns = self::MAX_TURNS;
         $attackCost = self::ATTACK_COST;
 

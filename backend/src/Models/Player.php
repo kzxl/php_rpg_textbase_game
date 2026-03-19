@@ -50,6 +50,8 @@ class Player
     public array $treeProgress = []; // points per tree, e.g. ['internal_cultivation' => 5]
     public array $skillProgress = []; // {nodeId: {level: 1, exp: 0}}
     public array $discoveredNodes = []; // manually unlocked nodes via items
+    public array $discoveredMonsters = []; // monster IDs discovered through combat
+    public array $discoveredItems = []; // item IDs discovered through inventory
     public array $trackedMonsters = []; // [{instance_id, monster_id, hp_current}]
     public int $lastMonsterSpawn = 0; // unix
     public string $currentArea = 'thanh_lam_tran'; // Ngao Du — current area
@@ -809,6 +811,9 @@ class Player
             'treeProgress' => $this->treeProgress,
             'skillProgress' => $this->skillProgress,
             'discoveredNodes' => $this->discoveredNodes,
+            'discoveredMonsters' => $this->discoveredMonsters,
+            'discoveredItems' => $this->discoveredItems,
+            'acDanh' => $this->getAcDanh(),
             'trackedMonsters' => $this->trackedMonsters,
             'combatBuffs' => $this->combatBuffs,
             'lastMonsterSpawn' => $this->lastMonsterSpawn,
@@ -929,6 +934,8 @@ class Player
         $player->treeProgress = $data['treeProgress'] ?? [];
         $player->skillProgress = $data['skillProgress'] ?? [];
         $player->discoveredNodes = $data['discoveredNodes'] ?? [];
+        $player->discoveredMonsters = $data['discoveredMonsters'] ?? [];
+        $player->discoveredItems = $data['discoveredItems'] ?? [];
         $player->trackedMonsters = $data['trackedMonsters'] ?? [];
         $player->combatBuffs = $data['combatBuffs'] ?? [];
         $player->lastMonsterSpawn = $data['lastMonsterSpawn'] ?? 0;
@@ -967,6 +974,44 @@ class Player
     }
 
     public function jail(int $seconds): void { $this->jailUntil = time() + $seconds; }
+
+    /**
+     * Get Ác Danh (Crime Reputation) title based on crimeExp.
+     */
+    public function getAcDanh(): array
+    {
+        $tiers = [
+            ['min' => 5000, 'name' => 'Ma Đạo Tông Sư', 'icon' => '👿', 'bonus' => 15],
+            ['min' => 2000, 'name' => 'Ác Bá',          'icon' => '💀', 'bonus' => 10],
+            ['min' => 500,  'name' => 'Đại Đạo',        'icon' => '⚔️', 'bonus' => 5],
+            ['min' => 100,  'name' => 'Tiểu Tặc',       'icon' => '🗡️', 'bonus' => 0],
+            ['min' => 0,    'name' => 'Lương Dân',       'icon' => '',   'bonus' => 0],
+        ];
+        foreach ($tiers as $t) {
+            if ($this->crimeExp >= $t['min']) return $t;
+        }
+        return $tiers[count($tiers) - 1];
+    }
+
+    /**
+     * Discover a monster (first encounter → wiki unlock).
+     */
+    public function discoverMonster(string $monsterId): bool
+    {
+        if (in_array($monsterId, $this->discoveredMonsters)) return false;
+        $this->discoveredMonsters[] = $monsterId;
+        return true; // first discovery
+    }
+
+    /**
+     * Discover an item (first pickup → wiki unlock).
+     */
+    public function discoverItem(string $itemId): bool
+    {
+        if (in_array($itemId, $this->discoveredItems)) return false;
+        $this->discoveredItems[] = $itemId;
+        return true;
+    }
 
     public function spendNerve(int $amount): bool
     {
