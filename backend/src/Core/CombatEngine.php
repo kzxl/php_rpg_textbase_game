@@ -24,6 +24,19 @@ class CombatEngine
     /** Max turns before stalemate */
     private const MAX_TURNS = 25;
 
+    /**
+     * Ngũ Hành (Five Elements) advantage cycle:
+     * Hỏa (fire) > Mộc (wood) > Thổ (earth) > Thủy (water) > Hỏa
+     * Kim (metal) is neutral — no advantage/disadvantage.
+     */
+    private const ELEMENT_ADVANTAGE = [
+        'fire'  => 'wood',   // Hỏa khắc Mộc
+        'wood'  => 'earth',  // Mộc khắc Thổ
+        'earth' => 'water',  // Thổ khắc Thủy
+        'water' => 'fire',   // Thủy khắc Hỏa
+    ];
+    private const ELEMENT_BONUS = 0.20; // +20% dmg advantage
+
     /** Base energy cost per attack */
     private const ATTACK_COST = 10;
 
@@ -163,6 +176,21 @@ class CombatEngine
                     $finalDamage = max(0, (int) round($finalDamage * (1 - $resVal)));
                     if ($resVal > 0) $this->log("🛡 {$defender->name} kháng " . ($resVal*100) . "% sát thương {$damageType}!");
                     if ($resVal < 0) $this->log("🔥 {$defender->name} chịu thêm " . abs($resVal*100) . "% sát thương {$damageType}!");
+                }
+            }
+
+            // 7. Ngũ Hành Advantage (Five Elements)
+            $attackerElement = $skill['element'] ?? null;
+            $defenderElement = $defender->getElement();
+            if ($attackerElement && $defenderElement && $attackerElement !== $defenderElement) {
+                $adv = self::ELEMENT_ADVANTAGE[$attackerElement] ?? null;
+                $disadv = self::ELEMENT_ADVANTAGE[$defenderElement] ?? null;
+                if ($adv === $defenderElement) {
+                    $finalDamage = (int) round($finalDamage * (1 + self::ELEMENT_BONUS));
+                    $this->log("☯ Ngũ Hành tương khắc! {$this->elementName($attackerElement)} khắc {$this->elementName($defenderElement)} (+" . (self::ELEMENT_BONUS*100) . "%)");
+                } elseif ($disadv === $attackerElement) {
+                    $finalDamage = (int) round($finalDamage * (1 - self::ELEMENT_BONUS));
+                    $this->log("☯ Ngũ Hành tương sinh! {$this->elementName($defenderElement)} khắc {$this->elementName($attackerElement)} (-" . (self::ELEMENT_BONUS*100) . "%)");
                 }
             }
 
@@ -538,6 +566,18 @@ class CombatEngine
     private function log(string $message): void
     {
         $this->log[] = $message;
+    }
+
+    private function elementName(string $element): string
+    {
+        return match($element) {
+            'fire' => 'Hỏa🔥',
+            'water' => 'Thủy💧',
+            'wood' => 'Mộc🌿',
+            'earth' => 'Thổ⛰️',
+            'metal' => 'Kim⚔️',
+            default => $element,
+        };
     }
 
     private function result(string $type, int $damage, Monster $target): array

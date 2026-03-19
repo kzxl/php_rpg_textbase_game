@@ -69,6 +69,11 @@ class Monster
         return $this->rawData;
     }
 
+    public function getElement(): ?string
+    {
+        return $this->rawData['element'] ?? null;
+    }
+
     /**
      * Create from JSON data with optional level scaling.
      */
