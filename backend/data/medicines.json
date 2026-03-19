@@ -1,0 +1,32 @@
+[
+  {
+    "id": "hoi_xuan_dan",
+    "name": "Hồi Xuân Đan",
+    "description": "Đan dược cơ bản, hồi phục ít HP.",
+    "tier": 1,
+    "healPercent": 15,
+    "reduceHospital": 15,
+    "cooldown": 10,
+    "icon": "💊"
+  },
+  {
+    "id": "tuc_mach_dan",
+    "name": "Tục Mạch Đan",
+    "description": "Đan dược trung cấp, hồi phục đáng kể.",
+    "tier": 2,
+    "healPercent": 35,
+    "reduceHospital": 30,
+    "cooldown": 30,
+    "icon": "💉"
+  },
+  {
+    "id": "cuu_chuyen_dai_hoan",
+    "name": "Cửu Chuyển Đại Hoàn",
+    "description": "Thần dược cực phẩm, hồi phục gần hết HP.",
+    "tier": 3,
+    "healPercent": 80,
+    "reduceHospital": 60,
+    "cooldown": 60,
+    "icon": "🔮"
+  }
+]

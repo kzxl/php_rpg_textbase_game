@@ -21,6 +21,11 @@ class Player
     public int $maxEnergy = 50;
     public int $statPoints = 0;
 
+    /** @var int Unix timestamp when hospital ends (0 = not hospitalized) */
+    public int $hospitalUntil = 0;
+    /** @var int Unix timestamp when medicine cooldown expires */
+    public int $medCooldownUntil = 0;
+
     /** @var array Base stat allocations */
     private array $baseStats;
 
@@ -192,6 +197,90 @@ class Player
     }
 
     /**
+     * Enter hospital (tịnh dưỡng) for a duration in seconds.
+     */
+    public function hospitalize(int $durationSeconds): void
+    {
+        $this->hospitalUntil = time() + $durationSeconds;
+    }
+
+    /**
+     * Check if currently hospitalized.
+     */
+    public function isHospitalized(): bool
+    {
+        return $this->hospitalUntil > time();
+    }
+
+    /**
+     * Get remaining hospital time in seconds.
+     */
+    public function hospitalRemaining(): int
+    {
+        return max(0, $this->hospitalUntil - time());
+    }
+
+    /**
+     * Use medicine: restore HP%, reduce hospital time, add to med cooldown.
+     * Returns null on success, error string on failure.
+     */
+    public function useMedicine(array $medicine): ?string
+    {
+        // Check med cooldown
+        if ($this->medCooldownUntil > time()) {
+            $remain = $this->medCooldownUntil - time();
+            return "Đan dược chưa hết cooldown! Còn {$remain}s.";
+        }
+
+        // Restore HP
+        $healAmount = (int) round($this->maxHp * ($medicine['healPercent'] / 100));
+        $this->heal($healAmount);
+
+        // Reduce hospital time
+        $reduceSeconds = $medicine['reduceHospital'] ?? 0;
+        if ($this->hospitalUntil > time()) {
+            $this->hospitalUntil = max(time(), $this->hospitalUntil - $reduceSeconds);
+        }
+
+        // If fully healed, leave hospital
+        if ($this->currentHp >= $this->maxHp) {
+            $this->hospitalUntil = 0;
+        }
+
+        // Add medicine cooldown
+        $cooldown = $medicine['cooldown'] ?? 30;
+        $this->medCooldownUntil = time() + $cooldown;
+
+        return null;
+    }
+
+    /**
+     * Train a stat in the gym. Costs energy, directly increases stat.
+     */
+    public function trainStat(string $stat, int $energyCost = 5): ?string
+    {
+        if (!in_array($stat, StatEngine::BATTLE_STATS)) {
+            return "Chỉ số không hợp lệ.";
+        }
+        if ($this->isHospitalized()) {
+            return "Đang tịnh dưỡng, không thể rèn luyện!";
+        }
+        if ($this->currentEnergy < $energyCost) {
+            return "Không đủ linh lực! Cần {$energyCost}.";
+        }
+
+        $this->currentEnergy -= $energyCost;
+
+        // Gain = 1 + random(0-1) based on stat level  
+        $currentStat = $this->allocatedStats[$stat] ?? 0;
+        $gain = 1; // base gain per train
+        $this->allocatedStats[$stat] = ($this->allocatedStats[$stat] ?? 0) + $gain;
+        $this->recalcDerived();
+
+        return null;
+    }
+
+    /**
      * Heal.
      */
     public function heal(int $amount): void
@@ -274,6 +363,10 @@ class Player
             'currentEnergy' => $this->currentEnergy,
             'maxEnergy' => $this->maxEnergy,
             'statPoints' => $this->statPoints,
+            'hospitalUntil' => $this->hospitalUntil,
+            'hospitalRemaining' => $this->hospitalRemaining(),
+            'medCooldownUntil' => $this->medCooldownUntil,
+            'medCooldownRemaining' => max(0, $this->medCooldownUntil - time()),
             'stats' => $finalStats,
             'allocatedStats' => $this->allocatedStats,
             'equipment' => array_map(fn($i) => $i->toArray(), $this->equipment),
@@ -317,6 +410,8 @@ class Player
         $player->recalcDerived();
         $player->currentHp = $data['currentHp'] ?? $player->maxHp;
         $player->currentEnergy = $data['currentEnergy'] ?? $player->maxEnergy;
+        $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
+        $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
 
         return $player;
     }

@@ -215,31 +215,35 @@ class CombatEngine
     {
         $allLogs = [];
         $turn = 0;
-        $outcome = 'loss'; // default: player loses
-        $canFlee = false;  // flee opens when monster misses
+        $outcome = 'loss';
+        $canFlee = false;
 
         $maxTurns = self::MAX_TURNS;
         $attackCost = self::ATTACK_COST;
+
+        // Spend energy once at combat start
+        if ($player->currentEnergy < self::ATTACK_COST) {
+            return [
+                'outcome' => 'no_energy',
+                'won' => false,
+                'turns' => 0,
+                'maxTurns' => self::MAX_TURNS,
+                'player' => $player->toArray(),
+                'monster' => $monster->toArray(),
+                'rewards' => null,
+                'log' => ["💤 Không đủ linh lực để chiến đấu! ({$player->currentEnergy}/{$player->maxEnergy}, cần {$attackCost})"],
+            ];
+        }
+        $player->spendEnergy(self::ATTACK_COST);
+        $allLogs[] = "🔹 -{$attackCost} linh lực ({$player->currentEnergy}/{$player->maxEnergy})";
 
         while ($player->isAlive() && $monster->isAlive() && $turn < self::MAX_TURNS) {
             $turn++;
             $allLogs[] = "--- Lượt {$turn}/{$maxTurns} ---";
 
-            // Energy regen
-            $regen = $player->regenEnergy();
-            if ($regen > 0) {
-                $allLogs[] = "🔮 +{$regen} linh lực ({$player->currentEnergy}/{$player->maxEnergy})";
-            }
-
-            // Player turn
-            if ($player->currentEnergy >= self::ATTACK_COST) {
-                $player->spendEnergy(self::ATTACK_COST);
-                $allLogs[] = "🔹 -{$attackCost} linh lực ({$player->currentEnergy}/{$player->maxEnergy})";
-                $this->attack($player, $monster);
-                $allLogs = array_merge($allLogs, $this->log);
-            } else {
-                $allLogs[] = "💤 {$player->name} kiệt linh lực!";
-            }
+            // Player attacks (no per-turn energy cost)
+            $this->attack($player, $monster);
+            $allLogs = array_merge($allLogs, $this->log);
 
             if (!$monster->isAlive()) {
                 $outcome = 'win';
@@ -310,7 +314,11 @@ class CombatEngine
                 break;
 
             case 'loss':
+                // Hospital: 30s base + 5s per monster level
+                $hospDuration = 30 + ($monster->level ?? 1) * 5;
+                $player->hospitalize($hospDuration);
                 $allLogs[] = "💀 {$player->name} đã ngã xuống...";
+                $allLogs[] = "🏥 Tịnh dưỡng {$hospDuration}s";
                 break;
         }
 

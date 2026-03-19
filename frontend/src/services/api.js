@@ -56,6 +56,20 @@ class GameAPI {
     return this.request(`/player/${id}/heal`, { method: 'POST' })
   }
 
+  useMedicine(id, medicineId) {
+    return this.request(`/player/${id}/use-medicine`, {
+      method: 'POST',
+      body: JSON.stringify({ medicineId }),
+    })
+  }
+
+  trainStat(id, stat) {
+    return this.request(`/player/${id}/train`, {
+      method: 'POST',
+      body: JSON.stringify({ stat }),
+    })
+  }
+
   // Combat
   fullCombat(playerId, monsterId = null) {
     return this.request('/combat/full', {
@@ -68,6 +82,7 @@ class GameAPI {
   getMonsters() { return this.request('/data/monsters') }
   getSkills() { return this.request('/data/skills') }
   getItems() { return this.request('/data/items') }
+  getMedicines() { return this.request('/data/medicines') }
 
   generateItem(rarity = 'common', slot = null) {
     return this.request('/items/generate', {

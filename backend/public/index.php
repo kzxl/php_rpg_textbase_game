@@ -197,10 +197,62 @@ $app->post('/api/player/{id}/heal', function (Request $request, Response $respon
     if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
     $player->fullHeal();
+    $player->hospitalUntil = 0; // Clear hospital on full heal
     savePlayer($id, $player);
 
     return jsonResponse($response, [
         'message' => "Đã hồi phục hoàn toàn",
+        'player' => $player->toArray(),
+    ]);
+});
+
+// --- Medicine (đan dược) ---
+$app->post('/api/player/{id}/use-medicine', function (Request $request, Response $response, array $args) {
+    $id = $args['id'];
+    $player = loadPlayer($id);
+    if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+    $body = $request->getParsedBody();
+    $medId = $body['medicineId'] ?? '';
+
+    // Load medicines
+    $medsFile = __DIR__ . '/../data/medicines.json';
+    $medicines = json_decode(file_get_contents($medsFile), true);
+    $medicine = null;
+    foreach ($medicines as $m) {
+        if ($m['id'] === $medId) { $medicine = $m; break; }
+    }
+    if (!$medicine) return jsonResponse($response, ['error' => 'Đan dược không tồn tại'], 404);
+
+    $error = $player->useMedicine($medicine);
+    if ($error) return jsonResponse($response, ['error' => $error], 400);
+
+    savePlayer($id, $player);
+    return jsonResponse($response, [
+        'message' => "Đã dùng {$medicine['name']}: +{$medicine['healPercent']}% HP",
+        'player' => $player->toArray(),
+    ]);
+});
+
+// --- Gym (rèn luyện) ---
+$app->post('/api/player/{id}/train', function (Request $request, Response $response, array $args) {
+    $id = $args['id'];
+    $player = loadPlayer($id);
+    if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+    $body = $request->getParsedBody();
+    $stat = $body['stat'] ?? '';
+    $energyCost = 5; // 5 energy per training session
+
+    $error = $player->trainStat($stat, $energyCost);
+    if ($error) return jsonResponse($response, ['error' => $error], 400);
+
+    savePlayer($id, $player);
+
+    $statNames = ['strength' => 'Sức mạnh', 'speed' => 'Tốc độ', 'dexterity' => 'Khéo léo', 'defense' => 'Phòng thủ'];
+    $statLabel = $statNames[$stat] ?? $stat;
+    return jsonResponse($response, [
+        'message' => "Rèn luyện +1 {$statLabel} (-{$energyCost} linh lực)",
         'player' => $player->toArray(),
     ]);
 });
@@ -213,6 +265,15 @@ $app->post('/api/combat/full', function (Request $request, Response $response) {
 
     $player = loadPlayer($playerId);
     if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+    // Block combat while hospitalized
+    if ($player->isHospitalized()) {
+        $remain = $player->hospitalRemaining();
+        return jsonResponse($response, [
+            'error' => "Đang tịnh dưỡng! Còn {$remain}s.",
+            'player' => $player->toArray(),
+        ], 400);
+    }
 
     $monsterSystem = new MonsterSystem();
     $monster = $monsterId
@@ -241,6 +302,12 @@ $app->get('/api/data/skills', function (Request $request, Response $response) {
 
 $app->get('/api/data/items', function (Request $request, Response $response) {
     return jsonResponse($response, ['items' => (new ItemSystem())->getAll()]);
+});
+
+$app->get('/api/data/medicines', function (Request $request, Response $response) {
+    $file = __DIR__ . '/../data/medicines.json';
+    $medicines = json_decode(file_get_contents($file), true);
+    return jsonResponse($response, ['medicines' => $medicines]);
 });
 
 $app->post('/api/items/generate', function (Request $request, Response $response) {

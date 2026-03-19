@@ -126,6 +126,9 @@ function renderGame() {
           <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
             <span class="icon">⚔</span> Tìm quái
           </li>
+          <li class="nav-item ${state.currentPage === 'gym' ? 'active' : ''}" data-page="gym">
+            <span class="icon">🏋</span> Rèn luyện
+          </li>
 
           <li class="nav-section">Nhân vật</li>
           <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
@@ -140,6 +143,10 @@ function renderGame() {
           </li>
 
           <li class="nav-section">Khác</li>
+          <li class="nav-item ${state.currentPage === 'hospital' ? 'active' : ''}" data-page="hospital">
+            <span class="icon">🏥</span> Tịnh dưỡng
+            ${p.hospitalRemaining > 0 ? `<span class="badge">${p.hospitalRemaining}s</span>` : ''}
+          </li>
           <li class="nav-item" id="navHeal">
             <span class="icon">❤</span> Hồi phục
           </li>
@@ -177,9 +184,11 @@ function renderPage() {
   if (!el) return
   switch (state.currentPage) {
     case 'combat': pageCombat(el); break
+    case 'gym': pageGym(el); break
     case 'stats': pageStats(el); break
     case 'skills': pageSkills(el); break
     case 'inventory': pageInventory(el); break
+    case 'hospital': pageHospital(el); break
   }
 }
 
@@ -225,12 +234,24 @@ async function startCombat(monsterId) {
   if (!state.player.currentHp || state.player.currentHp <= 0) {
     return notify('Đã kiệt sức! Hãy hồi phục trước.', 'error')
   }
+  if ((state.player.currentEnergy || 0) < 10) {
+    return notify('Không đủ Linh lực để chiến đấu!', 'error')
+  }
+  if (state.player.hospitalRemaining > 0) {
+    return notify(`Đang tịnh dưỡng! Còn ${state.player.hospitalRemaining}s`, 'error')
+  }
 
   rEl.innerHTML = `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--gold)">⏳ Đang chiến đấu...</div></div>`
 
   try {
     const r = await api.fullCombat(state.playerId, monsterId)
     state.player = r.player
+
+    if (r.outcome === 'no_energy') {
+      rEl.innerHTML = `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--red)">${r.log[0]}</div></div>`
+      updateSidebar()
+      return
+    }
 
     const logHtml = r.log.map(l => {
       if (l.startsWith('---')) return `<div class="turn">${l}</div>`
@@ -487,6 +508,116 @@ function pageInventory(el) {
   })
 }
 
+// ==============================
+// GYM PAGE (Rèn luyện)
+// ==============================
+function pageGym(el) {
+  const p = state.player
+  const stats = [
+    ['strength', '💪', 'Sức mạnh', 'Tăng sát thương mỗi đòn'],
+    ['speed', '🏃', 'Tốc độ', 'Tăng hit chance, giảm escape của đối thủ'],
+    ['dexterity', '🎯', 'Khéo léo', 'Tăng dodge, escape, stealth'],
+    ['defense', '🛡', 'Phòng thủ', 'Giảm sát thương nhận vào'],
+  ]
+  const energyCost = 5
+  const canTrain = p.currentEnergy >= energyCost && !p.hospitalRemaining
+
+  el.innerHTML = `
+    <div class="page-header">
+      <h1>🏋 Rèn luyện</h1>
+      <div class="actions"><span class="text-dim">🔮 ${p.currentEnergy}/${p.maxEnergy} linh lực · Chi phí: ${energyCost}/lần</span></div>
+    </div>
+    ${p.hospitalRemaining > 0 ? `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--red)">🏥 Đang tịnh dưỡng, không thể rèn luyện! Còn ${p.hospitalRemaining}s</div></div>` : ''}
+    <div class="panel">
+      <div class="panel-title">Chọn chỉ số rèn luyện</div>
+      <div class="panel-body no-pad">
+        ${stats.map(([key, icon, name, desc]) => `
+          <div class="list-item">
+            <div class="item-info">
+              <div class="item-name">${icon} ${name}</div>
+              <div class="item-meta">${desc} · Hiện tại: <strong>${p.allocatedStats?.[key] ?? 0}</strong></div>
+            </div>
+            <button class="btn btn--sm ${canTrain ? 'btn--green' : ''}" data-train="${key}" ${canTrain ? '' : 'disabled'}>+1</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">💡 Lưu ý</div>
+      <div class="panel-body text-dim" style="font-size:12px">
+        Mỗi lần rèn luyện tốn <strong>${energyCost} linh lực</strong> và tăng <strong>+1</strong> chỉ số đã chọn.<br>
+        Linh lực hồi phục theo thời gian. Tập trung vào chỉ số phù hợp với lối chơi của bạn.
+      </div>
+    </div>`
+
+  el.querySelectorAll('[data-train]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        const data = await api.trainStat(state.playerId, btn.dataset.train)
+        state.player = data.player
+        notify(data.message, 'success')
+        renderGame()
+      } catch (e) { notify(e.message || 'Lỗi rèn luyện', 'error') }
+    })
+  })
+}
+
+// ==============================
+// HOSPITAL PAGE (Tịnh dưỡng)
+// ==============================
+function pageHospital(el) {
+  const p = state.player
+  const isHosp = p.hospitalRemaining > 0
+  const medCD = p.medCooldownRemaining || 0
+  const meds = state.medicines || []
+
+  el.innerHTML = `
+    <div class="page-header">
+      <h1>🏥 Tịnh dưỡng</h1>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Trạng thái</div>
+      <div class="panel-body" style="text-align:center">
+        ${isHosp
+          ? `<div style="font-size:24px;color:var(--red);font-weight:700">🏥 Đang tịnh dưỡng</div>
+             <div class="text-dim mt-sm">Thời gian còn lại: <strong style="color:var(--gold)">${p.hospitalRemaining}s</strong></div>
+             <div class="text-dim mt-sm">HP: ${p.currentHp}/${p.maxHp}</div>`
+          : `<div style="font-size:24px;color:var(--green);font-weight:700">✅ Khỏe mạnh</div>
+             <div class="text-dim mt-sm">HP: ${p.currentHp}/${p.maxHp}</div>`
+        }
+        ${medCD > 0 ? `<div class="text-dim mt-sm">⏳ Đan dược cooldown: <strong style="color:var(--orange)">${medCD}s</strong></div>` : ''}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">💊 Đan dược</div>
+      <div class="panel-body no-pad">
+        ${meds.length === 0 ? '<div style="padding:14px" class="text-dim">Không có đan dược</div>' :
+          meds.map(m => `
+            <div class="list-item">
+              <div class="item-info">
+                <div class="item-name">${m.icon} ${m.name}</div>
+                <div class="item-meta">${m.description} · +${m.healPercent}% HP · -${m.reduceHospital}s tịnh dưỡng · CD: ${m.cooldown}s</div>
+              </div>
+              <button class="btn btn--sm btn--blue" data-med="${m.id}" ${medCD > 0 ? 'disabled' : ''}>Dùng</button>
+            </div>
+          `).join('')}
+      </div>
+    </div>`
+
+  el.querySelectorAll('[data-med]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        const data = await api.useMedicine(state.playerId, btn.dataset.med)
+        state.player = data.player
+        notify(data.message, 'success')
+        renderGame()
+      } catch (e) { notify(e.message || 'Lỗi dùng đan', 'error') }
+    })
+  })
+}
+
 function itemRow(item, showEquip) {
   const affixStr = (item.affixes || []).map(a => fmtAffix(a)).join(' · ')
   return `
@@ -513,10 +644,11 @@ function fmtAffix(a) {
 // ===== UTILITIES =====
 async function loadGameData() {
   try {
-    const [md, sd, id] = await Promise.all([api.getMonsters(), api.getSkills(), api.getItems()])
+    const [md, sd, id, medsD] = await Promise.all([api.getMonsters(), api.getSkills(), api.getItems(), api.getMedicines()])
     state.monsters = md.monsters || []
     state.skills = sd.skills || []
     state.items = id.items || []
+    state.medicines = medsD.medicines || []
   } catch (e) { console.error('Load data failed:', e) }
 }
 
