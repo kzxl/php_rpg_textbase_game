@@ -49,20 +49,71 @@
         "prerequisites": ["internal_4"],
         "bonuses": { "maxHp": 50, "maxEnergy": 20 },
         "bonusDescription": "+50 Max HP, +20 Max Linh Lực"
+      },
+      {
+        "id": "internal_6",
+        "name": "Kinh Mạch Cường Hóa",
+        "description": "Gia cố toàn bộ kinh mạch, chịu đựng tổn thương nặng hơn.",
+        "duration": 1200,
+        "prerequisites": ["internal_5"],
+        "bonuses": { "maxHp": 80 },
+        "bonusDescription": "+80 Max HP"
+      },
+      {
+        "id": "internal_7",
+        "name": "Linh Khí Tuần Hoàn",
+        "description": "Linh khí tự động lưu chuyển, giảm hao tổn chiến đấu.",
+        "duration": 2400,
+        "prerequisites": ["internal_6"],
+        "bonuses": { "maxEnergy": 30, "energyRegen": 10 },
+        "bonusDescription": "+30 Max Linh Lực, +10% Hồi Linh Lực"
+      },
+      {
+        "id": "internal_8",
+        "name": "Thể Phách Cực Hạn",
+        "description": "Đạt giới hạn thể xác phàm nhân, chuẩn bị đột phá.",
+        "duration": 4800,
+        "prerequisites": ["internal_7"],
+        "bonuses": { "maxHp": 150, "defense": 5 },
+        "bonusDescription": "+150 Max HP, +5% DEF"
       }
     ],
     "milestones": [
       {
+        "id": "ms_internal_2",
+        "require": 2,
+        "unlocks": "hp_regen_idle",
+        "description": "Đạt 2 Điểm: Hồi máu chậm ngoài chiến đấu."
+      },
+      {
         "id": "ms_internal_3",
         "require": 3,
         "unlocks": "meditation_basic",
-        "description": "Đạt 3 Điểm: (Chưa mở) Hồi máu tự động ngoài chiến đấu."
+        "description": "Đạt 3 Điểm: Thiền định cơ bản — tăng tốc hồi phục khi đứng yên."
+      },
+      {
+        "id": "ms_internal_4",
+        "require": 4,
+        "unlocks": "energy_regen_idle",
+        "description": "Đạt 4 Điểm: Hồi Linh Lực khi nghỉ ngơi."
       },
       {
         "id": "ms_internal_5",
         "require": 5,
         "unlocks": "fast_idle_regen",
-        "description": "Đạt 5 Điểm: Sinh nguyên bất tuyệt. Tăng gấp đôi tốc độ hồi phục cơ bản."
+        "description": "Đạt 5 Điểm: Sinh Nguyên Bất Tuyệt — Hồi phục cơ bản x2."
+      },
+      {
+        "id": "ms_internal_6",
+        "require": 6,
+        "unlocks": "combat_regen",
+        "description": "Đạt 6 Điểm: Hồi phục nhẹ giữa chiến đấu mỗi lượt."
+      },
+      {
+        "id": "ms_internal_8",
+        "require": 8,
+        "unlocks": "regen_scale_missing_hp",
+        "description": "Đạt 8 Điểm: HP thấp → hồi nhanh hơn (scaling theo % HP thiếu)."
       }
     ]
   },
@@ -98,6 +149,33 @@
         "prerequisites": ["perception_2"],
         "bonuses": { "dexterity": 3 },
         "bonusDescription": "+3% Thân Pháp (DEX)"
+      },
+      {
+        "id": "perception_4",
+        "name": "Dự Đoán",
+        "description": "Dự đoán hành động của kẻ địch trước khi ra đòn.",
+        "duration": 360,
+        "prerequisites": ["perception_3"],
+        "bonuses": { "accuracy": 5 },
+        "bonusDescription": "+5% Chính xác"
+      },
+      {
+        "id": "perception_5",
+        "name": "Nhìn Thấu",
+        "description": "Thấy rõ kết cấu nội lực đối phương, dễ dàng tìm điểm yếu.",
+        "duration": 720,
+        "prerequisites": ["perception_4"],
+        "bonuses": { "critChance": 5 },
+        "bonusDescription": "+5% Chí Mạng"
+      },
+      {
+        "id": "perception_6",
+        "name": "Thiên Nhãn",
+        "description": "Con mắt thấu thị, không gì che giấu được.",
+        "duration": 1440,
+        "prerequisites": ["perception_5"],
+        "bonuses": { "dexterity": 5, "critChance": 3 },
+        "bonusDescription": "+5% DEX, +3% Chí Mạng"
       }
     ],
     "milestones": [
@@ -105,13 +183,31 @@
         "id": "ms_perception_2",
         "require": 2,
         "unlocks": "view_monster_hp_number",
-        "description": "Đạt 2 Điểm: Kẻ địch không thể che giấu mức máu thực tế (Hiện số HP)."
+        "description": "Đạt 2 Điểm: Hiện số HP kẻ địch."
       },
       {
         "id": "ms_perception_3",
         "require": 3,
         "unlocks": "view_combat_stats",
-        "description": "Đạt 3 Điểm: Hiển thị các thông số ẩn như % Chí mạng, % Né tránh trong chiến đấu."
+        "description": "Đạt 3 Điểm: Hiển thị % Chí mạng, % Né tránh."
+      },
+      {
+        "id": "ms_perception_4",
+        "require": 4,
+        "unlocks": "see_enemy_skill",
+        "description": "Đạt 4 Điểm: Thấy skill kẻ địch trước khi giao chiến."
+      },
+      {
+        "id": "ms_perception_5",
+        "require": 5,
+        "unlocks": "see_drop_rate",
+        "description": "Đạt 5 Điểm: Hiện % rơi đồ của quái vật."
+      },
+      {
+        "id": "ms_perception_6",
+        "require": 6,
+        "unlocks": "predict_outcome",
+        "description": "Đạt 6 Điểm: Dự đoán kết quả hành động trước khi thực hiện."
       }
     ]
   },
@@ -128,7 +224,7 @@
         "duration": 60,
         "prerequisites": [],
         "bonuses": { "medEffectiveness": 5 },
-        "bonusDescription": "+5% Hiệu quả đan dược hồi máu"
+        "bonusDescription": "+5% Hiệu quả đan dược"
       },
       {
         "id": "alchemy_2",
@@ -137,7 +233,7 @@
         "duration": 120,
         "prerequisites": ["alchemy_1"],
         "bonuses": { "medEffectiveness": 10 },
-        "bonusDescription": "+10% Hiệu quả đan dược hồi máu"
+        "bonusDescription": "+10% Hiệu quả đan dược"
       },
       {
         "id": "alchemy_3",
@@ -146,7 +242,34 @@
         "duration": 240,
         "prerequisites": ["alchemy_2"],
         "bonuses": { "hospitalReduction": 5 },
-        "bonusDescription": "-5% Thời gian tịnh dưỡng khi bị thương"
+        "bonusDescription": "-5% Thời gian tịnh dưỡng"
+      },
+      {
+        "id": "alchemy_4",
+        "name": "Dung Hợp",
+        "description": "Kết hợp nhiều dược liệu mà không mất hiệu quả.",
+        "duration": 480,
+        "prerequisites": ["alchemy_3"],
+        "bonuses": { "craftSuccess": 5 },
+        "bonusDescription": "+5% Tỉ lệ luyện đan thành công"
+      },
+      {
+        "id": "alchemy_5",
+        "name": "Tinh Luyện",
+        "description": "Loại bỏ tạp chất, nâng cao phẩm chất đan dược.",
+        "duration": 960,
+        "prerequisites": ["alchemy_4"],
+        "bonuses": { "medEffectiveness": 15 },
+        "bonusDescription": "+15% Hiệu quả đan dược"
+      },
+      {
+        "id": "alchemy_6",
+        "name": "Đan Ý",
+        "description": "Dùng ý niệm dẫn dắt lửa đan, tạo ra đan dược thượng phẩm.",
+        "duration": 1920,
+        "prerequisites": ["alchemy_5"],
+        "bonuses": { "rareChance": 5, "craftSuccess": 5 },
+        "bonusDescription": "+5% Ra đan hiếm, +5% Thành công"
       }
     ],
     "milestones": [
@@ -154,7 +277,25 @@
         "id": "ms_alchemy_3",
         "require": 3,
         "unlocks": "view_item_affix",
-        "description": "Đạt 3 Điểm: (Chưa mở) Cảm nhận được dược tính ẩn sâu trong trang bị (Thấy Affix trang bị)."
+        "description": "Đạt 3 Điểm: Cảm nhận dược tính ẩn (Thấy Affix trang bị)."
+      },
+      {
+        "id": "ms_alchemy_4",
+        "require": 4,
+        "unlocks": "craft_advanced",
+        "description": "Đạt 4 Điểm: Luyện đan dược nâng cao."
+      },
+      {
+        "id": "ms_alchemy_5",
+        "require": 5,
+        "unlocks": "reroll_pill",
+        "description": "Đạt 5 Điểm: Roll lại kết quả luyện đan (1 lần/đan)."
+      },
+      {
+        "id": "ms_alchemy_6",
+        "require": 6,
+        "unlocks": "mutate_pill",
+        "description": "Đạt 6 Điểm: Đan dị biến — có cơ hội tạo đan dược đặc biệt ngẫu nhiên."
       }
     ]
   }

@@ -43,26 +43,62 @@ export function pageCrimes(el, ctx) {
     return
   }
 
+  const categoryMap = {
+    theft: { label: '🧤 Trộm cắp', color: 'var(--blue)' },
+    fraud: { label: '🎭 Gian trá', color: 'var(--purple)' },
+    vandalism: { label: '🔥 Phá hoại', color: 'var(--orange)' },
+    intel: { label: '🕶️ Tình báo', color: 'var(--cyan)' },
+    trade: { label: '📦 Buôn bán', color: 'var(--green)' },
+    explore: { label: '⚰️ Thám hiểm', color: 'var(--gold)' },
+    combat: { label: '🗡️ Chiến đấu', color: 'var(--red)' },
+    ritual: { label: '🩸 Nghi lễ', color: '#c0392b' },
+  }
+  const specialLabels = {
+    unlock_hidden_event: '🔓 Mở content ẩn',
+    rare_material_drop: '✨ Nguyên liệu hiếm',
+    random_buff: '⬆️ Buff ngẫu nhiên',
+    random_debuff: '⬇️ Debuff khi thất bại',
+    boss_encounter: '🐉 Gặp Boss',
+    epic_loot: '🏺 Bảo vật hiếm',
+    legendary_drop: '💎 Cổ vật truyền thuyết',
+  }
+
   el.innerHTML = `
     <div class="page-header">
       <h1>💀 Nghịch Thiên – Phá Luật</h1>
-      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Lính Thạch</span></div>
+      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Linh Thạch · 🏴 CE: ${p.crimeExp ?? 0}</span></div>
     </div>
     <div class="panel">
-      <div class="panel-title">Hành động</div>
+      <div class="panel-title">Hành động <span class="subtitle">${crimes.length} loại</span></div>
       <div class="panel-body no-pad">
         ${crimes.map(c => {
           const cs = p.crimeSkills?.[c.id] ?? 0
           const locked = cs < (c.minSkill ?? 0)
           const canDo = !locked && (p.nerve ?? 0) >= c.nerveCost
+          const cat = categoryMap[c.category] || categoryMap.theft
+          const specials = c.special || []
+          const successEst = Math.min(95, c.baseSuccessRate + cs * 0.5)
           return `
-            <div class="list-item">
+            <div class="list-item crime-item ${locked ? 'crime-locked' : ''}">
               <div class="item-info">
-                <div class="item-name">${c.icon} ${c.name} ${locked ? '🔒' : ''}</div>
-                <div class="item-meta">
-                  ${c.description} · ${c.nerveCost} Nghịch Khí
-                  ${locked ? ` · Cần Skill ${c.minSkill}` : ` · Skill: ${cs}/100`}
+                <div class="item-name" style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:18px">${c.icon}</span>
+                  <span>${c.name}</span>
+                  ${locked ? '<span style="opacity:0.5">🔒</span>' : ''}
+                  <span class="badge" style="background:${cat.color};font-size:10px;padding:1px 6px;">${cat.label}</span>
                 </div>
+                <div class="item-desc">${c.description}</div>
+                <div class="item-meta" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+                  <span>⚡ ${c.nerveCost} Khí</span>
+                  <span>💰 ${c.rewards.goldMin}-${c.rewards.goldMax}</span>
+                  <span style="color:${successEst >= 60 ? 'var(--green)' : successEst >= 40 ? 'var(--orange)' : 'var(--red)'}">🎯 ${Math.round(successEst)}%</span>
+                  ${locked ? `<span style="color:var(--red)">Cần Skill ${c.minSkill}</span>` : `<span>📊 ${cs}/100</span>`}
+                </div>
+                ${specials.length > 0 ? `
+                  <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">
+                    ${specials.map(s => `<span class="badge" style="background:rgba(255,255,255,0.08);font-size:10px;padding:1px 5px;">${specialLabels[s] || s}</span>`).join('')}
+                  </div>
+                ` : ''}
               </div>
               <button class="btn btn--sm ${canDo ? 'btn--red' : ''}" data-crime="${c.id}" ${canDo ? '' : 'disabled'}>
                 ${locked ? '🔒' : 'Thực hiện'}

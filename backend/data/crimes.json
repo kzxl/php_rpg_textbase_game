@@ -14,6 +14,20 @@
     "minSkill": 0
   },
   {
+    "id": "pickpocket",
+    "name": "Móc túi",
+    "description": "Móc túi người qua đường để lấy vàng hoặc vật phẩm nhỏ.",
+    "category": "theft",
+    "nerveCost": 3,
+    "baseSuccessRate": 70,
+    "rewards": { "goldMin": 10, "goldMax": 40, "ceGain": 2, "csGain": 2 },
+    "failPenalty": { "ceLoss": 1, "csLoss": 1 },
+    "critFailChance": 6,
+    "critFailPenalty": { "ceLoss": 3, "csLoss": 2, "jailSeconds": 60 },
+    "icon": "🧤",
+    "minSkill": 8
+  },
+  {
     "id": "shoplift",
     "name": "Trộm cắp",
     "description": "Trộm tiệm thuốc, thương hội lấy đan dược, nguyên liệu.",
@@ -26,6 +40,21 @@
     "critFailPenalty": { "ceLoss": 3, "csLoss": 2, "jailSeconds": 60 },
     "icon": "🛒",
     "minSkill": 10
+  },
+  {
+    "id": "spy",
+    "name": "Do thám",
+    "description": "Theo dõi mục tiêu để thu thập thông tin hoặc mở hidden event.",
+    "category": "intel",
+    "nerveCost": 4,
+    "baseSuccessRate": 65,
+    "rewards": { "goldMin": 0, "goldMax": 30, "ceGain": 3, "csGain": 3 },
+    "failPenalty": { "ceLoss": 1, "csLoss": 2 },
+    "critFailChance": 7,
+    "critFailPenalty": { "ceLoss": 4, "csLoss": 3, "jailSeconds": 60 },
+    "icon": "🕶️",
+    "minSkill": 15,
+    "special": ["unlock_hidden_event"]
   },
   {
     "id": "forgery",
@@ -42,6 +71,49 @@
     "minSkill": 25
   },
   {
+    "id": "grave_digging",
+    "name": "Đào mộ",
+    "description": "Đào mộ cổ để tìm di vật, có thể gặp vong linh.",
+    "category": "explore",
+    "nerveCost": 5,
+    "baseSuccessRate": 55,
+    "rewards": { "goldMin": 30, "goldMax": 100, "ceGain": 3, "csGain": 2 },
+    "failPenalty": { "ceLoss": 2, "csLoss": 1 },
+    "critFailChance": 10,
+    "critFailPenalty": { "ceLoss": 5, "csLoss": 3, "jailSeconds": 90 },
+    "icon": "⚰️",
+    "minSkill": 20
+  },
+  {
+    "id": "smuggling",
+    "name": "Buôn lậu",
+    "description": "Vận chuyển hàng cấm, có thể nhận nguyên liệu hiếm.",
+    "category": "trade",
+    "nerveCost": 6,
+    "baseSuccessRate": 50,
+    "rewards": { "goldMin": 80, "goldMax": 200, "ceGain": 4, "csGain": 3 },
+    "failPenalty": { "ceLoss": 2, "csLoss": 2 },
+    "critFailChance": 10,
+    "critFailPenalty": { "ceLoss": 6, "csLoss": 4, "jailSeconds": 120 },
+    "icon": "📦",
+    "minSkill": 30,
+    "special": ["rare_material_drop"]
+  },
+  {
+    "id": "blackmail",
+    "name": "Tống tiền",
+    "description": "Dùng thông tin bí mật để ép tiền hoặc vật phẩm.",
+    "category": "fraud",
+    "nerveCost": 6,
+    "baseSuccessRate": 55,
+    "rewards": { "goldMin": 100, "goldMax": 300, "ceGain": 5, "csGain": 4 },
+    "failPenalty": { "ceLoss": 2, "csLoss": 2 },
+    "critFailChance": 10,
+    "critFailPenalty": { "ceLoss": 6, "csLoss": 4, "jailSeconds": 120 },
+    "icon": "📜",
+    "minSkill": 35
+  },
+  {
     "id": "arson",
     "name": "Phá hoại",
     "description": "Đốt trại, phá trận pháp, thâm nhập cấm địa.",
@@ -56,6 +128,50 @@
     "minSkill": 40
   },
   {
+    "id": "assassination",
+    "name": "Ám sát",
+    "description": "Ám sát mục tiêu, có thể nhận thưởng lớn hoặc vật phẩm.",
+    "category": "combat",
+    "nerveCost": 8,
+    "baseSuccessRate": 45,
+    "rewards": { "goldMin": 120, "goldMax": 400, "ceGain": 6, "csGain": 5 },
+    "failPenalty": { "ceLoss": 3, "csLoss": 3 },
+    "critFailChance": 12,
+    "critFailPenalty": { "ceLoss": 8, "csLoss": 5, "jailSeconds": 180 },
+    "icon": "🗡️",
+    "minSkill": 45
+  },
+  {
+    "id": "cult_ritual",
+    "name": "Nghi lễ tà đạo",
+    "description": "Thực hiện nghi lễ để nhận buff hoặc hiệu ứng đặc biệt.",
+    "category": "ritual",
+    "nerveCost": 9,
+    "baseSuccessRate": 40,
+    "rewards": { "goldMin": 0, "goldMax": 100, "ceGain": 7, "csGain": 5 },
+    "failPenalty": { "ceLoss": 3, "csLoss": 3 },
+    "critFailChance": 14,
+    "critFailPenalty": { "ceLoss": 9, "csLoss": 6, "jailSeconds": 180 },
+    "icon": "🩸",
+    "minSkill": 50,
+    "special": ["random_buff", "random_debuff"]
+  },
+  {
+    "id": "tomb_raid",
+    "name": "Đột nhập cổ mộ",
+    "description": "Thám hiểm cổ mộ lớn, có thể rơi đồ hiếm hoặc gặp boss.",
+    "category": "explore",
+    "nerveCost": 10,
+    "baseSuccessRate": 35,
+    "rewards": { "goldMin": 200, "goldMax": 600, "ceGain": 8, "csGain": 6 },
+    "failPenalty": { "ceLoss": 4, "csLoss": 3 },
+    "critFailChance": 15,
+    "critFailPenalty": { "ceLoss": 10, "csLoss": 6, "jailSeconds": 240 },
+    "icon": "🏺",
+    "minSkill": 55,
+    "special": ["boss_encounter", "epic_loot"]
+  },
+  {
     "id": "heist",
     "name": "Lừa đảo",
     "description": "Lừa thương nhân, cướp đoạt bảo vật. Rủi ro cực cao.",
@@ -68,5 +184,20 @@
     "critFailPenalty": { "ceLoss": 15, "csLoss": 8, "jailSeconds": 300 },
     "icon": "💀",
     "minSkill": 60
+  },
+  {
+    "id": "artifact_hunt",
+    "name": "Truy tìm cổ vật",
+    "description": "Săn tìm cổ vật thất lạc, tỉ lệ thấp nhưng giá trị cao.",
+    "category": "explore",
+    "nerveCost": 12,
+    "baseSuccessRate": 25,
+    "rewards": { "goldMin": 300, "goldMax": 1000, "ceGain": 10, "csGain": 8 },
+    "failPenalty": { "ceLoss": 5, "csLoss": 4 },
+    "critFailChance": 20,
+    "critFailPenalty": { "ceLoss": 15, "csLoss": 10, "jailSeconds": 300 },
+    "icon": "💎",
+    "minSkill": 70,
+    "special": ["legendary_drop"]
   }
 ]

@@ -717,26 +717,82 @@ class Player
 
         $this->nerve -= $crime['nerveCost'];
 
-        // Success rate = base + CS bonus (each CS point adds 0.5%)
-        $successRate = min(95, $crime['baseSuccessRate'] + $cs * 0.5);
+        // Category bonus: skills in same category boost success
+        $categoryBonus = 0;
+        $category = $crime['category'] ?? 'theft';
+        foreach ($this->crimeSkills as $cid => $cval) {
+            // Any skill in the same category adds a small cross-bonus
+            $categoryBonus += $cval * 0.1;
+        }
+        $categoryBonus = min(15, $categoryBonus); // Cap at 15%
+
+        // Success rate = base + CS bonus + category bonus
+        $successRate = min(95, $crime['baseSuccessRate'] + $cs * 0.5 + $categoryBonus);
         $roll = mt_rand(1, 100);
 
         if ($roll <= $successRate) {
             // SUCCESS
-            $gold = mt_rand($crime['rewards']['goldMin'], $crime['rewards']['goldMax']);
+            $goldMultiplier = 1.0;
+            if ($category === 'fraud') $goldMultiplier = 1.0 + min(0.3, $cs * 0.005); // fraud → gold bonus
+            if ($category === 'trade') $goldMultiplier = 1.0 + min(0.25, $cs * 0.004);
+            
+            $gold = (int)(mt_rand($crime['rewards']['goldMin'], $crime['rewards']['goldMax']) * $goldMultiplier);
             $this->gold += $gold;
             $this->crimeExp += $crime['rewards']['ceGain'];
             $this->crimeSkills[$crime['id']] = min(100, ($this->crimeSkills[$crime['id']] ?? 0) + $crime['rewards']['csGain']);
-            // Max nerve grows with crimeExp (every 50 CE = +5 max nerve)
             $this->maxNerve = 15 + (int)floor($this->crimeExp / 50) * 5;
 
-            return [
+            $result = [
                 'outcome' => 'success',
-                'message' => "✅ Thành công! +{$gold} lính thạch",
+                'message' => "✅ Thành công! +{$gold} linh thạch",
                 'gold' => $gold,
                 'ceGain' => $crime['rewards']['ceGain'],
                 'csGain' => $crime['rewards']['csGain'],
             ];
+
+            // Handle special effects on success
+            $specials = $crime['special'] ?? [];
+            if (in_array('rare_material_drop', $specials)) {
+                $rareMats = ['mat_tinh_hoa', 'mat_loi_tinh', 'mat_huyet_tinh', 'mat_noi_dan_trung'];
+                if (mt_rand(1, 100) <= 25) {
+                    $matId = $rareMats[array_rand($rareMats)];
+                    $this->materials[$matId] = ($this->materials[$matId] ?? 0) + 1;
+                    $result['bonusDrop'] = $matId;
+                    $result['message'] .= " + Nguyên liệu hiếm!";
+                }
+            }
+            if (in_array('random_buff', $specials)) {
+                $buffs = [
+                    ['stat' => 'strength', 'value' => 5, 'name' => 'Tà Lực (+5 STR)'],
+                    ['stat' => 'speed', 'value' => 5, 'name' => 'Quỷ Tốc (+5 SPD)'],
+                    ['stat' => 'dexterity', 'value' => 5, 'name' => 'Huyền Thủ (+5 DEX)'],
+                ];
+                $buff = $buffs[array_rand($buffs)];
+                $this->combatBuffs[] = [
+                    'name' => $buff['name'],
+                    'stat' => $buff['stat'],
+                    'value' => $buff['value'],
+                    'expiresAt' => time() + 300,
+                ];
+                $result['buff'] = $buff['name'];
+                $result['message'] .= " + Buff: {$buff['name']}!";
+            }
+            if (in_array('legendary_drop', $specials) && mt_rand(1, 100) <= 5) {
+                $legendaryMats = ['mat_ba_vuong_nanh', 'mat_moc_hoang_tinh', 'mat_hoa_diem_tinh', 'mat_loi_de_vu', 'mat_huyet_ma_ban_giap'];
+                $matId = $legendaryMats[array_rand($legendaryMats)];
+                $this->materials[$matId] = ($this->materials[$matId] ?? 0) + 1;
+                $result['legendaryDrop'] = $matId;
+                $result['message'] .= " + 🌟 Cổ vật truyền thuyết!";
+            }
+            if (in_array('epic_loot', $specials) && mt_rand(1, 100) <= 15) {
+                $epicMats = ['mat_noi_dan_lon', 'mat_thien_thach', 'mat_hac_tinh'];
+                $matId = $epicMats[array_rand($epicMats)];
+                $this->materials[$matId] = ($this->materials[$matId] ?? 0) + mt_rand(1, 3);
+                $result['epicDrop'] = $matId;
+                $result['message'] .= " + Bảo vật hiếm!";
+            }
+
+            return $result;
         }
 
         // Check critical failure
@@ -746,6 +802,13 @@ class Player
             $this->crimeExp = max(0, $this->crimeExp - $crime['critFailPenalty']['ceLoss']);
             $this->crimeSkills[$crime['id']] = max(0, ($this->crimeSkills[$crime['id']] ?? 0) - $crime['critFailPenalty']['csLoss']);
             $jailTime = $crime['critFailPenalty']['jailSeconds'];
+
+            // random_debuff on critical fail from ritual
+            $specials = $crime['special'] ?? [];
+            if (in_array('random_debuff', $specials)) {
+                $jailTime = (int)($jailTime * 1.5);
+            }
+
             $this->jail($jailTime);
 
             return [
