@@ -40,49 +40,86 @@ export function pageCombat(el, ctx) {
     <div id="combatResult"></div>`
 
   // Phase 5: Fetch active tracked monsters and render with Sương Mù
-  const hasPerception = p.skills && p.skills.some(s => {
-    const sid = typeof s === 'string' ? s : s.id;
-    return sid === 'thien_nhan' || sid === 'nhan_thuat';
-  });
-  const renderStat = (val) => hasPerception ? val : '???';
+  // Progressive Info Disclosure: monster insight from Thiên Cơ
+  const mi = p.insightLevels?.monster ?? 0
+  const renderMonsterStat = (val) => mi >= 3 ? val : '???'
 
   const loadTrackedMonsters = async () => {
     try {
-      const res = await api.getAreaMonsters(p.id);
+      const res = await api.getAreaMonsters(p.id)
       if (res.monsters) {
-        state.player.trackedMonsters = res.monsters; // cache locally
-        const listEl = document.getElementById('trackedMonstersList');
-        if (!listEl) return;
+        state.player.trackedMonsters = res.monsters
+        const listEl = document.getElementById('trackedMonstersList')
+        if (!listEl) return
         
         if (res.monsters.length === 0) {
-           listEl.innerHTML = `<div style="padding: 16px; text-align: center;" class="text-dim">Không có dấu vết yêu thú nào quanh đây.</div>`;
-           return;
+           listEl.innerHTML = `<div style="padding: 16px; text-align: center;" class="text-dim">Không có dấu vết yêu thú nào quanh đây.</div>`
+           return
         }
 
-        listEl.innerHTML = res.monsters.map(m => `
-          <div class="list-item flex flex-col items-start gap-4">
-            <div class="item-info" style="width: 100%;">
-              <div class="flex justify-between items-center mb-sm">
-                <div class="item-name text-lg">${m.name} <span class="text-xs text-dim">(${m.instance_id.substring(0,8)})</span></div>
-                <button class="btn btn--red btn--sm btn-attack-tracked" data-inst="${m.instance_id}" data-mid="${m.id}">Giao Chiến</button>
-              </div>
-              <div class="item-desc text-sm text-dim mb-sm">${hasPerception ? (m.description || '') : 'Bản thể mờ ảo, không rõ căn cơ.'}</div>
-              
-              <!-- HP Bar -->
-              <div class="w-full bg-darker rounded mb-sm" style="height: 6px; overflow: hidden;">
-                <div class="bg-red h-full" style="width: ${(m.currentHp / m.stats.hp) * 100}%"></div>
-              </div>
+        listEl.innerHTML = res.monsters.map(m => {
+          const hpPct = (m.currentHp / m.stats.hp) * 100
+          const hpColor = hpPct > 60 ? 'var(--green)' : hpPct > 30 ? 'var(--orange)' : 'var(--red)'
 
-              <div class="item-meta flex gap-4 text-xs">
-                <span class="text-red">❤ ${m.currentHp} / ${renderStat(m.stats.hp)}</span>
-                <span class="text-orange">💪 ${renderStat(m.stats.strength)}</span>
-                <span class="text-cyan">🏃 ${renderStat(m.stats.speed)}</span>
-                <span class="text-green">🎯 ${renderStat(m.stats.dexterity)}</span>
-                <span class="text-blue">🛡 ${renderStat(m.stats.defense)}</span>
+          // Tier 0: name only
+          let descHtml = '<div class="item-desc text-sm text-dim mb-sm">Bản thể mờ ảo, không rõ căn cơ.</div>'
+          if (mi >= 1) descHtml = `<div class="item-desc text-sm text-dim mb-sm">${m.description || 'Yêu thú vùng này.'}</div>`
+
+          // Tier 1+: HP bar
+          let hpBarHtml = ''
+          if (mi >= 1) {
+            hpBarHtml = `<div class="w-full bg-darker rounded mb-sm" style="height: 6px; overflow: hidden;">
+              <div style="width: ${hpPct}%; background: ${hpColor}; height: 100%;"></div>
+            </div>`
+          }
+
+          // Tier 2+: HP numbers
+          let hpText = mi >= 2 ? `❤ ${m.currentHp}/${m.stats.hp}` : (mi >= 1 ? `❤ ???` : '')
+
+          // Tier 3+: combat stats  
+          let statsHtml = ''
+          if (mi >= 3) {
+            statsHtml = `
+              <span class="text-orange">💪 ${m.stats.strength}</span>
+              <span class="text-cyan">🏃 ${m.stats.speed}</span>
+              <span class="text-green">🎯 ${m.stats.dexterity}</span>
+              <span class="text-blue">🛡 ${m.stats.defense}</span>`
+          }
+
+          // Tier 4+: drops
+          let dropsHtml = ''
+          if (mi >= 4 && m.drops && m.drops.length > 0) {
+            dropsHtml = `<div class="text-xs text-dim mt-sm" style="display:flex;gap:4px;flex-wrap:wrap;">
+              📦 ${m.drops.map(d => `<span class="badge" style="background:rgba(255,255,255,0.08);font-size:9px;padding:1px 4px;">${d.id} (${mi >= 5 ? d.chance+'%' : '?%'})</span>`).join('')}
+            </div>`
+          }
+
+          // Tier 5+: XP/gold
+          let rewardHtml = ''
+          if (mi >= 5) {
+            const goldMin = m.goldReward?.[0] ?? m.goldReward?.min ?? '?'
+            const goldMax = m.goldReward?.[1] ?? m.goldReward?.max ?? '?'
+            rewardHtml = `<span class="text-gold">💰 ${goldMin}-${goldMax}</span> <span class="text-purple">✨ ${m.xpReward ?? '?'} XP</span>`
+          }
+
+          return `
+            <div class="list-item flex flex-col items-start gap-4">
+              <div class="item-info" style="width: 100%;">
+                <div class="flex justify-between items-center mb-sm">
+                  <div class="item-name text-lg">${m.name} <span class="text-xs text-dim">(${m.instance_id?.substring(0,8) ?? ''})</span></div>
+                  <button class="btn btn--red btn--sm btn-attack-tracked" data-inst="${m.instance_id}" data-mid="${m.id}">Giao Chiến</button>
+                </div>
+                ${descHtml}
+                ${hpBarHtml}
+                <div class="item-meta flex gap-4 text-xs flex-wrap">
+                  ${hpText ? `<span class="text-red">${hpText}</span>` : ''}
+                  ${statsHtml}
+                  ${rewardHtml}
+                </div>
+                ${dropsHtml}
               </div>
-            </div>
-          </div>
-        `).join('')
+            </div>`
+        }).join('')
 
         // Bind Attack Buttons
         const attackBtns = listEl.querySelectorAll('.btn-attack-tracked');
@@ -156,6 +193,14 @@ async function doExplore(ctx) {
         <div class="text-lg text-gold bold mb-sm">${ev.message}</div>
         <div class="text-sm text-dim mb-md" style="font-style:italic;">"${ev.greeting}"</div>
       `
+      // Display study effect if any
+      if (ev.studyEffect) {
+        const se = ev.studyEffect
+        const seColor = se.isDebuff ? 'var(--red)' : 'var(--gold)'
+        html += `<div class="text-sm mt-sm" style="color:${seColor};animation:fadeIn 0.5s;">
+          ${se.message}
+        </div>`
+      }
       if (ev.hasQuests) {
         html += `<button class="btn btn--gold btn--sm mt-sm" id="btnNpcInteract" data-npc="${ev.npcId}">💬 Nói Chuyện</button>`
       }

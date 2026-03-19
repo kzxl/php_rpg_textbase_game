@@ -603,6 +603,45 @@ class Player
             'travelRemaining' => $this->travelRemaining(),
             'activeQuests' => $this->activeQuests,
             'role' => $this->role,
+            'insightLevels' => $this->getInsightLevels(),
+        ];
+    }
+
+    /**
+     * Progressive Info Disclosure — what details the player can see.
+     * Based on education tree progress (treeProgress points).
+     *
+     * Monster insight (Thiên Cơ / perception):
+     *   0: name + icon only
+     *   1: HP bar (no number)
+     *   2: HP number
+     *   3: Combat stats (crit%, dodge%)
+     *   4: Enemy skills
+     *   5: Drop rates
+     *   6: Predicted outcome
+     *
+     * Material insight (Đan Dược / alchemy):
+     *   0: name only
+     *   1: category + description
+     *   2: rarity
+     *   3: affix / hidden properties
+     *   4: crafting uses
+     *   5: optimal combinations
+     *   6: mutations
+     *
+     * Self insight (Nội Công / internal_cultivation):
+     *   0-2: basic stats
+     *   3+: hidden regen rates
+     *   5+: buff durations
+     *   8: full stat breakdown
+     */
+    public function getInsightLevels(): array
+    {
+        $tp = $this->treeProgress;
+        return [
+            'monster' => min(6, $tp['perception'] ?? 0),
+            'material' => min(6, $tp['alchemy'] ?? 0),
+            'self' => min(8, $tp['internal_cultivation'] ?? 0),
         ];
     }
 
