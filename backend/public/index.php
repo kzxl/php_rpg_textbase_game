@@ -54,26 +54,19 @@ function jsonResponse(Response $response, mixed $data, int $status = 200): Respo
         ->withStatus($status);
 }
 
-// File-based player storage
-function savePath(): string
-{
-    $dir = __DIR__ . '/../storage/players';
-    if (!is_dir($dir)) mkdir($dir, 0777, true);
-    return $dir;
-}
+// MySQL-based player storage (replaces JSON files)
+use App\Core\PlayerRepository;
 
 function savePlayer(string $id, Player $player): void
 {
-    file_put_contents(savePath() . "/{$id}.json", json_encode($player->toArray(), JSON_UNESCAPED_UNICODE));
+    PlayerRepository::save($id, $player);
+    PlayerRepository::saveItems($id, $player);
 }
 
 function loadPlayer(string $id): ?Player
 {
-    $file = savePath() . "/{$id}.json";
-    if (!file_exists($file)) return null;
-    $data = json_decode(file_get_contents($file), true);
-    if (!$data) return null;
-    $player = Player::fromArray($data);
+    $player = PlayerRepository::load($id);
+    if (!$player) return null;
     // Auto-apply meditation HP regen
     $healed = $player->applyMeditation();
     if ($healed > 0) {

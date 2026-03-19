@@ -40,23 +40,24 @@ class Player
     public string $currentCourse = ''; // education course id being studied
     public int $courseEndsAt = 0; // unix timestamp
     public array $completedCourses = [];
+    public string $currentArea = 'thanh_lam_tran'; // Ngao Du — current area
 
     /** @var array Base stat allocations */
     private array $baseStats;
 
     /** @var array Stat point allocations */
-    private array $allocatedStats = [
+    public array $allocatedStats = [
         'strength' => 0, 'speed' => 0, 'dexterity' => 0, 'defense' => 0
     ];
 
     /** @var Item[] Equipped items */
-    private array $equipment = [];
+    public array $equipment = [];
 
     /** @var Item[] Inventory */
-    private array $inventory = [];
+    public array $inventory = [];
 
     /** @var array Active/passive skills */
-    private array $skills = [];
+    public array $skills = [];
 
     /** @var Modifier[] Extra modifiers (title, hidden, etc.) */
     private array $extraModifiers = [];
@@ -415,6 +416,7 @@ class Player
             'courseEndsAt' => $this->courseEndsAt,
             'courseRemaining' => max(0, $this->courseEndsAt - time()),
             'completedCourses' => $this->completedCourses,
+            'currentArea' => $this->currentArea,
         ];
     }
 
@@ -466,6 +468,7 @@ class Player
         $player->currentCourse = $data['currentCourse'] ?? '';
         $player->courseEndsAt = $data['courseEndsAt'] ?? 0;
         $player->completedCourses = $data['completedCourses'] ?? [];
+        $player->currentArea = $data['currentArea'] ?? 'thanh_lam_tran';
 
         return $player;
     }
