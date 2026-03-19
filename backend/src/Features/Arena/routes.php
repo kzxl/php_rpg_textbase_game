@@ -13,13 +13,13 @@ return function ($app) {
 
     // === RANK TIERS ===
     $RANKS = [
-        ['name' => 'Sơ Nhập',    'icon' => '🌱', 'min' => 0,    'color' => '#8b9467'],
-        ['name' => 'Luyện Khí',  'icon' => '💨', 'min' => 1000, 'color' => '#5ba3cf'],
-        ['name' => 'Trúc Cơ',   'icon' => '🏔️', 'min' => 1200, 'color' => '#6a8f3f'],
-        ['name' => 'Kim Đan',   'icon' => '🔮', 'min' => 1400, 'color' => '#d4a017'],
-        ['name' => 'Nguyên Anh', 'icon' => '👶', 'min' => 1600, 'color' => '#b06cff'],
-        ['name' => 'Hóa Thần',  'icon' => '⚡', 'min' => 1800, 'color' => '#ff6b35'],
-        ['name' => 'Thiên Đạo', 'icon' => '👑', 'min' => 2000, 'color' => '#ff4500'],
+        ['name' => 'Vô Danh',   'icon' => '🌑', 'min' => 0,    'color' => '#666'],
+        ['name' => 'Võ Sinh',   'icon' => '🥋', 'min' => 1000, 'color' => '#5ba3cf'],
+        ['name' => 'Võ Sĩ',    'icon' => '⚔️', 'min' => 1200, 'color' => '#6a8f3f'],
+        ['name' => 'Đấu Sĩ',   'icon' => '🔥', 'min' => 1400, 'color' => '#d4a017'],
+        ['name' => 'Đấu Sư',   'icon' => '💫', 'min' => 1600, 'color' => '#b06cff'],
+        ['name' => 'Á Quân',    'icon' => '🥈', 'min' => 1800, 'color' => '#c0c0c0'],
+        ['name' => 'Quán Quân', 'icon' => '👑', 'min' => 2000, 'color' => '#ff4500'],
     ];
 
     $getRank = function(int $rating) use ($RANKS) {

@@ -80,53 +80,124 @@ return function ($app) {
             if ($player->materials[$mid] <= 0) unset($player->materials[$mid]);
         }
 
-        // Bonus Success Rate from Tinh Chế
+        // Crafting Level bonuses
+        $craftLvl = $player->craftingLevel;
+        $lvlSuccessBonus = (int) floor($craftLvl / 5); // +1% per 5 levels
+        $critChance = $craftLvl >= 76 ? 8 : ($craftLvl >= 51 ? 5 : ($craftLvl >= 26 ? 3 : 0));
+        $matReturnRate = $craftLvl >= 76 ? 0.20 : ($craftLvl >= 51 ? 0.10 : 0);
+
+        // Bonus Success Rate from Tinh Chế skill
         $baseRate = $recipe['successRate'] ?? 100;
-        $bonus = 0;
+        $bonus = $lvlSuccessBonus;
         foreach ($player->skills as $ps) {
             $sid = is_array($ps) ? ($ps['id']??'') : $ps;
             if ($sid === 'tinh_che') {
                 $lvl = is_array($ps) ? ($ps['level']??1) : 1;
-                $bonus = $lvl * 2; // +2% success chance per level
-                // Grant XP
+                $bonus += $lvl * 2; // +2% success chance per skill level
                 $player->gainSkillXp('tinh_che', 5 * ($recipe['tier'] ?? 1));
                 break;
             }
         }
         $finalRate = min(100, $baseRate + $bonus);
 
+        // Crafting XP gain (always, even on fail)
+        $craftXpGain = 10 + (($recipe['tier'] ?? 1) * 5);
+        $player->craftingXp += $craftXpGain;
+        $xpToNext = $player->craftingLevel * 50;
+        $craftLevelUp = false;
+        while ($player->craftingXp >= $xpToNext && $player->craftingLevel < 100) {
+            $player->craftingXp -= $xpToNext;
+            $player->craftingLevel++;
+            $xpToNext = $player->craftingLevel * 50;
+            $craftLevelUp = true;
+        }
+
         // Roll success
         if (mt_rand(1, 100) > $finalRate) {
+            // Material return for high-level crafters
+            $returnedMats = [];
+            if ($matReturnRate > 0) {
+                foreach ($mats as $m) {
+                    $returned = (int) floor($m['amount'] * $matReturnRate);
+                    if ($returned > 0) {
+                        $player->materials[$m['id']] = ($player->materials[$m['id']] ?? 0) + $returned;
+                        $returnedMats[] = "{$m['id']} x{$returned}";
+                    }
+                }
+            }
+
             savePlayer($id, $player);
+            $failMsg = 'Luyện đan thất bại, lò nổ tung! Mất sạch nguyên liệu.';
+            if (!empty($returnedMats)) $failMsg .= ' (LĐT Lv.' . $player->craftingLevel . ' thu hồi 1 phần nguyên liệu)';
             return jsonResponse($response, [
                 'success' => false,
-                'message' => 'Luyện đan thất bại, lò nổ tung! Mất sạch nguyên liệu.',
+                'message' => $failMsg,
+                'craftLevelUp' => $craftLevelUp,
+                'craftingLevel' => $player->craftingLevel,
+                'craftXpGain' => $craftXpGain,
                 'player' => $player->toArray()
             ]);
         }
 
-        // Success!
+        // === SUCCESS! Check for Đại Thành (Critical Craft) ===
+        $quality = 'normal'; // Phàm Phẩm
+        $qualityLabel = '';
+        $qualityBonus = 0;
+        if ($critChance > 0 && mt_rand(1, 100) <= $critChance) {
+            if ($craftLvl >= 76 && mt_rand(1, 100) <= 20) {
+                $quality = 'divine';   // Thiên Phẩm
+                $qualityLabel = '🌟 THIÊN PHẨM';
+                $qualityBonus = 50;    // +50% stat
+            } else {
+                $quality = 'supreme';  // Cực Phẩm
+                $qualityLabel = '✨ CỰC PHẨM';
+                $qualityBonus = 25;    // +25% stat
+            }
+        } elseif (mt_rand(1, 100) <= 20 + $craftLvl / 2) {
+            $quality = 'refined';      // Tinh Phẩm
+            $qualityLabel = '💎 TINH PHẨM';
+            $qualityBonus = 10;        // +10% stat
+        }
+
+        // Create result
         $targetId = $recipe['target'];
-        $msg = 'Luyện đan thành công! Thu được 1 viên Đan Dược mới.';
+        $msg = 'Luyện đan thành công!';
 
         if ($isItem) {
             $itemSystem = new \App\Systems\ItemSystem();
             $item = $itemSystem->createItem($targetId);
             if ($item) {
+                // Apply quality bonus to item stats
+                if ($qualityBonus > 0 && property_exists($item, 'affixes')) {
+                    foreach ($item->affixes as &$affix) {
+                        if (isset($affix['value'])) {
+                            $affix['value'] = (int) round($affix['value'] * (1 + $qualityBonus / 100));
+                        }
+                    }
+                }
                 $player->addToInventory($item);
                 $msg = "Chế tác thành công! Thu được {$item->name}.";
             } else {
                 return jsonResponse($response, ['error' => 'Lỗi khởi tạo Item System'], 500);
             }
         } else {
-            $player->medicines[$targetId] = ($player->medicines[$targetId] ?? 0) + 1;
+            $player->medicines[$targetId] = ($player->medicines[$targetId] ?? 0) + ($quality !== 'normal' ? 2 : 1);
+            if ($quality !== 'normal') $msg = "Luyện đan thành công! Thu được 2 viên (bonus {$qualityLabel})";
         }
+
+        if ($qualityLabel) $msg = "🎇 ĐẠI THÀNH! {$qualityLabel}! " . $msg;
+        if ($craftLevelUp) $msg .= " 🎉 Luyện Đan Thuật đạt Lv.{$player->craftingLevel}!";
         
         savePlayer($id, $player);
 
         return jsonResponse($response, [
             'success' => true,
             'message' => $msg,
+            'quality' => $quality,
+            'qualityLabel' => $qualityLabel,
+            'craftLevelUp' => $craftLevelUp,
+            'craftingLevel' => $player->craftingLevel,
+            'craftXpGain' => $craftXpGain,
             'player' => $player->toArray()
         ]);
     });

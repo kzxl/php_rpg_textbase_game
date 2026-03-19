@@ -59,6 +59,8 @@ class Player
     public string $role = 'player'; // Phase 10: 'player' | 'admin'
     public int $realmTier = 1; // Cảnh giới hiện tại (1-8), cần đột phá để lên tier
     public int $createdAt = 0; // Unix timestamp when account was created
+    public int $craftingLevel = 1; // Luyện Đan Thuật level (1-100)
+    public int $craftingXp = 0; // Crafting XP for current level
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -824,6 +826,9 @@ class Player
             'talentDisplay' => $this->getTalentDisplay(),
             'mugCooldownUntil' => $this->mugCooldownUntil,
             'createdAt' => $this->createdAt,
+            'craftingLevel' => $this->craftingLevel,
+            'craftingXp' => $this->craftingXp,
+            'craftingXpToNext' => $this->craftingLevel * 50,
         ];
     }
 
@@ -938,6 +943,8 @@ class Player
         $player->talents = $data['talents'] ?? self::generateRandomTalents();
         $player->mugCooldownUntil = $data['mugCooldownUntil'] ?? 0;
         $player->createdAt = $data['createdAt'] ?? time();
+        $player->craftingLevel = $data['craftingLevel'] ?? 1;
+        $player->craftingXp = $data['craftingXp'] ?? 0;
 
         return $player;
     }
