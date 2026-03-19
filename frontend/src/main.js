@@ -12,6 +12,7 @@ import { pageInventory } from './pages/inventory.js'
 import { pageGym } from './pages/gym.js'
 import { pageCrimes } from './pages/crimes.js'
 import { pageEducation } from './pages/education.js'
+import { pageTravel } from './pages/travel.js'
 
 // ===== STATE =====
 const state = {
@@ -202,7 +203,7 @@ function renderGame() {
             <span class="icon">⚔</span> Tìm quái
           </li>
           <li class="nav-item ${state.currentPage === 'gym' ? 'active' : ''}" data-page="gym">
-            <span class="icon">🏋</span> Lực Thể
+            <span class="icon">🏋</span> Rèn Luyện
           </li>
 
           <li class="nav-section">NGHỊCH THIÊN</li>
@@ -211,6 +212,10 @@ function renderGame() {
           </li>
           <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
             <span class="icon">📜</span> Tu Luyện
+          </li>
+          <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
+            <span class="icon">🗺️</span> Ngao Du
+            ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">🚶</span>` : ''}
           </li>
 
           <li class="nav-section">NHÂN VẬT</li>
@@ -259,6 +264,7 @@ const pageMap = {
   stats: pageStats,
   skills: pageSkills,
   inventory: pageInventory,
+  travel: pageTravel,
 }
 
 function renderPage() {

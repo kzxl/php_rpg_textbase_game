@@ -43,6 +43,8 @@ class Player
     public int $courseEndsAt = 0; // unix timestamp
     public array $completedCourses = [];
     public string $currentArea = 'thanh_lam_tran'; // Ngao Du — current area
+    public ?string $travelingTo = null; // Travel destination area ID
+    public int $travelArrivesAt = 0; // Unix timestamp when travel completes
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -421,6 +423,9 @@ class Player
             'courseRemaining' => max(0, $this->courseEndsAt - time()),
             'completedCourses' => $this->completedCourses,
             'currentArea' => $this->currentArea,
+            'travelingTo' => $this->travelingTo,
+            'travelArrivesAt' => $this->travelArrivesAt,
+            'travelRemaining' => $this->travelRemaining(),
         ];
     }
 
@@ -473,6 +478,8 @@ class Player
         $player->courseEndsAt = $data['courseEndsAt'] ?? 0;
         $player->completedCourses = $data['completedCourses'] ?? [];
         $player->currentArea = $data['currentArea'] ?? 'thanh_lam_tran';
+        $player->travelingTo = $data['travelingTo'] ?? null;
+        $player->travelArrivesAt = $data['travelArrivesAt'] ?? 0;
         $player->username = $data['username'] ?? '';
         $player->passwordHash = $data['passwordHash'] ?? '';
 
@@ -483,6 +490,18 @@ class Player
 
     public function isJailed(): bool { return $this->jailUntil > time(); }
     public function jailRemaining(): int { return max(0, $this->jailUntil - time()); }
+
+    // Travel methods
+    public function isTraveling(): bool { return $this->travelingTo !== null && $this->travelArrivesAt > 0; }
+    public function travelRemaining(): int { return $this->isTraveling() ? max(0, $this->travelArrivesAt - time()) : 0; }
+    public function completeTravelIfReady(): ?string {
+        if (!$this->isTraveling() || $this->travelRemaining() > 0) return null;
+        $this->currentArea = $this->travelingTo;
+        $areaName = $this->travelingTo;
+        $this->travelingTo = null;
+        $this->travelArrivesAt = 0;
+        return $areaName;
+    }
 
     public function jail(int $seconds): void { $this->jailUntil = time() + $seconds; }
 

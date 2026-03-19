@@ -25,13 +25,15 @@ class PlayerRepository
             current_hp, max_hp, current_energy, max_energy, stat_points,
             allocated_stats, hospital_until, med_cooldown_until, last_hp_regen,
             gold, nerve, max_nerve, crime_exp, crime_skills, jail_until,
-            current_course, course_ends_at, completed_courses, current_area
+            current_course, course_ends_at, completed_courses, current_area,
+            traveling_to, travel_arrives_at
         ) VALUES (
             :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
             :current_hp, :max_hp, :current_energy, :max_energy, :stat_points,
             :allocated_stats, :hospital_until, :med_cooldown_until, :last_hp_regen,
             :gold, :nerve, :max_nerve, :crime_exp, :crime_skills, :jail_until,
-            :current_course, :course_ends_at, :completed_courses, :current_area
+            :current_course, :course_ends_at, :completed_courses, :current_area,
+            :traveling_to, :travel_arrives_at
         ) ON DUPLICATE KEY UPDATE
             name = VALUES(name), gender = VALUES(gender),
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
@@ -45,7 +47,9 @@ class PlayerRepository
             jail_until = VALUES(jail_until),
             current_course = VALUES(current_course), course_ends_at = VALUES(course_ends_at),
             completed_courses = VALUES(completed_courses),
-            current_area = VALUES(current_area)";
+            current_area = VALUES(current_area),
+            traveling_to = VALUES(traveling_to),
+            travel_arrives_at = VALUES(travel_arrives_at)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -76,6 +80,8 @@ class PlayerRepository
             'course_ends_at' => $data['courseEndsAt'] ?? 0,
             'completed_courses' => json_encode($data['completedCourses'] ?? []),
             'current_area' => $data['currentArea'] ?? 'thanh_lam_tran',
+            'traveling_to' => $data['travelingTo'] ?? null,
+            'travel_arrives_at' => $data['travelArrivesAt'] ?? 0,
         ]);
     }
 
