@@ -39,9 +39,10 @@ class Player
     public int $crimeExp = 0; // hidden, determines maxNerve growth
     public array $crimeSkills = []; // ['search_trash' => 5, 'shoplift' => 2]
     public int $jailUntil = 0;
-    public string $currentCourse = ''; // education course id being studied
-    public int $courseEndsAt = 0; // unix timestamp
-    public array $completedCourses = [];
+    public string $studyingNode = ''; // education node id being studied
+    public int $studyEndsAt = 0; // unix timestamp
+    public array $unlockedNodes = []; // array of learned node ids
+    public array $treeProgress = []; // points per tree, e.g. ['internal_cultivation' => 5]
     public string $currentArea = 'thanh_lam_tran'; // Ngao Du — current area
     public ?string $travelingTo = null; // Travel destination area ID
     public int $travelArrivesAt = 0; // Unix timestamp when travel completes
@@ -418,10 +419,11 @@ class Player
             'crimeSkills' => $this->crimeSkills,
             'jailUntil' => $this->jailUntil,
             'jailRemaining' => max(0, $this->jailUntil - time()),
-            'currentCourse' => $this->currentCourse,
-            'courseEndsAt' => $this->courseEndsAt,
-            'courseRemaining' => max(0, $this->courseEndsAt - time()),
-            'completedCourses' => $this->completedCourses,
+            'studyingNode' => $this->studyingNode,
+            'studyEndsAt' => $this->studyEndsAt,
+            'studyRemaining' => max(0, $this->studyEndsAt - time()),
+            'unlockedNodes' => $this->unlockedNodes,
+            'treeProgress' => $this->treeProgress,
             'currentArea' => $this->currentArea,
             'travelingTo' => $this->travelingTo,
             'travelArrivesAt' => $this->travelArrivesAt,
@@ -474,9 +476,10 @@ class Player
         $player->crimeExp = $data['crimeExp'] ?? 0;
         $player->crimeSkills = $data['crimeSkills'] ?? [];
         $player->jailUntil = $data['jailUntil'] ?? 0;
-        $player->currentCourse = $data['currentCourse'] ?? '';
-        $player->courseEndsAt = $data['courseEndsAt'] ?? 0;
-        $player->completedCourses = $data['completedCourses'] ?? [];
+        $player->studyingNode = $data['studyingNode'] ?? '';
+        $player->studyEndsAt = $data['studyEndsAt'] ?? 0;
+        $player->unlockedNodes = $data['unlockedNodes'] ?? [];
+        $player->treeProgress = $data['treeProgress'] ?? [];
         $player->currentArea = $data['currentArea'] ?? 'thanh_lam_tran';
         $player->travelingTo = $data['travelingTo'] ?? null;
         $player->travelArrivesAt = $data['travelArrivesAt'] ?? 0;
@@ -620,37 +623,58 @@ class Player
     }
 
     /**
-     * Enroll in an education course.
+     * Enroll in an education node.
      */
-    public function enrollCourse(array $course): ?string
+    public function enrollNode(array $node, string $treeId): ?string
     {
         if ($this->isJailed()) return 'Đang bị giam!';
-        if ($this->currentCourse !== '') return 'Đang học một môn khác!';
-        if (in_array($course['id'], $this->completedCourses)) return 'Đã hoàn thành môn này!';
+        if ($this->studyingNode !== '') return 'Đang tu luyện môn khác!';
+        if (in_array($node['id'], $this->unlockedNodes)) return 'Đã lĩnh ngộ thành công môn này!';
 
         // Check prereqs
-        foreach (($course['prerequisites'] ?? []) as $prereq) {
-            if (!in_array($prereq, $this->completedCourses)) {
-                return "Cần hoàn thành {$prereq} trước!";
+        foreach (($node['prerequisites'] ?? []) as $prereq) {
+            if (!in_array($prereq, $this->unlockedNodes)) {
+                return "Cần lĩnh ngộ cơ sở trước!";
             }
         }
 
-        $this->currentCourse = $course['id'];
-        $this->courseEndsAt = time() + ($course['duration'] ?? 60);
-        return null;
+        $this->studyingNode = $node['id'] . '|' . $treeId;
+        $this->studyEndsAt = time() + ($node['duration'] ?? 60);
+        return null; // success
     }
 
     /**
-     * Check/complete education. Returns completed course or null.
+     * Check/complete education. Returns completed node ID or null.
      */
     public function checkEducation(): ?string
     {
-        if ($this->currentCourse === '' || $this->courseEndsAt > time()) return null;
+        if ($this->studyingNode === '' || $this->studyEndsAt > time()) return null;
 
-        $completed = $this->currentCourse;
-        $this->completedCourses[] = $completed;
-        $this->currentCourse = '';
-        $this->courseEndsAt = 0;
-        return $completed;
+        $parts = explode('|', $this->studyingNode);
+        $nodeId = $parts[0];
+        $treeId = $parts[1] ?? 'unknown';
+
+        $this->unlockedNodes[] = $nodeId;
+        $this->treeProgress[$treeId] = ($this->treeProgress[$treeId] ?? 0) + 1;
+        
+        $this->studyingNode = '';
+        $this->studyEndsAt = 0;
+        return $nodeId;
+    }
+
+    /**
+     * Helper to check if a specific node is unlocked.
+     */
+    public function hasNode(string $nodeId): bool
+    {
+        return in_array($nodeId, $this->unlockedNodes);
+    }
+
+    /**
+     * Helper to check tree progress points.
+     */
+    public function getTreeProgress(string $treeId): int
+    {
+        return $this->treeProgress[$treeId] ?? 0;
     }
 }

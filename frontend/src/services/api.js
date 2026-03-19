@@ -117,9 +117,9 @@ class GameAPI {
   }
 
   // Education
-  enrollCourse(id, courseId) {
+  enrollNode(id, nodeId, treeId) {
     return this.request(`/player/${id}/enroll`, {
-      method: 'POST', body: JSON.stringify({ courseId }),
+      method: 'POST', body: JSON.stringify({ nodeId, treeId }),
     })
   }
   checkEducation(id) {

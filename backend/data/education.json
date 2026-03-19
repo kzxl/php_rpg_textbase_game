@@ -1,123 +1,161 @@
 [
   {
-    "id": "vo_hoc_intro",
-    "name": "Võ học nhập môn",
-    "category": "combat",
-    "description": "Nền tảng võ thuật cơ bản.",
-    "icon": "⚔️",
-    "duration": 30,
-    "prerequisites": [],
-    "bonuses": { "strength": 2 },
-    "bonusDescription": "+2% STR"
+    "id": "internal_cultivation",
+    "name": "Nội Công",
+    "description": "Tu luyện kinh mạch, tăng cường thể chất và tốc độ hồi phục.",
+    "icon": "🧘",
+    "nodes": [
+      {
+        "id": "internal_1",
+        "name": "Thở Sâu",
+        "description": "Cách hô hấp căn bản.",
+        "duration": 30,
+        "prerequisites": [],
+        "bonuses": { "maxHp": 10 },
+        "bonusDescription": "+10 Max HP"
+      },
+      {
+        "id": "internal_2",
+        "name": "Tụ Khí",
+        "description": "Biết cách tích tụ linh khí vào đan điền.",
+        "duration": 60,
+        "prerequisites": ["internal_1"],
+        "bonuses": { "maxEnergy": 5 },
+        "bonusDescription": "+5 Max Linh Lực"
+      },
+      {
+        "id": "internal_3",
+        "name": "Lưu Trọng",
+        "description": "Điều chuyển linh khí khắp cơ thể.",
+        "duration": 120,
+        "prerequisites": ["internal_2"],
+        "bonuses": { "maxHp": 20 },
+        "bonusDescription": "+20 Max HP"
+      },
+      {
+        "id": "internal_4",
+        "name": "Tiểu Chu Thiên",
+        "description": "Mở rộng kinh mạch cơ bản.",
+        "duration": 300,
+        "prerequisites": ["internal_3"],
+        "bonuses": { "maxEnergy": 10 },
+        "bonusDescription": "+10 Max Linh Lực"
+      },
+      {
+        "id": "internal_5",
+        "name": "Đại Chu Thiên",
+        "description": "Khí vận hành toàn thân, sinh lực dồi dào.",
+        "duration": 600,
+        "prerequisites": ["internal_4"],
+        "bonuses": { "maxHp": 50, "maxEnergy": 20 },
+        "bonusDescription": "+50 Max HP, +20 Max Linh Lực"
+      }
+    ],
+    "milestones": [
+      {
+        "id": "ms_internal_3",
+        "require": 3,
+        "unlocks": "meditation_basic",
+        "description": "Đạt 3 Điểm: (Chưa mở) Hồi máu tự động ngoài chiến đấu."
+      },
+      {
+        "id": "ms_internal_5",
+        "require": 5,
+        "unlocks": "fast_idle_regen",
+        "description": "Đạt 5 Điểm: Sinh nguyên bất tuyệt. Tăng gấp đôi tốc độ hồi phục cơ bản."
+      }
+    ]
   },
   {
-    "id": "vo_hoc_adv",
-    "name": "Võ học nâng cao",
-    "category": "combat",
-    "description": "Kỹ thuật chiến đấu nâng cao, mở khóa rèn vũ khí.",
-    "icon": "⚔️",
-    "duration": 60,
-    "prerequisites": ["vo_hoc_intro"],
-    "bonuses": { "strength": 3, "gymBonus": 2 },
-    "bonusDescription": "+3% STR, +2% Gym gains"
+    "id": "perception",
+    "name": "Thiên Cơ",
+    "description": "Học cách nhìn thấu vạn vật, nắm bắt thời cơ.",
+    "icon": "👁️",
+    "nodes": [
+      {
+        "id": "perception_1",
+        "name": "Quan Sát",
+        "description": "Tập trung tinh thần để nhìn rõ mục tiêu.",
+        "duration": 45,
+        "prerequisites": [],
+        "bonuses": { "dexterity": 2 },
+        "bonusDescription": "+2% Thân Pháp (DEX)"
+      },
+      {
+        "id": "perception_2",
+        "name": "Điểm Yếu",
+        "description": "Tìm kiếm sơ hở trong quá trình thủ thế của địch.",
+        "duration": 90,
+        "prerequisites": ["perception_1"],
+        "bonuses": { "critChance": 2 },
+        "bonusDescription": "+2% Chí Mạng"
+      },
+      {
+        "id": "perception_3",
+        "name": "Phân Tích",
+        "description": "Tìm hiểu bản chất của chiến đấu.",
+        "duration": 180,
+        "prerequisites": ["perception_2"],
+        "bonuses": { "dexterity": 3 },
+        "bonusDescription": "+3% Thân Pháp (DEX)"
+      }
+    ],
+    "milestones": [
+      {
+        "id": "ms_perception_2",
+        "require": 2,
+        "unlocks": "view_monster_hp_number",
+        "description": "Đạt 2 Điểm: Kẻ địch không thể che giấu mức máu thực tế (Hiện số HP)."
+      },
+      {
+        "id": "ms_perception_3",
+        "require": 3,
+        "unlocks": "view_combat_stats",
+        "description": "Đạt 3 Điểm: Hiển thị các thông số ẩn như % Chí mạng, % Né tránh trong chiến đấu."
+      }
+    ]
   },
   {
-    "id": "dan_duoc_intro",
-    "name": "Đan dược học nhập môn",
-    "category": "alchemy",
-    "description": "Học cách nhận biết và sử dụng đan dược.",
+    "id": "alchemy",
+    "name": "Đan Dược",
+    "description": "Nghiên cứu thảo mộc, luyện chế linh đan diệu dược.",
     "icon": "🧪",
-    "duration": 30,
-    "prerequisites": [],
-    "bonuses": { "medEffectiveness": 10 },
-    "bonusDescription": "+10% hiệu quả đan dược"
-  },
-  {
-    "id": "dan_duoc_adv",
-    "name": "Đan dược học nâng cao",
-    "category": "alchemy",
-    "description": "Chế tạo đan dược, luyện đan cơ bản.",
-    "icon": "🧪",
-    "duration": 60,
-    "prerequisites": ["dan_duoc_intro"],
-    "bonuses": { "medEffectiveness": 15, "hospitalReduction": 5 },
-    "bonusDescription": "+15% hiệu quả đan dược, -5% thời gian tịnh dưỡng"
-  },
-  {
-    "id": "ho_the_intro",
-    "name": "Hộ thể thuật nhập môn",
-    "category": "defense",
-    "description": "Kỹ thuật phòng ngự cơ bản.",
-    "icon": "🛡",
-    "duration": 30,
-    "prerequisites": [],
-    "bonuses": { "defense": 2 },
-    "bonusDescription": "+2% DEF"
-  },
-  {
-    "id": "ho_the_adv",
-    "name": "Hộ thể thuật nâng cao",
-    "category": "defense",
-    "description": "Rèn áo giáp, kỹ thuật hộ thể cao cấp.",
-    "icon": "🛡",
-    "duration": 60,
-    "prerequisites": ["ho_the_intro"],
-    "bonuses": { "defense": 3, "hospitalReduction": 5 },
-    "bonusDescription": "+3% DEF, -5% thời gian tịnh dưỡng"
-  },
-  {
-    "id": "than_phap_intro",
-    "name": "Thân pháp nhập môn",
-    "category": "agility",
-    "description": "Khinh công cơ bản, di chuyển nhanh hơn.",
-    "icon": "🏃",
-    "duration": 30,
-    "prerequisites": [],
-    "bonuses": { "speed": 2 },
-    "bonusDescription": "+2% SPD"
-  },
-  {
-    "id": "than_phap_adv",
-    "name": "Thân pháp nâng cao",
-    "category": "agility",
-    "description": "Khinh công cao cấp, né tránh tuyệt đỉnh.",
-    "icon": "🏃",
-    "duration": 60,
-    "prerequisites": ["than_phap_intro"],
-    "bonuses": { "speed": 3, "dodge": 2 },
-    "bonusDescription": "+3% SPD, +2% Dodge"
-  },
-  {
-    "id": "am_khi_intro",
-    "name": "Ám khí thuật nhập môn",
-    "category": "precision",
-    "description": "Sử dụng ám khí, tăng chính xác.",
-    "icon": "🎯",
-    "duration": 30,
-    "prerequisites": [],
-    "bonuses": { "dexterity": 2 },
-    "bonusDescription": "+2% DEX"
-  },
-  {
-    "id": "am_khi_adv",
-    "name": "Ám khí thuật nâng cao",
-    "category": "precision",
-    "description": "Ám khí sát thương, crit nâng cao.",
-    "icon": "🎯",
-    "duration": 60,
-    "prerequisites": ["am_khi_intro"],
-    "bonuses": { "dexterity": 3, "critChance": 3 },
-    "bonusDescription": "+3% DEX, +3% Crit Chance"
-  },
-  {
-    "id": "thien_van",
-    "name": "Thiên văn học",
-    "category": "knowledge",
-    "description": "Hiểu Thiên Đạo, tăng kinh nghiệm thu được.",
-    "icon": "📖",
-    "duration": 45,
-    "prerequisites": [],
-    "bonuses": { "xpBonus": 5, "crimeSuccess": 5 },
-    "bonusDescription": "+5% XP, +5% Crime success"
+    "nodes": [
+      {
+        "id": "alchemy_1",
+        "name": "Nhận Biết",
+        "description": "Phân loại cơ bản thảo dược.",
+        "duration": 60,
+        "prerequisites": [],
+        "bonuses": { "medEffectiveness": 5 },
+        "bonusDescription": "+5% Hiệu quả đan dược hồi máu"
+      },
+      {
+        "id": "alchemy_2",
+        "name": "Chiết Xuất",
+        "description": "Lấy dược lực chân chính từ cỏ cây.",
+        "duration": 120,
+        "prerequisites": ["alchemy_1"],
+        "bonuses": { "medEffectiveness": 10 },
+        "bonusDescription": "+10% Hiệu quả đan dược hồi máu"
+      },
+      {
+        "id": "alchemy_3",
+        "name": "Hỏa Hầu",
+        "description": "Kiểm soát ngọn lửa luyện đan.",
+        "duration": 240,
+        "prerequisites": ["alchemy_2"],
+        "bonuses": { "hospitalReduction": 5 },
+        "bonusDescription": "-5% Thời gian tịnh dưỡng khi bị thương"
+      }
+    ],
+    "milestones": [
+      {
+        "id": "ms_alchemy_3",
+        "require": 3,
+        "unlocks": "view_item_affix",
+        "description": "Đạt 3 Điểm: (Chưa mở) Cảm nhận được dược tính ẩn sâu trong trang bị (Thấy Affix trang bị)."
+      }
+    ]
   }
 ]

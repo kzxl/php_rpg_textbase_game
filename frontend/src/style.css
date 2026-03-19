@@ -91,50 +91,68 @@ html, body {
   margin-top: 2px;
 }
 
-.sidebar-nav { list-style: none; }
+.nav { list-style: none; padding-bottom: 20px; }
 
-.sidebar-nav .nav-section {
-  padding: 10px 14px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-dim);
+.nav-section {
+  padding: 18px 14px 6px 18px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gold);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  opacity: 0.9;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-.sidebar-nav .nav-item {
+.nav-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 9px 14px;
-  font-size: 13px;
-  color: var(--text);
+  gap: 12px;
+  padding: 10px 14px;
+  margin: 2px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-dim);
   cursor: pointer;
-  border-left: 3px solid transparent;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
 }
 
-.sidebar-nav .nav-item:hover {
-  background: var(--bg-hover);
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-bright);
+  transform: translateX(4px);
 }
 
-.sidebar-nav .nav-item.active {
-  background: rgba(91, 141, 217, 0.08);
-  color: var(--text-link);
-  border-left-color: var(--text-link);
+.nav-item.active {
+  background: rgba(91, 141, 217, 0.1);
+  color: var(--blue);
+  border: 1px solid rgba(91, 141, 217, 0.2);
+  box-shadow: inset 0 0 12px rgba(91, 141, 217, 0.05), 0 4px 12px rgba(0, 0, 0, 0.2);
   font-weight: 600;
 }
 
-.sidebar-nav .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
-.sidebar-nav .nav-item .badge {
+.nav-item .icon { 
+  font-size: 16px; 
+  width: 24px; 
+  text-align: center; 
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  transition: filter 0.2s;
+}
+
+.nav-item.active .icon {
+  filter: drop-shadow(0 0 8px var(--blue));
+}
+
+.nav .badge {
   margin-left: auto;
   background: var(--red);
   color: #fff;
   font-size: 10px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 8px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
 /* Player summary in sidebar */
@@ -676,3 +694,190 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+
+/* ===== EDUCATION UI (Tu Luyện) ===== */
+.edu-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+}
+
+.edu-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edu-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edu-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.edu-tab:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-bright);
+  transform: translateX(4px);
+}
+
+.edu-tab.active {
+  background: rgba(208, 165, 48, 0.1);
+  color: var(--gold);
+  border-color: rgba(208, 165, 48, 0.3);
+  box-shadow: 0 4px 12px rgba(208, 165, 48, 0.1);
+}
+
+.edu-tab-icon { font-size: 18px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+.edu-tab-name { flex: 1; font-size: 14px; }
+.edu-tab-badge {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+.edu-tab.active .edu-tab-badge { background: var(--gold); color: #000; border-color: var(--gold); }
+
+.edu-studying-panel {
+  border: 1px solid rgba(139, 195, 74, 0.3);
+  box-shadow: inset 0 0 20px rgba(139, 195, 74, 0.05), 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.edu-studying-panel .btn--green {
+  background: linear-gradient(135deg, #6ab04c, #badc58);
+  color: #1a1a2e;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(106, 176, 76, 0.3);
+}
+
+/* Milestones Grid */
+.edu-milestones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.edu-milestone {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.edu-milestone.reached {
+  background: rgba(106, 176, 76, 0.05);
+  border-color: rgba(106, 176, 76, 0.3);
+}
+
+.edu-milestone .ms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.edu-milestone.reached .ms-pts { color: var(--green); }
+.edu-milestone.locked .ms-pts { color: var(--text-dim); }
+
+.edu-milestone .ms-status {
+  background: rgba(255,255,255,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.edu-milestone.reached .ms-status { background: rgba(106, 176, 76, 0.2); color: var(--green); }
+
+.edu-milestone .ms-desc {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+.edu-milestone.locked .ms-desc { color: var(--text-dim); }
+
+/* Nodes List */
+.edu-nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edu-node {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.edu-node.done {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.edu-node.studying {
+  background: rgba(106, 176, 76, 0.05);
+  border-color: rgba(106, 176, 76, 0.4);
+}
+
+.edu-node.locked {
+  opacity: 0.6;
+}
+
+.edu-node.available {
+  border-color: rgba(91, 141, 217, 0.3);
+}
+
+.edu-node-info { flex: 1; }
+
+.edu-node-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+
+.edu-node.done .edu-node-title { color: var(--text); text-decoration: line-through; opacity: 0.7; }
+.edu-node.studying .edu-node-title { color: var(--green); }
+
+.edu-node-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.edu-node-bonus {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.edu-node-action {
+  margin-left: 20px;
+  min-width: 120px;
+  text-align: right;
+}
