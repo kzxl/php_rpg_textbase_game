@@ -39,7 +39,7 @@ return function ($app) {
 
         return jsonResponse($response, [
             'id' => $id,
-            'message' => "Chào mừng {$name} đến với thế giới Thiên Đạo.",
+            'message' => "Chào mừng {$name} đến với Nghịch Thiên Ký.",
             'player' => $player->toArray(),
         ], 201);
     });

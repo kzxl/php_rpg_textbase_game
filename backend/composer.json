@@ -1,6 +1,6 @@
 {
     "name": "rpg/engine",
-    "description": "Text RPG Engine - Thiên Đạo Bị Lỗi",
+    "description": "Tu Tiên RPG Engine - Nghịch Thiên Ký",
     "type": "project",
     "require": {
         "php": ">=8.2",

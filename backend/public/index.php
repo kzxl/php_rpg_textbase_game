@@ -72,7 +72,7 @@ function loadPlayer(string $id): ?Player
 
 $app->get('/', function (Request $request, Response $response) {
     return jsonResponse($response, [
-        'name' => 'Thiên Đạo Bị Lỗi – RPG Engine',
+        'name' => 'Nghịch Thiên Ký – RPG Engine',
         'version' => '2.0.0',
         'architecture' => 'feature-based',
     ]);

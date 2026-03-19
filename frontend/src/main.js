@@ -1,5 +1,5 @@
 /**
- * Thiên Đạo Bị Lỗi – Torn City Style UI
+ * Nghịch Thiên Ký – Tu Tiên RPG
  */
 import './style.css'
 import { api } from './services/api.js'
@@ -32,7 +32,7 @@ function renderIntro() {
   app.innerHTML = `
     <div class="intro-page">
       <div class="intro-box">
-        <div class="title">天 道 · THIÊN ĐẠO</div>
+        <div class="title">NGHỊCH THIÊN KÝ</div>
         <div class="intro-text">Thế giới này vận hành theo quy luật tuyệt đối.
 Không ai có thể vượt qua.
 
@@ -104,8 +104,8 @@ function renderGame() {
       <!-- SIDEBAR -->
       <aside class="sidebar">
         <div class="sidebar-header">
-          <div class="game-title">THIÊN ĐẠO</div>
-          <div class="game-sub">Bị Lỗi v1.0</div>
+          <div class="game-title">NGHỊCH THIÊN KÝ</div>
+          <div class="game-sub">Tu Tiên RPG v2.0</div>
         </div>
 
         <div class="sidebar-player">
