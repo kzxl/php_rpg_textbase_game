@@ -119,6 +119,11 @@ function renderGame() {
             <div class="bar-label"><span>🔮 Linh lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
           </div>
+          <div class="sidebar-bar" style="margin-top:4px">
+            <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}</span></div>
+            <div class="bar-track"><div class="bar-fill nerve" style="width:${(p.nerve ?? 0) / (p.maxNerve ?? 15) * 100}%"></div></div>
+          </div>
+          <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>
         </div>
 
         <ul class="sidebar-nav">
@@ -127,28 +132,38 @@ function renderGame() {
             <span class="icon">⚔</span> Tìm quái
           </li>
           <li class="nav-item ${state.currentPage === 'gym' ? 'active' : ''}" data-page="gym">
-            <span class="icon">🏋</span> Rèn luyện
+            <span class="icon">🏋</span> Lưực thể
+          </li>
+
+          <li class="nav-section">Nghịch Thiên</li>
+          <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
+            <span class="icon">💀</span> Phá Luật
+            ${(p.jailRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--red)">⚔️</span>` : ''}
+          </li>
+          <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
+            <span class="icon">📜</span> Tu Luyện
+            ${p.currentCourse ? `<span class="badge">📖</span>` : ''}
           </li>
 
           <li class="nav-section">Nhân vật</li>
           <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
-            <span class="icon">📊</span> Chỉ số
+            <span class="icon">📊</span> Căn Cốt
             ${p.statPoints > 0 ? `<span class="badge">${p.statPoints}</span>` : ''}
           </li>
           <li class="nav-item ${state.currentPage === 'skills' ? 'active' : ''}" data-page="skills">
-            <span class="icon">⚡</span> Kỹ năng
+            <span class="icon">⚡</span> Thần Thông
           </li>
           <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
-            <span class="icon">🎒</span> Trang bị
+            <span class="icon">🎒</span> Pháp Bảo
           </li>
 
           <li class="nav-section">Khác</li>
           <li class="nav-item ${state.currentPage === 'hospital' ? 'active' : ''}" data-page="hospital">
-            <span class="icon">🏥</span> Tịnh dưỡng
-            ${p.hospitalRemaining > 0 ? `<span class="badge">${p.hospitalRemaining}s</span>` : ''}
+            <span class="icon">🏥</span> Tịnh Dưỡng
+            ${(p.hospitalRemaining ?? 0) > 0 ? `<span class="badge">${p.hospitalRemaining}s</span>` : ''}
           </li>
           <li class="nav-item" id="navHeal">
-            <span class="icon">❤</span> Hồi phục
+            <span class="icon">❤</span> Hồi Phục
           </li>
         </ul>
       </aside>
@@ -185,6 +200,8 @@ function renderPage() {
   switch (state.currentPage) {
     case 'combat': pageCombat(el); break
     case 'gym': pageGym(el); break
+    case 'crimes': pageCrimes(el); break
+    case 'education': pageEducation(el); break
     case 'stats': pageStats(el); break
     case 'skills': pageSkills(el); break
     case 'inventory': pageInventory(el); break
@@ -618,6 +635,164 @@ function pageHospital(el) {
   })
 }
 
+// ==============================
+// CRIMES PAGE (Nghịch Thiên / Phá Luật)
+// ==============================
+function pageCrimes(el) {
+  const p = state.player
+  const crimes = state.crimes || []
+  const isJailed = (p.jailRemaining ?? 0) > 0
+
+  if (isJailed) {
+    // JAIL VIEW (Thiên Lao)
+    const remaining = p.jailRemaining
+    const bailCost = Math.max(10, 100 * Math.ceil(remaining / 60) * p.level)
+    el.innerHTML = `
+      <div class="page-header"><h1>🏛 Thiên Lao</h1></div>
+      <div class="panel">
+        <div class="panel-title">Trạng thái</div>
+        <div class="panel-body" style="text-align:center">
+          <div style="font-size:28px;color:var(--red);font-weight:700">⛓ Bị giam giữ</div>
+          <div class="text-dim mt-sm">Thời gian còn lại: <strong style="color:var(--gold)">${remaining}s</strong></div>
+          <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
+            <button class="btn btn--blue" id="btnEscape">🏃 Vượt ngục (3 Nghịch Khí)</button>
+            <button class="btn btn--gold" id="btnBail">💰 Bảo lãnh (${bailCost} Lính Thạch)</button>
+          </div>
+        </div>
+      </div>`
+
+    document.getElementById('btnEscape')?.addEventListener('click', async () => {
+      try {
+        const data = await api.escapeJail(state.playerId)
+        state.player = data.player
+        notify(data.message, data.success ? 'success' : 'error')
+        renderGame()
+      } catch (e) { notify(e.message || 'Lỗi', 'error') }
+    })
+    document.getElementById('btnBail')?.addEventListener('click', async () => {
+      try {
+        const data = await api.bail(state.playerId)
+        state.player = data.player
+        notify(data.message, data.success ? 'success' : 'error')
+        renderGame()
+      } catch (e) { notify(e.message || 'Lỗi', 'error') }
+    })
+    return
+  }
+
+  // CRIMES VIEW
+  el.innerHTML = `
+    <div class="page-header">
+      <h1>💀 Nghịch Thiên – Phá Luật</h1>
+      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Lính Thạch</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Hành động</div>
+      <div class="panel-body no-pad">
+        ${crimes.map(c => {
+          const cs = p.crimeSkills?.[c.id] ?? 0
+          const locked = cs < (c.minSkill ?? 0)
+          const canDo = !locked && (p.nerve ?? 0) >= c.nerveCost
+          return `
+            <div class="list-item">
+              <div class="item-info">
+                <div class="item-name">${c.icon} ${c.name} ${locked ? '🔒' : ''}</div>
+                <div class="item-meta">
+                  ${c.description} · ${c.nerveCost} Nghịch Khí
+                  ${locked ? ` · Cần Skill ${c.minSkill}` : ` · Skill: ${cs}/100`}
+                </div>
+              </div>
+              <button class="btn btn--sm ${canDo ? 'btn--red' : ''}" data-crime="${c.id}" ${canDo ? '' : 'disabled'}>
+                ${locked ? '🔒' : 'Thực hiện'}
+              </button>
+            </div>`
+        }).join('')}
+      </div>
+    </div>`
+
+  el.querySelectorAll('[data-crime]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        const data = await api.commitCrime(state.playerId, btn.dataset.crime)
+        state.player = data.player
+        const type = data.outcome === 'success' ? 'success' : data.outcome === 'critical_fail' ? 'error' : 'info'
+        notify(data.message, type)
+        renderGame()
+      } catch (e) { notify(e.message || 'Lỗi', 'error') }
+    })
+  })
+}
+
+// ==============================
+// EDUCATION PAGE (Tu Luyện)
+// ==============================
+function pageEducation(el) {
+  const p = state.player
+  const courses = state.courses || []
+  const completed = p.completedCourses || []
+  const studying = p.currentCourse || ''
+  const remaining = p.courseRemaining ?? 0
+
+  el.innerHTML = `
+    <div class="page-header"><h1>📜 Tu Luyện</h1></div>
+
+    ${studying ? `
+    <div class="panel">
+      <div class="panel-title">📖 Đang học</div>
+      <div class="panel-body" style="text-align:center">
+        <div style="font-size:20px;font-weight:700;color:var(--gold)">${courses.find(c => c.id === studying)?.name ?? studying}</div>
+        <div class="text-dim mt-sm">⏳ Còn lại: <strong>${remaining}s</strong></div>
+        <button class="btn btn--green mt-sm" id="btnCheckEdu" ${remaining > 0 ? 'disabled' : ''}>
+          ${remaining > 0 ? 'Đang học...' : '✅ Nhận kết quả'}
+        </button>
+      </div>
+    </div>` : ''}
+
+    <div class="panel">
+      <div class="panel-title">Danh sách môn học (${completed.length}/${courses.length} hoàn thành)</div>
+      <div class="panel-body no-pad">
+        ${courses.map(c => {
+          const done = completed.includes(c.id)
+          const prereqMet = (c.prerequisites || []).every(p => completed.includes(p))
+          const canEnroll = !done && !studying && prereqMet
+          return `
+            <div class="list-item">
+              <div class="item-info">
+                <div class="item-name">${c.icon} ${c.name} ${done ? '✅' : ''}</div>
+                <div class="item-meta">
+                  ${c.description} · ${c.duration}s · ${c.bonusDescription}
+                  ${!prereqMet ? ` · 🔒 Cần: ${c.prerequisites.join(', ')}` : ''}
+                </div>
+              </div>
+              <button class="btn btn--sm ${canEnroll ? 'btn--blue' : ''}" data-enroll="${c.id}" ${canEnroll ? '' : 'disabled'}>
+                ${done ? '✅' : canEnroll ? 'Học' : '🔒'}
+              </button>
+            </div>`
+        }).join('')}
+      </div>
+    </div>`
+
+  document.getElementById('btnCheckEdu')?.addEventListener('click', async () => {
+    try {
+      const data = await api.checkEducation(state.playerId)
+      state.player = data.player
+      notify(data.message, data.completed ? 'success' : 'info')
+      renderGame()
+    } catch (e) { notify(e.message || 'Lỗi', 'error') }
+  })
+
+  el.querySelectorAll('[data-enroll]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        const data = await api.enrollCourse(state.playerId, btn.dataset.enroll)
+        state.player = data.player
+        notify(data.message, 'success')
+        renderGame()
+      } catch (e) { notify(e.message || 'Lỗi', 'error') }
+    })
+  })
+}
+
 function itemRow(item, showEquip) {
   const affixStr = (item.affixes || []).map(a => fmtAffix(a)).join(' · ')
   return `
@@ -644,11 +819,16 @@ function fmtAffix(a) {
 // ===== UTILITIES =====
 async function loadGameData() {
   try {
-    const [md, sd, id, medsD] = await Promise.all([api.getMonsters(), api.getSkills(), api.getItems(), api.getMedicines()])
+    const [md, sd, id, medsD, crimesD, eduD] = await Promise.all([
+      api.getMonsters(), api.getSkills(), api.getItems(),
+      api.getMedicines(), api.getCrimes(), api.getEducation()
+    ])
     state.monsters = md.monsters || []
     state.skills = sd.skills || []
     state.items = id.items || []
     state.medicines = medsD.medicines || []
+    state.crimes = crimesD.crimes || []
+    state.courses = eduD.courses || []
   } catch (e) { console.error('Load data failed:', e) }
 }
 

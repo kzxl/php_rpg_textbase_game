@@ -1,0 +1,72 @@
+[
+  {
+    "id": "search_trash",
+    "name": "Lục lọi",
+    "description": "Lục thùng rác, bãi biển, mộ cổ tìm vật phẩm.",
+    "category": "theft",
+    "nerveCost": 2,
+    "baseSuccessRate": 80,
+    "rewards": { "goldMin": 5, "goldMax": 20, "ceGain": 1, "csGain": 1 },
+    "failPenalty": { "ceLoss": 0, "csLoss": 0 },
+    "critFailChance": 3,
+    "critFailPenalty": { "ceLoss": 1, "csLoss": 1, "jailSeconds": 30 },
+    "icon": "🔍",
+    "minSkill": 0
+  },
+  {
+    "id": "shoplift",
+    "name": "Trộm cắp",
+    "description": "Trộm tiệm thuốc, thương hội lấy đan dược, nguyên liệu.",
+    "category": "theft",
+    "nerveCost": 3,
+    "baseSuccessRate": 65,
+    "rewards": { "goldMin": 15, "goldMax": 50, "ceGain": 2, "csGain": 2 },
+    "failPenalty": { "ceLoss": 1, "csLoss": 1 },
+    "critFailChance": 5,
+    "critFailPenalty": { "ceLoss": 3, "csLoss": 2, "jailSeconds": 60 },
+    "icon": "🛒",
+    "minSkill": 10
+  },
+  {
+    "id": "forgery",
+    "name": "Giả mạo",
+    "description": "Giả lệnh bài, ấn tín quan phủ để lừa tiền.",
+    "category": "fraud",
+    "nerveCost": 5,
+    "baseSuccessRate": 50,
+    "rewards": { "goldMin": 40, "goldMax": 120, "ceGain": 4, "csGain": 3 },
+    "failPenalty": { "ceLoss": 2, "csLoss": 2 },
+    "critFailChance": 8,
+    "critFailPenalty": { "ceLoss": 5, "csLoss": 4, "jailSeconds": 120 },
+    "icon": "🎭",
+    "minSkill": 25
+  },
+  {
+    "id": "arson",
+    "name": "Phá hoại",
+    "description": "Đốt trại, phá trận pháp, thâm nhập cấm địa.",
+    "category": "vandalism",
+    "nerveCost": 7,
+    "baseSuccessRate": 40,
+    "rewards": { "goldMin": 80, "goldMax": 250, "ceGain": 6, "csGain": 4 },
+    "failPenalty": { "ceLoss": 3, "csLoss": 3 },
+    "critFailChance": 12,
+    "critFailPenalty": { "ceLoss": 8, "csLoss": 5, "jailSeconds": 180 },
+    "icon": "🔥",
+    "minSkill": 40
+  },
+  {
+    "id": "heist",
+    "name": "Lừa đảo",
+    "description": "Lừa thương nhân, cướp đoạt bảo vật. Rủi ro cực cao.",
+    "category": "fraud",
+    "nerveCost": 10,
+    "baseSuccessRate": 30,
+    "rewards": { "goldMin": 200, "goldMax": 600, "ceGain": 10, "csGain": 6 },
+    "failPenalty": { "ceLoss": 5, "csLoss": 4 },
+    "critFailChance": 18,
+    "critFailPenalty": { "ceLoss": 15, "csLoss": 8, "jailSeconds": 300 },
+    "icon": "💀",
+    "minSkill": 60
+  }
+]

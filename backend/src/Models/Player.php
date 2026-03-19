@@ -26,6 +26,17 @@ class Player
     /** @var int Unix timestamp when medicine cooldown expires */
     public int $medCooldownUntil = 0;
 
+    // --- Phase 1: Crimes + Jail + Education ---
+    public int $gold = 0;
+    public int $nerve = 15;
+    public int $maxNerve = 15;
+    public int $crimeExp = 0; // hidden, determines maxNerve growth
+    public array $crimeSkills = []; // ['search_trash' => 5, 'shoplift' => 2]
+    public int $jailUntil = 0;
+    public string $currentCourse = ''; // education course id being studied
+    public int $courseEndsAt = 0; // unix timestamp
+    public array $completedCourses = [];
+
     /** @var array Base stat allocations */
     private array $baseStats;
 
@@ -372,6 +383,18 @@ class Player
             'equipment' => array_map(fn($i) => $i->toArray(), $this->equipment),
             'inventory' => array_map(fn($i) => $i->toArray(), $this->inventory),
             'skills' => array_values($this->skills),
+            // Phase 1
+            'gold' => $this->gold,
+            'nerve' => $this->nerve,
+            'maxNerve' => $this->maxNerve,
+            'crimeExp' => $this->crimeExp,
+            'crimeSkills' => $this->crimeSkills,
+            'jailUntil' => $this->jailUntil,
+            'jailRemaining' => max(0, $this->jailUntil - time()),
+            'currentCourse' => $this->currentCourse,
+            'courseEndsAt' => $this->courseEndsAt,
+            'courseRemaining' => max(0, $this->courseEndsAt - time()),
+            'completedCourses' => $this->completedCourses,
         ];
     }
 
@@ -412,7 +435,173 @@ class Player
         $player->currentEnergy = $data['currentEnergy'] ?? $player->maxEnergy;
         $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
         $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
+        // Phase 1
+        $player->gold = $data['gold'] ?? 0;
+        $player->nerve = $data['nerve'] ?? 15;
+        $player->maxNerve = $data['maxNerve'] ?? 15;
+        $player->crimeExp = $data['crimeExp'] ?? 0;
+        $player->crimeSkills = $data['crimeSkills'] ?? [];
+        $player->jailUntil = $data['jailUntil'] ?? 0;
+        $player->currentCourse = $data['currentCourse'] ?? '';
+        $player->courseEndsAt = $data['courseEndsAt'] ?? 0;
+        $player->completedCourses = $data['completedCourses'] ?? [];
 
         return $player;
+    }
+
+    // === Phase 1 Methods ===
+
+    public function isJailed(): bool { return $this->jailUntil > time(); }
+    public function jailRemaining(): int { return max(0, $this->jailUntil - time()); }
+
+    public function jail(int $seconds): void { $this->jailUntil = time() + $seconds; }
+
+    public function spendNerve(int $amount): bool
+    {
+        if ($this->nerve < $amount) return false;
+        $this->nerve -= $amount;
+        return true;
+    }
+
+    /**
+     * Execute a crime. Returns result array.
+     */
+    public function commitCrime(array $crime): array
+    {
+        if ($this->isJailed()) return ['outcome' => 'jailed', 'message' => 'Đang bị giam! Không thể phạm tội.'];
+        if ($this->isHospitalized()) return ['outcome' => 'hospital', 'message' => 'Đang tịnh dưỡng! Không thể phạm tội.'];
+        if ($this->nerve < $crime['nerveCost']) return ['outcome' => 'no_nerve', 'message' => 'Không đủ Nghịch Khí!'];
+
+        $cs = $this->crimeSkills[$crime['id']] ?? 0;
+        if ($cs < ($crime['minSkill'] ?? 0)) {
+            return ['outcome' => 'locked', 'message' => "Cần Crime Skill {$crime['minSkill']} để thực hiện!"];
+        }
+
+        $this->nerve -= $crime['nerveCost'];
+
+        // Success rate = base + CS bonus (each CS point adds 0.5%)
+        $successRate = min(95, $crime['baseSuccessRate'] + $cs * 0.5);
+        $roll = mt_rand(1, 100);
+
+        if ($roll <= $successRate) {
+            // SUCCESS
+            $gold = mt_rand($crime['rewards']['goldMin'], $crime['rewards']['goldMax']);
+            $this->gold += $gold;
+            $this->crimeExp += $crime['rewards']['ceGain'];
+            $this->crimeSkills[$crime['id']] = min(100, ($this->crimeSkills[$crime['id']] ?? 0) + $crime['rewards']['csGain']);
+            // Max nerve grows with crimeExp (every 50 CE = +5 max nerve)
+            $this->maxNerve = 15 + (int)floor($this->crimeExp / 50) * 5;
+
+            return [
+                'outcome' => 'success',
+                'message' => "✅ Thành công! +{$gold} lính thạch",
+                'gold' => $gold,
+                'ceGain' => $crime['rewards']['ceGain'],
+                'csGain' => $crime['rewards']['csGain'],
+            ];
+        }
+
+        // Check critical failure
+        $critRoll = mt_rand(1, 100);
+        if ($critRoll <= ($crime['critFailChance'] ?? 5)) {
+            // CRITICAL FAILURE → Jail
+            $this->crimeExp = max(0, $this->crimeExp - $crime['critFailPenalty']['ceLoss']);
+            $this->crimeSkills[$crime['id']] = max(0, ($this->crimeSkills[$crime['id']] ?? 0) - $crime['critFailPenalty']['csLoss']);
+            $jailTime = $crime['critFailPenalty']['jailSeconds'];
+            $this->jail($jailTime);
+
+            return [
+                'outcome' => 'critical_fail',
+                'message' => "❌ Thảm bại! Bị bắt giam {$jailTime}s!",
+                'jailSeconds' => $jailTime,
+                'ceLoss' => $crime['critFailPenalty']['ceLoss'],
+                'csLoss' => $crime['critFailPenalty']['csLoss'],
+            ];
+        }
+
+        // NORMAL FAILURE
+        $this->crimeExp = max(0, $this->crimeExp - ($crime['failPenalty']['ceLoss'] ?? 0));
+        $this->crimeSkills[$crime['id']] = max(0, ($this->crimeSkills[$crime['id']] ?? 0) - ($crime['failPenalty']['csLoss'] ?? 0));
+
+        return [
+            'outcome' => 'fail',
+            'message' => '⚠️ Thất bại! Không thu được gì.',
+            'ceLoss' => $crime['failPenalty']['ceLoss'] ?? 0,
+            'csLoss' => $crime['failPenalty']['csLoss'] ?? 0,
+        ];
+    }
+
+    /**
+     * Attempt jail escape. Costs nerve, DEX-based success.
+     */
+    public function escapeJail(): array
+    {
+        if (!$this->isJailed()) return ['success' => false, 'message' => 'Không bị giam!'];
+        if ($this->nerve < 3) return ['success' => false, 'message' => 'Cần 3 Nghịch Khí để vượt ngục!'];
+
+        $this->nerve -= 3;
+        $dex = $this->getFinalStats()['dexterity'] ?? 10;
+        $escapeChance = min(60, 20 + $dex * 0.5);
+
+        if (mt_rand(1, 100) <= $escapeChance) {
+            $this->jailUntil = 0;
+            return ['success' => true, 'message' => '🏃 Vượt ngục thành công!'];
+        }
+
+        // Failed escape: +50% time
+        $remaining = $this->jailRemaining();
+        $this->jailUntil += (int)($remaining * 0.5);
+        return ['success' => false, 'message' => "❌ Thất bại! Thời gian giam tăng thêm {$remaining}s!"];
+    }
+
+    /**
+     * Bail out of jail. Costs gold.
+     */
+    public function bailOut(): array
+    {
+        if (!$this->isJailed()) return ['success' => false, 'message' => 'Không bị giam!'];
+        $remaining = (int)ceil($this->jailRemaining() / 60);
+        $cost = max(10, 100 * $remaining * $this->level);
+
+        if ($this->gold < $cost) return ['success' => false, 'message' => "Cần {$cost} lính thạch để bảo lãnh!"];
+
+        $this->gold -= $cost;
+        $this->jailUntil = 0;
+        return ['success' => true, 'message' => "💰 Bảo lãnh thành công! -{$cost} lính thạch", 'cost' => $cost];
+    }
+
+    /**
+     * Enroll in an education course.
+     */
+    public function enrollCourse(array $course): ?string
+    {
+        if ($this->isJailed()) return 'Đang bị giam!';
+        if ($this->currentCourse !== '') return 'Đang học một môn khác!';
+        if (in_array($course['id'], $this->completedCourses)) return 'Đã hoàn thành môn này!';
+
+        // Check prereqs
+        foreach (($course['prerequisites'] ?? []) as $prereq) {
+            if (!in_array($prereq, $this->completedCourses)) {
+                return "Cần hoàn thành {$prereq} trước!";
+            }
+        }
+
+        $this->currentCourse = $course['id'];
+        $this->courseEndsAt = time() + ($course['duration'] ?? 60);
+        return null;
+    }
+
+    /**
+     * Check/complete education. Returns completed course or null.
+     */
+    public function checkEducation(): ?string
+    {
+        if ($this->currentCourse === '' || $this->courseEndsAt > time()) return null;
+
+        $completed = $this->currentCourse;
+        $this->completedCourses[] = $completed;
+        $this->currentCourse = '';
+        $this->courseEndsAt = 0;
+        return $completed;
     }
 }

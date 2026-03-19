@@ -83,6 +83,33 @@ class GameAPI {
   getSkills() { return this.request('/data/skills') }
   getItems() { return this.request('/data/items') }
   getMedicines() { return this.request('/data/medicines') }
+  getCrimes() { return this.request('/data/crimes') }
+  getEducation() { return this.request('/data/education') }
+
+  // Crimes
+  commitCrime(id, crimeId) {
+    return this.request(`/player/${id}/commit-crime`, {
+      method: 'POST', body: JSON.stringify({ crimeId }),
+    })
+  }
+
+  // Jail
+  escapeJail(id) {
+    return this.request(`/player/${id}/escape-jail`, { method: 'POST' })
+  }
+  bail(id) {
+    return this.request(`/player/${id}/bail`, { method: 'POST' })
+  }
+
+  // Education
+  enrollCourse(id, courseId) {
+    return this.request(`/player/${id}/enroll`, {
+      method: 'POST', body: JSON.stringify({ courseId }),
+    })
+  }
+  checkEducation(id) {
+    return this.request(`/player/${id}/check-education`, { method: 'POST' })
+  }
 
   generateItem(rarity = 'common', slot = null) {
     return this.request('/items/generate', {
