@@ -66,8 +66,7 @@ return function ($app) {
                 array_splice($player->trackedMonsters, $trackedIndex, 1);
 
                 // Phase 9: Update quest progress for kill-type quests
-                $npcsFile = __DIR__ . '/../../../data/npcs.json';
-                $npcsData = file_exists($npcsFile) ? json_decode(file_get_contents($npcsFile), true)['npcs'] ?? [] : [];
+                $npcsData = \App\Core\GameDataRepository::getNpcs();
                 $questNotifs = $player->updateQuestProgress('kill', $trackedInstance['monster_id'], 1, $npcsData);
                 if (!empty($questNotifs)) {
                     $result['questNotifications'] = $questNotifs;

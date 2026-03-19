@@ -2,10 +2,12 @@
 
 /**
  * Crime Feature — Nghịch Thiên (crimes), Thiên Lao (jail).
+ * Uses GameDataRepository (DB) instead of JSON files.
  */
 
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Core\GameDataRepository;
 
 return function ($app) {
     $app->post('/api/player/{id}/commit-crime', function (Request $request, Response $response, array $args) {
@@ -16,12 +18,7 @@ return function ($app) {
         $body = $request->getParsedBody();
         $crimeId = $body['crimeId'] ?? '';
 
-        $crimesFile = __DIR__ . '/../../../data/crimes.json';
-        $crimes = json_decode(file_get_contents($crimesFile), true);
-        $crime = null;
-        foreach ($crimes as $c) {
-            if ($c['id'] === $crimeId) { $crime = $c; break; }
-        }
+        $crime = GameDataRepository::getCrimeById($crimeId);
         if (!$crime) return jsonResponse($response, ['error' => 'Crime not found'], 404);
 
         $result = $player->commitCrime($crime);
@@ -51,8 +48,7 @@ return function ($app) {
     });
 
     $app->get('/api/data/crimes', function (Request $request, Response $response) {
-        $file = __DIR__ . '/../../../data/crimes.json';
-        $crimes = json_decode(file_get_contents($file), true);
+        $crimes = GameDataRepository::getCrimes();
         return jsonResponse($response, ['crimes' => $crimes]);
     });
 };

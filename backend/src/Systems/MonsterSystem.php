@@ -3,9 +3,11 @@
 namespace App\Systems;
 
 use App\Models\Monster;
+use App\Core\GameDataRepository;
 
 /**
  * Manages monster loading and encounter generation.
+ * Uses GameDataRepository (DB) instead of JSON files.
  */
 class MonsterSystem
 {
@@ -13,49 +15,27 @@ class MonsterSystem
 
     public function __construct()
     {
-        $path = __DIR__ . '/../../data/monsters.json';
-        if (file_exists($path)) {
-            $data = json_decode(file_get_contents($path), true);
-            $this->monsterData = $data['monsters'] ?? [];
-        }
+        $this->monsterData = GameDataRepository::getMonsters();
     }
 
-    /**
-     * Get all monster templates.
-     */
     public function getAll(): array
     {
         return $this->monsterData;
     }
 
-    /**
-     * Create a monster instance by ID, scaled to player level.
-     */
     public function spawn(string $id, int $playerLevel = 1): ?Monster
     {
-        foreach ($this->monsterData as $data) {
-            if ($data['id'] === $id) {
-                return Monster::fromData($data, $playerLevel);
-            }
-        }
-        return null;
+        $data = GameDataRepository::getMonsterById($id);
+        return $data ? Monster::fromData($data, $playerLevel) : null;
     }
 
-    /**
-     * Spawn a random monster appropriate for player level.
-     */
     public function spawnRandom(int $playerLevel = 1): Monster
     {
-        // Filter monsters appropriate for level
         $available = array_filter($this->monsterData, function ($m) use ($playerLevel) {
             $minLevel = $m['minLevel'] ?? 1;
             return $playerLevel >= $minLevel;
         });
-
-        if (empty($available)) {
-            $available = $this->monsterData;
-        }
-
+        if (empty($available)) $available = $this->monsterData;
         $chosen = $available[array_rand($available)];
         return Monster::fromData($chosen, $playerLevel);
     }

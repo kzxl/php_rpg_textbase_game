@@ -726,8 +726,22 @@ class Player
         }
         $categoryBonus = min(15, $categoryBonus); // Cap at 15%
 
-        // Success rate = base + CS bonus + category bonus
-        $successRate = min(95, $crime['baseSuccessRate'] + $cs * 0.5 + $categoryBonus);
+        // Education tree cross-bonus
+        $eduBonus = 0;
+        $tp = $this->treeProgress;
+        if ($category === 'intel' || $category === 'spy') {
+            // Thiên Cơ (perception) → intel/spy crimes +success
+            $eduBonus = min(10, ($tp['perception'] ?? 0) * 2);
+        } elseif ($category === 'trade' || $category === 'fraud') {
+            // Đan Dược (alchemy) → trade/fraud +gold multiplier (applied later)
+            $eduBonus = min(8, ($tp['alchemy'] ?? 0) * 1.5);
+        } elseif ($category === 'combat') {
+            // Nội Công → combat crimes +success
+            $eduBonus = min(10, ($tp['internal_cultivation'] ?? 0) * 1.5);
+        }
+
+        // Success rate = base + CS bonus + category bonus + education bonus
+        $successRate = min(95, $crime['baseSuccessRate'] + $cs * 0.5 + $categoryBonus + $eduBonus);
         $roll = mt_rand(1, 100);
 
         if ($roll <= $successRate) {

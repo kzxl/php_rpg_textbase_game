@@ -29,8 +29,6 @@ export function pageCombat(el, ctx) {
 
     <div id="exploreResult"></div>
 
-    <div id="exploreResult"></div>
-
     <!-- DẤU VẾT YÊU THÚ -->
     <div class="panel mt-md">
       <div class="panel-title">Bản Địa Yêu Thú <span class="subtitle">(Tối đa 5 con rình rập)</span></div>

@@ -2,10 +2,12 @@
 
 /**
  * Education Feature — Tu Luyện (Progression Trees).
+ * Uses GameDataRepository (DB) instead of JSON files.
  */
 
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Core\GameDataRepository;
 
 return function ($app) {
     $app->post('/api/player/{id}/enroll', function (Request $request, Response $response, array $args) {
@@ -13,7 +15,6 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        // Auto check previous education first
         $completed = $player->checkEducation();
 
         $body = $request->getParsedBody();
@@ -24,14 +25,11 @@ return function ($app) {
             return jsonResponse($response, ['error' => 'Thiếu thông tin Node/Tree'], 400);
         }
 
-        $treesFile = __DIR__ . '/../../../data/education.json';
-        $trees = json_decode(file_get_contents($treesFile), true) ?: [];
+        $trees = GameDataRepository::getEducationTrees();
         
         $targetNode = null;
-        $targetTree = null;
         foreach ($trees as $t) {
             if ($t['id'] === $treeId) {
-                $targetTree = $t;
                 foreach ($t['nodes'] as $n) {
                     if ($n['id'] === $nodeId) {
                         $targetNode = $n;
@@ -72,8 +70,7 @@ return function ($app) {
     });
 
     $app->get('/api/data/education', function (Request $request, Response $response) {
-        $file = __DIR__ . '/../../../data/education.json';
-        $trees = json_decode(file_get_contents($file), true) ?: [];
+        $trees = GameDataRepository::getEducationTrees();
         return jsonResponse($response, ['trees' => $trees]);
     });
 };

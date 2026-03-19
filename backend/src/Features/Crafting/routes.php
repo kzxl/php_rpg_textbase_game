@@ -2,17 +2,17 @@
 
 /**
  * Crafting Feature — Hệ Thống Luyện Đan & Tập Tinh Chế
+ * Uses GameDataRepository (DB) instead of JSON files.
  */
 
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Core\GameDataRepository;
 
 return function ($app) {
     // Phase 8: Get list of recipes
     $app->get('/api/recipes', function (Request $request, Response $response) {
-        $recipesFile = __DIR__ . '/../../../data/recipes.json';
-        $recipes = file_exists($recipesFile) ? json_decode(file_get_contents($recipesFile), true)['recipes'] ?? [] : [];
-        return jsonResponse($response, ['recipes' => $recipes]);
+        return jsonResponse($response, ['recipes' => GameDataRepository::getRecipes()]);
     });
 
     // Phase 8: Craft Item
@@ -25,16 +25,7 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        $recipesFile = __DIR__ . '/../../../data/recipes.json';
-        $recipes = file_exists($recipesFile) ? json_decode(file_get_contents($recipesFile), true)['recipes'] ?? [] : [];
-        
-        $recipe = null;
-        foreach ($recipes as $r) {
-            if ($r['id'] === $recipeId) {
-                $recipe = $r;
-                break;
-            }
-        }
+        $recipe = GameDataRepository::getRecipeById($recipeId);
         if (!$recipe) return jsonResponse($response, ['error' => 'Công thức không tồn tại'], 400);
 
         // Check requirements
