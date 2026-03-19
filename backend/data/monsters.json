@@ -1,0 +1,60 @@
+{
+    "monsters": [
+        {
+            "id": "slime",
+            "name": "Yêu Tinh Nhầy",
+            "description": "Sinh vật đơn giản nhất, sinh ra từ linh khí dư thừa.",
+            "stats": { "hp": 30, "strength": 4, "speed": 3, "dexterity": 2, "defense": 2 },
+            "xpReward": 15
+        },
+        {
+            "id": "wolf",
+            "name": "Hắc Lang",
+            "description": "Sói đen đã hấp thụ âm khí, hung tính rất cao.",
+            "stats": { "hp": 50, "strength": 8, "speed": 10, "dexterity": 7, "defense": 4 },
+            "xpReward": 30
+        },
+        {
+            "id": "bandit",
+            "name": "Sơn Tặc",
+            "description": "Tên cướp núi, có kinh nghiệm chiến đấu.",
+            "stats": { "hp": 60, "strength": 10, "speed": 7, "dexterity": 8, "defense": 7 },
+            "xpReward": 40
+        },
+        {
+            "id": "spirit",
+            "name": "Linh Hồn Lạc",
+            "description": "Hồn ma bị mắc kẹt giữa hai cõi, tấn công nhanh nhưng yếu.",
+            "stats": { "hp": 35, "strength": 6, "speed": 15, "dexterity": 12, "defense": 1 },
+            "xpReward": 35
+        },
+        {
+            "id": "golem",
+            "name": "Thạch Nhân",
+            "description": "Người đá cổ đại, phòng thủ cực cao nhưng chậm chạp.",
+            "stats": { "hp": 100, "strength": 12, "speed": 2, "dexterity": 1, "defense": 20 },
+            "xpReward": 50
+        },
+        {
+            "id": "phantom",
+            "name": "Huyễn Ảnh Sát Thủ",
+            "description": "Sát thủ bóng tối, crit cao và né giỏi.",
+            "stats": { "hp": 45, "strength": 14, "speed": 12, "dexterity": 18, "defense": 3 },
+            "xpReward": 60
+        },
+        {
+            "id": "serpent",
+            "name": "Độc Xà Vương",
+            "description": "Rắn độc khổng lồ, lẩn tránh cực kỳ nhanh.",
+            "stats": { "hp": 70, "strength": 15, "speed": 14, "dexterity": 14, "defense": 8 },
+            "xpReward": 80
+        },
+        {
+            "id": "boss_demon",
+            "name": "Ma Tướng",
+            "description": "Tướng quân ma đạo, đã khai thác nhiều lỗi Thiên Đạo.",
+            "stats": { "hp": 200, "strength": 25, "speed": 15, "dexterity": 15, "defense": 15 },
+            "xpReward": 200
+        }
+    ]
+}

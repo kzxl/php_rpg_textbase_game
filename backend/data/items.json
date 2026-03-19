@@ -1,0 +1,105 @@
+{
+    "items": [
+        {
+            "id": "rusty_sword",
+            "name": "Kiếm Gỉ",
+            "baseType": "sword",
+            "slot": "weapon",
+            "rarity": "common",
+            "affixes": [
+                { "type": "flat", "stat": "strength", "value": 3 }
+            ]
+        },
+        {
+            "id": "leather_armor",
+            "name": "Giáp Da",
+            "baseType": "armor",
+            "slot": "body",
+            "rarity": "common",
+            "affixes": [
+                { "type": "flat", "stat": "defense", "value": 4 }
+            ]
+        },
+        {
+            "id": "swift_boots",
+            "name": "Hài Tốc Hành",
+            "baseType": "boots",
+            "slot": "feet",
+            "rarity": "common",
+            "affixes": [
+                { "type": "flat", "stat": "speed", "value": 3 },
+                { "type": "flat", "stat": "dexterity", "value": 2 }
+            ]
+        },
+        {
+            "id": "steel_blade",
+            "name": "Cương Kiếm",
+            "baseType": "sword",
+            "slot": "weapon",
+            "rarity": "rare",
+            "affixes": [
+                { "type": "flat", "stat": "strength", "value": 8 },
+                { "type": "increase", "stat": "strength", "value": 10 }
+            ]
+        },
+        {
+            "id": "shadow_cloak",
+            "name": "Áo Choàng Ảnh",
+            "baseType": "cloak",
+            "slot": "body",
+            "rarity": "rare",
+            "affixes": [
+                { "type": "flat", "stat": "dexterity", "value": 6 },
+                { "type": "increase", "stat": "speed", "value": 8 }
+            ]
+        },
+        {
+            "id": "iron_shield",
+            "name": "Thiết Khiên",
+            "baseType": "shield",
+            "slot": "shield",
+            "rarity": "rare",
+            "affixes": [
+                { "type": "flat", "stat": "defense", "value": 10 },
+                { "type": "increase", "stat": "defense", "value": 5 }
+            ]
+        },
+        {
+            "id": "demon_fang",
+            "name": "Ma Nha Kiếm",
+            "baseType": "sword",
+            "slot": "weapon",
+            "rarity": "epic",
+            "affixes": [
+                { "type": "flat", "stat": "strength", "value": 15 },
+                { "type": "increase", "stat": "strength", "value": 20 },
+                { "type": "more", "stat": "strength", "value": 10, "condition": { "type": "hp_below", "value": 0.5 } }
+            ]
+        },
+        {
+            "id": "heavenly_robe",
+            "name": "Thiên Đạo Bào",
+            "baseType": "robe",
+            "slot": "body",
+            "rarity": "legendary",
+            "affixes": [
+                { "type": "flat", "stat": "defense", "value": 15 },
+                { "type": "increase", "stat": "defense", "value": 25 },
+                { "type": "flat", "stat": "dexterity", "value": 10 },
+                { "type": "more", "stat": "defense", "value": 15 }
+            ]
+        }
+    ],
+    "affixes": [
+        { "id": "sharp",          "type": "flat",     "stat": "strength",  "value": [2, 8],   "weight": 20 },
+        { "id": "heavy",          "type": "flat",     "stat": "strength",  "value": [5, 15],  "weight": 10 },
+        { "id": "nimble",         "type": "flat",     "stat": "dexterity", "value": [2, 8],   "weight": 20 },
+        { "id": "quick",          "type": "flat",     "stat": "speed",     "value": [2, 6],   "weight": 15 },
+        { "id": "sturdy",         "type": "flat",     "stat": "defense",   "value": [3, 10],  "weight": 15 },
+        { "id": "empowered",      "type": "increase", "stat": "strength",  "value": [5, 20],  "weight": 12 },
+        { "id": "evasive",        "type": "increase", "stat": "dexterity", "value": [5, 15],  "weight": 12 },
+        { "id": "fortified",      "type": "increase", "stat": "defense",   "value": [5, 15],  "weight": 12 },
+        { "id": "devastating",    "type": "more",     "stat": "strength",  "value": [5, 12],  "weight": 5 },
+        { "id": "unyielding",     "type": "more",     "stat": "defense",   "value": [5, 10],  "weight": 5 }
+    ]
+}

@@ -1,0 +1,86 @@
+{
+    "skills": [
+        {
+            "id": "heavy_strike",
+            "name": "Trọng Kích",
+            "description": "Tập trung sức mạnh vào một đòn mạnh.",
+            "type": "active",
+            "damageMultiplier": 1.5,
+            "cost": 15,
+            "cooldown": 0,
+            "modifiers": []
+        },
+        {
+            "id": "swift_slash",
+            "name": "Tốc Trảm",
+            "description": "Đòn chém nhanh, hy sinh sát thương lấy tốc độ.",
+            "type": "active",
+            "damageMultiplier": 0.8,
+            "cost": 8,
+            "cooldown": 0,
+            "modifiers": [
+                { "type": "flat", "stat": "speed", "value": 5, "source": "skill" }
+            ]
+        },
+        {
+            "id": "precision_thrust",
+            "name": "Chính Xác Thích",
+            "description": "Đòn đâm chính xác, tăng tỉ lệ chí mạng.",
+            "type": "active",
+            "damageMultiplier": 1.2,
+            "cost": 12,
+            "cooldown": 0,
+            "modifiers": [
+                { "type": "flat", "stat": "dexterity", "value": 8, "source": "skill" }
+            ]
+        },
+        {
+            "id": "iron_body",
+            "name": "Thiết Thân Công",
+            "description": "Luyện thân pháp cứng như sắt. Nội công thụ động.",
+            "type": "passive",
+            "damageMultiplier": 1.0,
+            "modifiers": [
+                { "type": "increase", "stat": "defense", "value": 15, "source": "skill" },
+                { "type": "flat", "stat": "strength", "value": 3, "source": "skill" }
+            ]
+        },
+        {
+            "id": "shadow_step",
+            "name": "Ảnh Bộ",
+            "description": "Di chuyển như bóng, tăng né tránh. Nội công thụ động.",
+            "type": "passive",
+            "damageMultiplier": 1.0,
+            "modifiers": [
+                { "type": "increase", "stat": "dexterity", "value": 20, "source": "skill" },
+                { "type": "flat", "stat": "speed", "value": 5, "source": "skill" }
+            ]
+        },
+        {
+            "id": "rage",
+            "name": "Cuồng Nộ",
+            "description": "HP càng thấp càng mạnh. Khai thác lỗi Thiên Đạo.",
+            "type": "passive",
+            "damageMultiplier": 1.0,
+            "modifiers": [
+                {
+                    "type": "more", "stat": "strength", "value": 30, "source": "skill",
+                    "condition": { "type": "hp_below", "value": 0.3 }
+                }
+            ]
+        },
+        {
+            "id": "inner_calm",
+            "name": "Tĩnh Tâm",
+            "description": "Khi HP đầy, phòng ngự tăng mạnh.",
+            "type": "passive",
+            "damageMultiplier": 1.0,
+            "modifiers": [
+                {
+                    "type": "more", "stat": "defense", "value": 25, "source": "skill",
+                    "condition": { "type": "hp_above", "value": 0.8 }
+                }
+            ]
+        }
+    ]
+}

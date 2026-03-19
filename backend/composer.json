@@ -1,0 +1,19 @@
+{
+    "name": "rpg/engine",
+    "description": "Text RPG Engine - Thiên Đạo Bị Lỗi",
+    "type": "project",
+    "require": {
+        "php": ">=8.2",
+        "slim/slim": "^4.0",
+        "slim/psr7": "^1.0",
+        "php-di/slim-bridge": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "scripts": {
+        "start": "php -S localhost:8080 -t public"
+    }
+}
