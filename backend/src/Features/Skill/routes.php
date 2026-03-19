@@ -105,17 +105,61 @@ return function ($app) {
             if ($isMovement && $movementCount >= 1) {
                 return jsonResponse($response, ['error' => 'Chỉ được trang bị 1 Thân Pháp cùng lúc. Hãy tháo cái cũ ra.'], 400);
             }
-            if (!$isPassive && !$isMovement && $activeCount >= 2) {
-                return jsonResponse($response, ['error' => 'Chỉ được trang bị tối đa 2 Chiêu Thức chiến đấu cùng lúc.'], 400);
+
+            // Realm-based active skill slots: 3 base + bonus per tier
+            $maxSlots = 3;
+            if ($player->realmTier >= 3) $maxSlots++; // Kim Đan: 4
+            if ($player->realmTier >= 5) $maxSlots++; // Hóa Thần: 5
+            if ($player->realmTier >= 7) $maxSlots++; // Đại Thừa: 6
+            if (!$isPassive && !$isMovement && $activeCount >= $maxSlots) {
+                return jsonResponse($response, ['error' => "Tối đa {$maxSlots} Chiêu Thức (Cảnh Giới tầng {$player->realmTier}). Hãy tháo bớt."], 400);
             }
 
             if (is_array($player->skills[$pIndex])) $player->skills[$pIndex]['isEquipped'] = true;
             else $player->skills[$pIndex] = ['id' => $skillId, 'isEquipped' => true];
         }
 
+        // Detect Ngũ Hành Combo
+        $elementCounts = [];
+        $ELEMENT_NAMES = ['fire' => 'Hỏa🔥', 'water' => 'Thủy💧', 'wood' => 'Mộc🌿', 'earth' => 'Thổ⛰️', 'metal' => 'Kim⚔️'];
+        $ELEMENT_COMBOS = [
+            'fire'  => ['name' => 'Phần Thiên', 'desc' => '+15% crit damage', 'stat' => 'critDamage', 'value' => 0.15],
+            'water' => ['name' => 'Hải Triều', 'desc' => '+10% dodge chance', 'stat' => 'dodge', 'value' => 0.10],
+            'wood'  => ['name' => 'Sinh Cơ', 'desc' => 'Regen 3% HP/turn', 'stat' => 'hpRegen', 'value' => 0.03],
+            'earth' => ['name' => 'Sơn Thạch', 'desc' => '+15% defense', 'stat' => 'defense', 'value' => 0.15],
+            'metal' => ['name' => 'Đoạn Kiếm', 'desc' => '+10% armor pen', 'stat' => 'armorPen', 'value' => 0.10],
+        ];
+        foreach ($player->skills as $ps) {
+            if (!empty($ps['isEquipped'])) {
+                $sid = is_array($ps) ? ($ps['id'] ?? '') : $ps;
+                foreach ($allSkills as $ms) {
+                    if ($ms['id'] === $sid && !empty($ms['element'])) {
+                        $elementCounts[$ms['element']] = ($elementCounts[$ms['element']] ?? 0) + 1;
+                    }
+                }
+            }
+        }
+        $activeCombo = null;
+        foreach ($elementCounts as $elem => $count) {
+            if ($count >= 2 && isset($ELEMENT_COMBOS[$elem])) {
+                $combo = $ELEMENT_COMBOS[$elem];
+                $combo['element'] = $elem;
+                $combo['icon'] = $ELEMENT_NAMES[$elem] ?? $elem;
+                $combo['triple'] = $count >= 3; // Triple combo = doubled passive
+                if ($count >= 3) $combo['desc'] .= ' (x2)';
+                $activeCombo = $combo;
+                break;
+            }
+        }
+
         savePlayer($id, $player);
         \App\Core\PlayerRepository::saveSkills($id, $player);
-        return jsonResponse($response, ['message' => 'Lắp vào thành công!', 'player' => $player->toArray()]);
+        return jsonResponse($response, [
+            'message' => 'Lắp vào thành công!' . ($activeCombo ? " ☯ Combo: {$activeCombo['name']}!" : ''),
+            'player' => $player->toArray(),
+            'activeCombo' => $activeCombo,
+            'maxSlots' => $maxSlots,
+        ]);
     });
 
     $app->get('/api/data/skills', function (Request $request, Response $response) {
