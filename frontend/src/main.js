@@ -1,8 +1,17 @@
 /**
  * Nghịch Thiên Ký – Tu Tiên RPG
+ * App Shell: routing, sidebar, state, notifications
+ * Pages are imported from ./pages/
  */
 import './style.css'
 import { api } from './services/api.js'
+import { pageCombat } from './pages/combat.js'
+import { pageStats } from './pages/stats.js'
+import { pageSkills } from './pages/skills.js'
+import { pageInventory } from './pages/inventory.js'
+import { pageGym } from './pages/gym.js'
+import { pageCrimes } from './pages/crimes.js'
+import { pageEducation } from './pages/education.js'
 
 // ===== STATE =====
 const state = {
@@ -15,6 +24,15 @@ const state = {
 }
 
 const app = document.getElementById('app')
+
+// ===== SHARED CONTEXT (passed to all page modules) =====
+const ctx = {
+  get state() { return state },
+  api,
+  notify,
+  renderGame,
+  updateSidebar,
+}
 
 // ===== RENDER =====
 function render() {
@@ -32,72 +50,52 @@ function renderIntro() {
   app.innerHTML = `
     <div class="intro-page">
       <div class="intro-box">
-        <div class="title">NGHỊCH THIÊN KÝ</div>
+        <div class="title">NGHỊCH THIÊN KÝ</div>
         <div class="intro-text">Thế giới này vận hành theo quy luật tuyệt đối.
 Không ai có thể vượt qua.
 
-Nhưng bạn… <em>vừa phát hiện ra một điều kỳ lạ.</em>
+...Cho đến khi hệ thống xuất hiện lỗi.</div>
 
-Bạn đã nhảy… 100 lần.
-Và cơ thể bạn… <em>nhẹ đi một chút.</em></div>
-        <div class="panel" style="border:none; background:transparent;">
-          <div class="panel-body">
-            <input class="input mb-md" id="playerName" placeholder="Nhập tên đạo hữu..." maxlength="20" />
-            <div class="gender-grid">
-              <div class="gender-card" data-gender="male" id="gMale">
-                <div class="g-icon">⚔</div>
-                <div class="g-label">Nam</div>
-                <div class="g-desc">Mạnh mẽ, bền bỉ</div>
-              </div>
-              <div class="gender-card" data-gender="female" id="gFemale">
-                <div class="g-icon">☽</div>
-                <div class="g-label">Nữ</div>
-                <div class="g-desc">Khéo léo, nhanh nhẹn</div>
-              </div>
-            </div>
-            <button class="btn" id="btnCreate" style="width:100%;padding:10px;" disabled>BẮT ĐẦU TU LUYỆN</button>
+        <div class="input-group">
+          <label>Đạo danh</label>
+          <input type="text" id="inpName" placeholder="Nhập tên nhân vật..." />
+        </div>
+        <div class="input-group">
+          <label>Giới tính</label>
+          <div class="gender-pick">
+            <label class="g-opt"><input type="radio" name="gender" value="male" checked /> ♂ Nam</label>
+            <label class="g-opt"><input type="radio" name="gender" value="female" /> ♀ Nữ</label>
           </div>
         </div>
+        <button class="btn btn--gold btn--lg" id="btnStart">BẮT ĐẦU TU LUYỆN</button>
       </div>
     </div>`
 
-  let gender = null
-  document.querySelectorAll('.gender-card').forEach(el => {
-    el.addEventListener('click', () => {
-      document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'))
-      el.classList.add('selected')
-      gender = el.dataset.gender
-      document.getElementById('btnCreate').disabled = false
-    })
-  })
-
-  document.getElementById('btnCreate').addEventListener('click', async () => {
-    const name = document.getElementById('playerName').value.trim() || 'Vô Danh'
-    if (!gender) return
-    const btn = document.getElementById('btnCreate')
-    btn.disabled = true
-    btn.textContent = 'ĐANG TẠO...'
+  document.getElementById('btnStart').addEventListener('click', async () => {
+    const name = document.getElementById('inpName').value.trim() || 'Vô Danh'
+    const gender = document.querySelector('input[name="gender"]:checked').value
     try {
       const data = await api.createPlayer(name, gender)
       state.playerId = data.id
       state.player = data.player
+      notify(data.message, 'success')
       await loadGameData()
-      render()
+      renderGame()
     } catch (e) {
-      notify('Lỗi kết nối server! Đảm bảo backend PHP đang chạy.', 'error')
-      btn.disabled = false
-      btn.textContent = 'BẮT ĐẦU TU LUYỆN'
+      notify('Lỗi kết nối server!', 'error')
     }
   })
 }
 
 // ==============================
-// MAIN GAME (Torn Layout)
+// GAME SHELL
 // ==============================
 function renderGame() {
-  const p = state.player; if (!p) return
+  const p = state.player
+  if (!p) return
   const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
   const enPct = p.maxEnergy > 0 ? Math.max(0, (p.currentEnergy / p.maxEnergy) * 100) : 0
+  const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
 
   app.innerHTML = `
     <div class="game-layout">
@@ -121,31 +119,29 @@ function renderGame() {
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}</span></div>
-            <div class="bar-track"><div class="bar-fill nerve" style="width:${(p.nerve ?? 0) / (p.maxNerve ?? 15) * 100}%"></div></div>
+            <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
           </div>
           <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>
         </div>
 
-        <ul class="sidebar-nav">
-          <li class="nav-section">Chiến đấu</li>
+        <ul class="nav">
+          <li class="nav-section">CHIẾN ĐẤU</li>
           <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
             <span class="icon">⚔</span> Tìm quái
           </li>
           <li class="nav-item ${state.currentPage === 'gym' ? 'active' : ''}" data-page="gym">
-            <span class="icon">🏋</span> Lưực thể
+            <span class="icon">🏋</span> Lực Thể
           </li>
 
-          <li class="nav-section">Nghịch Thiên</li>
+          <li class="nav-section">NGHỊCH THIÊN</li>
           <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
             <span class="icon">💀</span> Phá Luật
-            ${(p.jailRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--red)">⚔️</span>` : ''}
           </li>
           <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
             <span class="icon">📜</span> Tu Luyện
-            ${p.currentCourse ? `<span class="badge">📖</span>` : ''}
           </li>
 
-          <li class="nav-section">Nhân vật</li>
+          <li class="nav-section">NHÂN VẬT</li>
           <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
             <span class="icon">📊</span> Căn Cốt
             ${p.statPoints > 0 ? `<span class="badge">${p.statPoints}</span>` : ''}
@@ -179,153 +175,28 @@ function renderGame() {
     })
   })
 
-  document.getElementById('navHeal')?.addEventListener('click', async () => {})
-
   renderPage()
+}
+
+// ===== PAGE DISPATCHER =====
+const pageMap = {
+  combat: pageCombat,
+  gym: pageGym,
+  crimes: pageCrimes,
+  education: pageEducation,
+  stats: pageStats,
+  skills: pageSkills,
+  inventory: pageInventory,
 }
 
 function renderPage() {
   const el = document.getElementById('pageContent')
   if (!el) return
-  switch (state.currentPage) {
-    case 'combat': pageCombat(el); break
-    case 'gym': pageGym(el); break
-    case 'crimes': pageCrimes(el); break
-    case 'education': pageEducation(el); break
-    case 'stats': pageStats(el); break
-    case 'skills': pageSkills(el); break
-    case 'inventory': pageInventory(el); break
-  }
+  const pageFn = pageMap[state.currentPage]
+  if (pageFn) pageFn(el, ctx)
 }
 
-// ==============================
-// COMBAT PAGE
-// ==============================
-function pageCombat(el) {
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>⚔ Tìm quái vật</h1>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Chọn đối thủ</div>
-      <div class="panel-body no-pad">
-        ${state.monsters.map(m => `
-          <div class="list-item clickable" data-mid="${m.id}">
-            <div class="item-info">
-              <div class="item-name">${m.name}</div>
-              <div class="item-desc">${m.description || ''}</div>
-              <div class="item-meta">
-                <span>❤${m.stats.hp}</span>
-                <span>💪${m.stats.strength}</span>
-                <span>🏃${m.stats.speed}</span>
-                <span>🎯${m.stats.dexterity}</span>
-                <span>🛡${m.stats.defense}</span>
-              </div>
-            </div>
-            <button class="btn btn--red btn--sm">Chiến</button>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-    <div id="combatResult"></div>`
-
-  el.querySelectorAll('.list-item.clickable').forEach(item => {
-    item.addEventListener('click', () => startCombat(item.dataset.mid))
-  })
-}
-
-async function startCombat(monsterId) {
-  const rEl = document.getElementById('combatResult')
-  if (!rEl) return
-  if (!state.player.currentHp || state.player.currentHp <= 0) {
-    return notify('Đã kiệt sức! Hãy hồi phục trước.', 'error')
-  }
-  if ((state.player.currentEnergy || 0) < 10) {
-    return notify('Không đủ Linh lực để chiến đấu!', 'error')
-  }
-  if (state.player.hospitalRemaining > 0) {
-    return notify(`Đang tịnh dưỡng! Còn ${state.player.hospitalRemaining}s`, 'error')
-  }
-
-  rEl.innerHTML = `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--gold)">⏳ Đang chiến đấu...</div></div>`
-
-  try {
-    const r = await api.fullCombat(state.playerId, monsterId)
-    state.player = r.player
-
-    if (r.outcome === 'no_energy') {
-      rEl.innerHTML = `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--red)">${r.log[0]}</div></div>`
-      updateSidebar()
-      return
-    }
-
-    const logHtml = r.log.map(l => {
-      if (l.startsWith('---')) return `<div class="turn">${l}</div>`
-      if (l.includes('linh lực') && l.includes('+')) return `<div class="energy">${l}</div>`
-      if (l.includes('linh lực')) return `<div class="energy-cost">${l}</div>`
-      if (l.includes('kiệt linh')) return `<div class="miss">${l}</div>`
-      if (l.includes('hụt')) return `<div class="miss">${l}</div>`
-      if (l.includes('né được')) return `<div class="dodge">${l}</div>`
-      if (l.includes('CHÍNH MẠNG') || l.includes('💥')) return `<div class="crit">${l}</div>`
-      if (l.includes('🔥')) return `<div class="heavy">${l}</div>`
-      if (l.includes('chặn hoàn toàn') || l.includes('🛡')) return `<div class="dodge">${l}</div>`
-      if (l.includes('ngã xuống') || l.includes('💀')) return `<div class="death">${l}</div>`
-      if (l.includes('Chiến thắng') || l.includes('🏆')) return `<div class="victory">${l}</div>`
-      if (l.includes('Đột phá') || l.includes('🎉')) return `<div class="levelup">${l}</div>`
-      if (l.includes('bỏ chạy') || l.includes('🏃')) return `<div class="flee">${l}</div>`
-      if (l.includes('Hết') || l.includes('⏰')) return `<div class="stalemate">${l}</div>`
-      if (l.includes('Bất phân') || l.includes('🤝')) return `<div class="stalemate">${l}</div>`
-      if (l.includes('Thoát thân') || l.includes('🚪')) return `<div class="flee">${l}</div>`
-      if (l.includes('Linh Thạch') || l.includes('💰')) return `<div class="gold-reward">${l}</div>`
-      if (l.includes('Tịnh dưỡng') || l.includes('🏥')) return `<div class="hospital">${l}</div>`
-      return `<div class="hit">${l}</div>`
-    }).join('')
-
-    const m = r.monster
-    const pHp = Math.max(0, (state.player.currentHp / state.player.maxHp) * 100)
-    const mHp = Math.max(0, (m.currentHp / m.maxHp) * 100)
-
-    // Outcome banner
-    const outcomeMap = {
-      'win': { icon: '🏆', text: 'Chiến thắng', cls: 'win' },
-      'loss': { icon: '💀', text: 'Thất bại', cls: 'lose' },
-      'stalemate': { icon: '⏰', text: 'Bất phân thắng bại', cls: 'draw' },
-      'flee': { icon: '🏃', text: 'Thoát thân', cls: 'flee' },
-    }
-    const oc = outcomeMap[r.outcome] || outcomeMap['loss']
-    const goldText = r.rewards?.gold ? ` · +${r.rewards.gold} 💰` : ''
-    const rewardText = r.rewards ? ` · +${r.rewards.xp} XP${goldText}` : ''
-
-    rEl.innerHTML = `
-      <div class="panel">
-        <div class="panel-title">${oc.icon} ${oc.text}
-          <span class="subtitle">${r.turns}/${r.maxTurns || 25} lượt${rewardText}</span>
-        </div>
-        <div class="panel-body combat-result ${oc.cls}">
-          <div class="combat-opponents">
-            <div class="fighter">
-              <div class="f-name player-name">${state.player.name}</div>
-              <div class="mini-hp-bar"><div class="fill hp" style="width:${pHp}%"></div></div>
-              <div class="mini-hp-val">${state.player.currentHp}/${state.player.maxHp}</div>
-            </div>
-            <div class="vs">VS</div>
-            <div class="fighter">
-              <div class="f-name monster-name">${m.name}</div>
-              <div class="mini-hp-bar"><div class="fill hp" style="width:${mHp}%"></div></div>
-              <div class="mini-hp-val">${m.currentHp}/${m.maxHp}</div>
-            </div>
-          </div>
-        </div>
-        <div class="combat-log">${logHtml}</div>
-      </div>`
-
-    // Update sidebar only (not full re-render which would destroy combat result)
-    updateSidebar()
-  } catch (e) {
-    rEl.innerHTML = `<div class="panel"><div class="panel-body text-red">Lỗi: ${e.message}</div></div>`
-  }
-}
-
+// ===== SIDEBAR UPDATE (partial, no full re-render) =====
 function updateSidebar() {
   const p = state.player; if (!p) return
   const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
@@ -352,7 +223,6 @@ function updateSidebar() {
       <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>`
   }
 
-  // Update stat badge
   const statNav = document.querySelector('.nav-item[data-page="stats"]')
   if (statNav) {
     const badge = statNav.querySelector('.badge')
@@ -363,519 +233,6 @@ function updateSidebar() {
       badge.remove()
     }
   }
-}
-
-// ==============================
-// STATS PAGE
-// ==============================
-function pageStats(el) {
-  const p = state.player, s = p.stats, a = p.allocatedStats || {}
-  const has = p.statPoints > 0
-
-  const stats = [
-    ['strength', '💪', 'Sức mạnh'],
-    ['speed', '🏃', 'Tốc độ'],
-    ['dexterity', '🎯', 'Khéo léo'],
-    ['defense', '🛡', 'Phòng thủ'],
-  ]
-
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>📊 Chỉ số chiến đấu</h1>
-      ${has ? `<div class="actions"><span class="text-gold">✦ ${p.statPoints} điểm chưa phân bổ</span></div>` : ''}
-    </div>
-    <div class="panel">
-      <div class="panel-title">Battle Stats</div>
-      <div class="panel-body no-pad">
-        ${stats.map(([key, icon, name]) => `
-          <div class="stat-row">
-            <div class="stat-label"><span class="stat-icon">${icon}</span> ${name}</div>
-            <div class="stat-val">
-              ${s[key] ?? 0}
-              ${a[key] > 0 ? `<span class="bonus">(+${a[key]})</span>` : ''}
-              ${has ? `<button class="allocate-btn" data-stat="${key}">+</button>` : ''}
-            </div>
-          </div>
-        `).join('')}
-        <div class="derived-row">
-          <div class="d-item"><div class="d-val">${s.maxHp ?? 100}</div><div class="d-label">Max HP</div></div>
-          <div class="d-item"><div class="d-val">${s.maxEnergy ?? 50}</div><div class="d-label">🔮 Linh lực</div></div>
-          <div class="d-item"><div class="d-val">+${s.energyRegen ?? 5}/t</div><div class="d-label">Hồi/lượt</div></div>
-        </div>
-        <div class="derived-row">
-          <div class="d-item"><div class="d-val">${s.critChance ?? 5}%</div><div class="d-label">Chí mạng</div></div>
-          <div class="d-item"><div class="d-val">×${s.critMultiplier ?? 1.5}</div><div class="d-label">Hệ số CM</div></div>
-          <div class="d-item"><div class="d-val">10</div><div class="d-label">🔵 Chi phí/đòn</div></div>
-        </div>
-      </div>
-    </div>`
-
-  el.querySelectorAll('.allocate-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation()
-      try {
-        const data = await api.allocateStat(state.playerId, btn.dataset.stat)
-        state.player = data.player
-        notify(data.message, 'success')
-        renderGame()
-      } catch (e2) { notify('Lỗi phân bổ', 'error') }
-    })
-  })
-}
-
-// ==============================
-// SKILLS PAGE
-// ==============================
-function pageSkills(el) {
-  const learned = state.player.skills || []
-  const learnedIds = learned.map(s => s.id)
-  const available = state.skills.filter(s => !learnedIds.includes(s.id))
-
-  el.innerHTML = `
-    <div class="page-header"><h1>⚡ Kỹ năng</h1></div>
-
-    <div class="panel">
-      <div class="panel-title">Đã học (${learned.length})</div>
-      <div class="panel-body no-pad">
-        ${learned.length === 0 ? '<div style="padding:14px" class="text-dim">Chưa có kỹ năng nào</div>' :
-          learned.map(s => `
-            <div class="list-item">
-              <div class="item-info">
-                <div class="item-name">${s.name}</div>
-                <div class="item-meta">${s.type === 'passive' ? '🔮 Nội công' : `⚡ Chiêu thức · 🔵${s.cost || 0} linh lực`}${s.description ? ' · ' + s.description : ''}</div>
-              </div>
-            </div>
-          `).join('')}
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Có thể học (${available.length})</div>
-      <div class="panel-body no-pad">
-        ${available.map(s => `
-          <div class="list-item">
-            <div class="item-info">
-              <div class="item-name">${s.name}</div>
-              <div class="item-meta">${s.type === 'passive' ? '🔮 Nội công' : `⚡ Chiêu thức · 🔵${s.cost || 0} linh lực`}${s.description ? ' · ' + s.description : ''}</div>
-            </div>
-            <button class="btn btn--sm" data-sid="${s.id}">Học</button>
-          </div>
-        `).join('')}
-      </div>
-    </div>`
-
-  el.querySelectorAll('[data-sid]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      try {
-        const data = await api.learnSkill(state.playerId, btn.dataset.sid)
-        state.player = data.player
-        notify(data.message, 'success')
-        pageSkills(el)
-      } catch (e) { notify('Lỗi học kỹ năng', 'error') }
-    })
-  })
-}
-
-// ==============================
-// INVENTORY PAGE (Pháp Bảo) - Tabs: Pháp Khí | Đan Dược
-// ==============================
-function pageInventory(el) {
-  const equip = Object.values(state.player.equipment || {})
-  const p = state.player
-  const meds = state.medicines || []
-  const medCD = p.medCooldownRemaining || 0
-  const tab = state.inventoryTab || 'equip'
-
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>🎒 Pháp Bảo</h1>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title" style="display:flex;gap:0">
-        <button class="btn btn--sm ${tab === 'equip' ? 'btn--blue' : 'btn--dark'}" data-tab="equip">⚔ Pháp Khí</button>
-        <button class="btn btn--sm ${tab === 'medicine' ? 'btn--blue' : 'btn--dark'}" data-tab="medicine">
-          💊 Đan Dược ${medCD > 0 ? `<span style="color:var(--orange)">(⏳${medCD}s)</span>` : ''}
-        </button>
-      </div>
-
-      <div class="panel-body no-pad" id="invTabContent"></div>
-    </div>`
-
-  const content = document.getElementById('invTabContent')
-
-  if (tab === 'equip') {
-    content.innerHTML = `
-      <div style="padding:10px;display:flex;gap:8px">
-        <button class="btn btn--dark btn--sm" id="btnGen">🎲 Tạo ngẫu nhiên</button>
-      </div>
-      <div class="panel" style="margin:0">
-        <div class="panel-title">Đang trang bị (${equip.length})</div>
-        <div class="panel-body no-pad">
-          ${equip.length === 0 ? '<div style="padding:14px" class="text-dim">Chưa trang bị gì</div>' :
-            equip.map(i => itemRow(i, false)).join('')}
-        </div>
-      </div>
-      <div class="panel" style="margin:0">
-        <div class="panel-title">Kho vũ khí (${state.items.length})</div>
-        <div class="panel-body no-pad">
-          ${state.items.map(i => itemRow(i, true)).join('')}
-        </div>
-      </div>`
-
-    content.querySelectorAll('[data-eid]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        try {
-          const data = await api.equipItem(state.playerId, btn.dataset.eid)
-          state.player = data.player
-          notify(data.message, 'success')
-          renderGame()
-        } catch (e) { notify('Lỗi trang bị', 'error') }
-      })
-    })
-
-    document.getElementById('btnGen')?.addEventListener('click', async () => {
-      const rars = ['common','common','rare','rare','epic','legendary']
-      try {
-        const data = await api.generateItem(state.playerId, rars[Math.floor(Math.random()*rars.length)])
-        state.player = data.player
-        state.items = data.items || []
-        notify(data.message, 'success')
-        pageInventory(el)
-      } catch (e) { notify('Lỗi tạo item', 'error') }
-    })
-  } else {
-    // DAN DUOC TAB
-    content.innerHTML = `
-      <div style="padding:12px">
-        ${medCD > 0 ? `
-          <div style="text-align:center;padding:8px;margin-bottom:8px;background:rgba(255,165,0,0.1);border-radius:8px">
-            <span style="color:var(--orange);font-weight:700">⏳ Đan độc: ${medCD}s / ${300}s</span>
-            <div class="bar-track" style="margin-top:4px"><div class="bar-fill nerve" style="width:${medCD/300*100}%;background:var(--orange)"></div></div>
-          </div>` : ''}
-        ${meds.length === 0 ? '<div class="text-dim">Không có đan dược</div>' :
-          meds.map(m => `
-            <div class="list-item">
-              <div class="item-info">
-                <div class="item-name">${m.icon} ${m.name}</div>
-                <div class="item-meta">${m.description} · +${m.healPercent}% HP · Đan độc +${m.cooldownAdd}s</div>
-              </div>
-              <button class="btn btn--sm btn--blue" data-med="${m.id}" 
-                ${medCD + (m.cooldownAdd || 0) > 300 ? 'disabled' : ''}>Dùng</button>
-            </div>
-          `).join('')}
-      </div>`
-
-    content.querySelectorAll('[data-med]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        try {
-          const data = await api.useMedicine(state.playerId, btn.dataset.med)
-          state.player = data.player
-          notify(data.message, 'success')
-          renderGame()
-        } catch (e) { notify(e.message || 'Đan độc quá nồng!', 'error') }
-      })
-    })
-  }
-
-  // Tab switching
-  el.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.inventoryTab = btn.dataset.tab
-      pageInventory(el)
-    })
-  })
-}
-
-// ==============================
-// GYM PAGE (Rèn luyện)
-// ==============================
-function pageGym(el) {
-  const p = state.player
-  const stats = [
-    ['strength', '💪', 'Sức mạnh', 'Tăng sát thương mỗi đòn'],
-    ['speed', '🏃', 'Tốc độ', 'Tăng hit chance, giảm escape của đối thủ'],
-    ['dexterity', '🎯', 'Khéo léo', 'Tăng dodge, escape, stealth'],
-    ['defense', '🛡', 'Phòng thủ', 'Giảm sát thương nhận vào'],
-  ]
-  const energyCost = 5
-  const canTrain = p.currentEnergy >= energyCost && !p.hospitalRemaining
-
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>🏋 Rèn luyện</h1>
-      <div class="actions"><span class="text-dim">🔮 ${p.currentEnergy}/${p.maxEnergy} linh lực · Chi phí: ${energyCost}/lần</span></div>
-    </div>
-    ${p.hospitalRemaining > 0 ? `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--red)">🏥 Đang tịnh dưỡng, không thể rèn luyện! Còn ${p.hospitalRemaining}s</div></div>` : ''}
-    <div class="panel">
-      <div class="panel-title">Chọn chỉ số rèn luyện</div>
-      <div class="panel-body no-pad">
-        ${stats.map(([key, icon, name, desc]) => `
-          <div class="list-item">
-            <div class="item-info">
-              <div class="item-name">${icon} ${name}</div>
-              <div class="item-meta">${desc} · Hiện tại: <strong>${p.allocatedStats?.[key] ?? 0}</strong></div>
-            </div>
-            <button class="btn btn--sm ${canTrain ? 'btn--green' : ''}" data-train="${key}" ${canTrain ? '' : 'disabled'}>+1</button>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">💡 Lưu ý</div>
-      <div class="panel-body text-dim" style="font-size:12px">
-        Mỗi lần rèn luyện tốn <strong>${energyCost} linh lực</strong> và tăng <strong>+1</strong> chỉ số đã chọn.<br>
-        Linh lực hồi phục theo thời gian. Tập trung vào chỉ số phù hợp với lối chơi của bạn.
-      </div>
-    </div>`
-
-  el.querySelectorAll('[data-train]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      try {
-        const data = await api.trainStat(state.playerId, btn.dataset.train)
-        state.player = data.player
-        notify(data.message, 'success')
-        renderGame()
-      } catch (e) { notify(e.message || 'Lỗi rèn luyện', 'error') }
-    })
-  })
-}
-
-// ==============================
-// HOSPITAL PAGE (Tịnh dưỡng)
-// ==============================
-function pageHospital(el) {
-  const p = state.player
-  const isHosp = p.hospitalRemaining > 0
-  const medCD = p.medCooldownRemaining || 0
-  const meds = state.medicines || []
-
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>🏥 Tịnh dưỡng</h1>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Trạng thái</div>
-      <div class="panel-body" style="text-align:center">
-        ${isHosp
-          ? `<div style="font-size:24px;color:var(--red);font-weight:700">🏥 Đang tịnh dưỡng</div>
-             <div class="text-dim mt-sm">Thời gian còn lại: <strong style="color:var(--gold)">${p.hospitalRemaining}s</strong></div>
-             <div class="text-dim mt-sm">HP: ${p.currentHp}/${p.maxHp}</div>`
-          : `<div style="font-size:24px;color:var(--green);font-weight:700">✅ Khỏe mạnh</div>
-             <div class="text-dim mt-sm">HP: ${p.currentHp}/${p.maxHp}</div>`
-        }
-        ${medCD > 0 ? `<div class="text-dim mt-sm">⏳ Đan dược cooldown: <strong style="color:var(--orange)">${medCD}s</strong></div>` : ''}
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">💊 Đan dược</div>
-      <div class="panel-body no-pad">
-        ${meds.length === 0 ? '<div style="padding:14px" class="text-dim">Không có đan dược</div>' :
-          meds.map(m => `
-            <div class="list-item">
-              <div class="item-info">
-                <div class="item-name">${m.icon} ${m.name}</div>
-                <div class="item-meta">${m.description} · +${m.healPercent}% HP · -${m.reduceHospital}s tịnh dưỡng · CD: ${m.cooldown}s</div>
-              </div>
-              <button class="btn btn--sm btn--blue" data-med="${m.id}" ${medCD > 0 ? 'disabled' : ''}>Dùng</button>
-            </div>
-          `).join('')}
-      </div>
-    </div>`
-
-  el.querySelectorAll('[data-med]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      try {
-        const data = await api.useMedicine(state.playerId, btn.dataset.med)
-        state.player = data.player
-        notify(data.message, 'success')
-        renderGame()
-      } catch (e) { notify(e.message || 'Lỗi dùng đan', 'error') }
-    })
-  })
-}
-
-// ==============================
-// CRIMES PAGE (Nghịch Thiên / Phá Luật)
-// ==============================
-function pageCrimes(el) {
-  const p = state.player
-  const crimes = state.crimes || []
-  const isJailed = (p.jailRemaining ?? 0) > 0
-
-  if (isJailed) {
-    // JAIL VIEW (Thiên Lao)
-    const remaining = p.jailRemaining
-    const bailCost = Math.max(10, 100 * Math.ceil(remaining / 60) * p.level)
-    el.innerHTML = `
-      <div class="page-header"><h1>🏛 Thiên Lao</h1></div>
-      <div class="panel">
-        <div class="panel-title">Trạng thái</div>
-        <div class="panel-body" style="text-align:center">
-          <div style="font-size:28px;color:var(--red);font-weight:700">⛓ Bị giam giữ</div>
-          <div class="text-dim mt-sm">Thời gian còn lại: <strong style="color:var(--gold)">${remaining}s</strong></div>
-          <div style="margin-top:16px;display:flex;gap:12px;justify-content:center">
-            <button class="btn btn--blue" id="btnEscape">🏃 Vượt ngục (3 Nghịch Khí)</button>
-            <button class="btn btn--gold" id="btnBail">💰 Bảo lãnh (${bailCost} Lính Thạch)</button>
-          </div>
-        </div>
-      </div>`
-
-    document.getElementById('btnEscape')?.addEventListener('click', async () => {
-      try {
-        const data = await api.escapeJail(state.playerId)
-        state.player = data.player
-        notify(data.message, data.success ? 'success' : 'error')
-        renderGame()
-      } catch (e) { notify(e.message || 'Lỗi', 'error') }
-    })
-    document.getElementById('btnBail')?.addEventListener('click', async () => {
-      try {
-        const data = await api.bail(state.playerId)
-        state.player = data.player
-        notify(data.message, data.success ? 'success' : 'error')
-        renderGame()
-      } catch (e) { notify(e.message || 'Lỗi', 'error') }
-    })
-    return
-  }
-
-  // CRIMES VIEW
-  el.innerHTML = `
-    <div class="page-header">
-      <h1>💀 Nghịch Thiên – Phá Luật</h1>
-      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Lính Thạch</span></div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Hành động</div>
-      <div class="panel-body no-pad">
-        ${crimes.map(c => {
-          const cs = p.crimeSkills?.[c.id] ?? 0
-          const locked = cs < (c.minSkill ?? 0)
-          const canDo = !locked && (p.nerve ?? 0) >= c.nerveCost
-          return `
-            <div class="list-item">
-              <div class="item-info">
-                <div class="item-name">${c.icon} ${c.name} ${locked ? '🔒' : ''}</div>
-                <div class="item-meta">
-                  ${c.description} · ${c.nerveCost} Nghịch Khí
-                  ${locked ? ` · Cần Skill ${c.minSkill}` : ` · Skill: ${cs}/100`}
-                </div>
-              </div>
-              <button class="btn btn--sm ${canDo ? 'btn--red' : ''}" data-crime="${c.id}" ${canDo ? '' : 'disabled'}>
-                ${locked ? '🔒' : 'Thực hiện'}
-              </button>
-            </div>`
-        }).join('')}
-      </div>
-    </div>`
-
-  el.querySelectorAll('[data-crime]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      try {
-        const data = await api.commitCrime(state.playerId, btn.dataset.crime)
-        state.player = data.player
-        const type = data.outcome === 'success' ? 'success' : data.outcome === 'critical_fail' ? 'error' : 'info'
-        notify(data.message, type)
-        renderGame()
-      } catch (e) { notify(e.message || 'Lỗi', 'error') }
-    })
-  })
-}
-
-// ==============================
-// EDUCATION PAGE (Tu Luyện)
-// ==============================
-function pageEducation(el) {
-  const p = state.player
-  const courses = state.courses || []
-  const completed = p.completedCourses || []
-  const studying = p.currentCourse || ''
-  const remaining = p.courseRemaining ?? 0
-
-  el.innerHTML = `
-    <div class="page-header"><h1>📜 Tu Luyện</h1></div>
-
-    ${studying ? `
-    <div class="panel">
-      <div class="panel-title">📖 Đang học</div>
-      <div class="panel-body" style="text-align:center">
-        <div style="font-size:20px;font-weight:700;color:var(--gold)">${courses.find(c => c.id === studying)?.name ?? studying}</div>
-        <div class="text-dim mt-sm">⏳ Còn lại: <strong>${remaining}s</strong></div>
-        <button class="btn btn--green mt-sm" id="btnCheckEdu" ${remaining > 0 ? 'disabled' : ''}>
-          ${remaining > 0 ? 'Đang học...' : '✅ Nhận kết quả'}
-        </button>
-      </div>
-    </div>` : ''}
-
-    <div class="panel">
-      <div class="panel-title">Danh sách môn học (${completed.length}/${courses.length} hoàn thành)</div>
-      <div class="panel-body no-pad">
-        ${courses.map(c => {
-          const done = completed.includes(c.id)
-          const prereqMet = (c.prerequisites || []).every(p => completed.includes(p))
-          const canEnroll = !done && !studying && prereqMet
-          return `
-            <div class="list-item">
-              <div class="item-info">
-                <div class="item-name">${c.icon} ${c.name} ${done ? '✅' : ''}</div>
-                <div class="item-meta">
-                  ${c.description} · ${c.duration}s · ${c.bonusDescription}
-                  ${!prereqMet ? ` · 🔒 Cần: ${c.prerequisites.join(', ')}` : ''}
-                </div>
-              </div>
-              <button class="btn btn--sm ${canEnroll ? 'btn--blue' : ''}" data-enroll="${c.id}" ${canEnroll ? '' : 'disabled'}>
-                ${done ? '✅' : canEnroll ? 'Học' : '🔒'}
-              </button>
-            </div>`
-        }).join('')}
-      </div>
-    </div>`
-
-  document.getElementById('btnCheckEdu')?.addEventListener('click', async () => {
-    try {
-      const data = await api.checkEducation(state.playerId)
-      state.player = data.player
-      notify(data.message, data.completed ? 'success' : 'info')
-      renderGame()
-    } catch (e) { notify(e.message || 'Lỗi', 'error') }
-  })
-
-  el.querySelectorAll('[data-enroll]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      try {
-        const data = await api.enrollCourse(state.playerId, btn.dataset.enroll)
-        state.player = data.player
-        notify(data.message, 'success')
-        renderGame()
-      } catch (e) { notify(e.message || 'Lỗi', 'error') }
-    })
-  })
-}
-
-function itemRow(item, showEquip) {
-  const affixStr = (item.affixes || []).map(a => fmtAffix(a)).join(' · ')
-  return `
-    <div class="list-item">
-      <div class="item-info">
-        <span class="rarity-dot ${item.rarity}"></span>
-        <span class="item-name rarity-${item.rarity}">${item.name}</span>
-        <div class="item-meta">${item.slot} · ${item.rarity}${affixStr ? ' · ' + affixStr : ''}</div>
-      </div>
-      ${showEquip ? `<button class="btn btn--sm btn--blue" data-eid="${item.id}">Equip</button>` : ''}
-    </div>`
-}
-
-function fmtAffix(a) {
-  const names = { strength:'STR', speed:'SPD', dexterity:'DEX', defense:'DEF', critMultiplier:'CRIT MUL' }
-  const n = names[a.stat] || a.stat
-  const s = a.value >= 0 ? '+' : ''
-  if (a.type === 'flat') return `${s}${a.value} ${n}`
-  if (a.type === 'increase') return `${s}${a.value}% ${n}`
-  if (a.type === 'more') return `×${s}${a.value}% ${n}`
-  return `${s}${a.value} ${n}`
 }
 
 // ===== UTILITIES =====
