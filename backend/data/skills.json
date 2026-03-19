@@ -5,6 +5,9 @@
             "name": "Trọng Kích",
             "description": "Tập trung sức mạnh vào một đòn mạnh.",
             "type": "active",
+            "tags": ["attack", "physical", "melee", "single"],
+            "damageType": "physical",
+            "weaponTypes": ["sword", "mace", "axe"],
             "damageMultiplier": 1.5,
             "cost": 15,
             "cooldown": 0,
@@ -15,6 +18,9 @@
             "name": "Tốc Trảm",
             "description": "Đòn chém nhanh, hy sinh sát thương lấy tốc độ.",
             "type": "active",
+            "tags": ["attack", "physical", "melee", "single"],
+            "damageType": "physical",
+            "weaponTypes": ["sword", "dagger"],
             "damageMultiplier": 0.8,
             "cost": 8,
             "cooldown": 0,
@@ -27,6 +33,9 @@
             "name": "Chính Xác Thích",
             "description": "Đòn đâm chính xác, tăng tỉ lệ chí mạng.",
             "type": "active",
+            "tags": ["attack", "physical", "melee", "single"],
+            "damageType": "physical",
+            "weaponTypes": ["sword", "spear", "dagger"],
             "damageMultiplier": 1.2,
             "cost": 12,
             "cooldown": 0,
@@ -35,10 +44,43 @@
             ]
         },
         {
+            "id": "flame_burst",
+            "name": "Liệt Hỏa Chưởng",
+            "description": "Phóng hỏa cầu thiêu đốt kẻ địch. Sát thương phép.",
+            "type": "active",
+            "tags": ["spell", "magical", "ranged", "single"],
+            "damageType": "magical",
+            "weaponTypes": null,
+            "damageMultiplier": 1.4,
+            "cost": 20,
+            "cooldown": 0,
+            "modifiers": [
+                { "type": "flat", "stat": "strength", "value": 5, "source": "skill", "appliesTo": ["magical"] }
+            ]
+        },
+        {
+            "id": "frost_nova",
+            "name": "Hàn Băng Trận",
+            "description": "Đóng băng khu vực, gây sát thương diện rộng và giảm tốc.",
+            "type": "active",
+            "tags": ["spell", "magical", "ranged", "aoe"],
+            "damageType": "magical",
+            "weaponTypes": null,
+            "damageMultiplier": 1.1,
+            "cost": 25,
+            "cooldown": 0,
+            "modifiers": [
+                { "type": "flat", "stat": "speed", "value": -3, "source": "skill", "appliesTo": ["magical"] }
+            ]
+        },
+        {
             "id": "iron_body",
             "name": "Thiết Thân Công",
             "description": "Luyện thân pháp cứng như sắt. Nội công thụ động.",
             "type": "passive",
+            "tags": ["buff", "physical"],
+            "damageType": null,
+            "weaponTypes": null,
             "damageMultiplier": 1.0,
             "modifiers": [
                 { "type": "increase", "stat": "defense", "value": 15, "source": "skill" },
@@ -50,6 +92,9 @@
             "name": "Ảnh Bộ",
             "description": "Di chuyển như bóng, tăng né tránh. Nội công thụ động.",
             "type": "passive",
+            "tags": ["buff", "physical"],
+            "damageType": null,
+            "weaponTypes": null,
             "damageMultiplier": 1.0,
             "modifiers": [
                 { "type": "increase", "stat": "dexterity", "value": 20, "source": "skill" },
@@ -61,6 +106,9 @@
             "name": "Cuồng Nộ",
             "description": "HP càng thấp càng mạnh. Khai thác lỗi Thiên Đạo.",
             "type": "passive",
+            "tags": ["buff", "physical"],
+            "damageType": null,
+            "weaponTypes": null,
             "damageMultiplier": 1.0,
             "modifiers": [
                 {
@@ -74,6 +122,9 @@
             "name": "Tĩnh Tâm",
             "description": "Khi HP đầy, phòng ngự tăng mạnh.",
             "type": "passive",
+            "tags": ["buff", "magical"],
+            "damageType": null,
+            "weaponTypes": null,
             "damageMultiplier": 1.0,
             "modifiers": [
                 {
@@ -85,8 +136,11 @@
         {
             "id": "toa_thien",
             "name": "Tọa Thiền Công",
-            "description": "Ngồi thiền điều tức, hồi 1% HP mỗi 10s ngoài chiến đấu. Tăng phòng ngự khi HP cao.",
+            "description": "Ngồi thiền điều tức, hồi 1% HP mỗi 10s ngoài chiến đấu.",
             "type": "passive",
+            "tags": ["buff", "magical"],
+            "damageType": null,
+            "weaponTypes": null,
             "damageMultiplier": 1.0,
             "modifiers": [
                 {
@@ -94,6 +148,31 @@
                     "condition": { "type": "hp_above", "value": 0.8 }
                 }
             ]
+        },
+        {
+            "id": "arcane_shield",
+            "name": "Linh Khiên Thuật",
+            "description": "Tạo khiên linh lực bảo vệ. Phòng ngự tăng theo linh lực.",
+            "type": "passive",
+            "tags": ["buff", "magical"],
+            "damageType": null,
+            "weaponTypes": null,
+            "damageMultiplier": 1.0,
+            "modifiers": [
+                { "type": "increase", "stat": "defense", "value": 20, "source": "skill", "appliesTo": ["magical"] },
+                { "type": "flat", "stat": "defense", "value": 5, "source": "skill" }
+            ]
         }
-    ]
+    ],
+    "tagDescriptions": {
+        "attack": "Đòn tấn công trực tiếp",
+        "spell": "Phép thuật tiêu hao linh lực",
+        "buff": "Tăng cường thụ động",
+        "physical": "Sát thương vật lý — scale theo Strength",
+        "magical": "Sát thương phép — scale theo Dexterity + Energy",
+        "melee": "Cận chiến",
+        "ranged": "Tầm xa",
+        "single": "Đánh đơn mục tiêu",
+        "aoe": "Sát thương diện rộng"
+    }
 }

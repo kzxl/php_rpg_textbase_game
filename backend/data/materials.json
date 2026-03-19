@@ -1,0 +1,49 @@
+{
+    "materials": [
+        { "id": "mat_thit_tho", "name": "Thịt Thô", "tier": 1, "category": "basic", "description": "Thịt thường, dùng hồi máu hoặc chế đồ basic.", "stackable": true, "sellPrice": 1 },
+        { "id": "mat_da_tho", "name": "Da Thô", "tier": 1, "category": "basic", "description": "Da thú bình thường, chế giáp cơ bản.", "stackable": true, "sellPrice": 2 },
+        { "id": "mat_xuong_vun", "name": "Xương Vụn", "tier": 1, "category": "basic", "description": "Mảnh xương vỡ, dùng chế vũ khí đơn giản.", "stackable": true, "sellPrice": 1 },
+        { "id": "mat_noc_xa", "name": "Nọc Xà", "tier": 1, "category": "basic", "description": "Nọc độc rắn xanh, dùng tẩm tên hoặc chế đan dược.", "stackable": true, "sellPrice": 3 },
+        { "id": "mat_da_ran", "name": "Da Rắn", "tier": 1, "category": "basic", "description": "Da rắn dai, chế giáp nhẹ.", "stackable": true, "sellPrice": 2 },
+        { "id": "mat_go_linh", "name": "Gỗ Linh", "tier": 1, "category": "basic", "description": "Gỗ từ Mộc Nhân, chứa linh lực nhẹ.", "stackable": true, "sellPrice": 3 },
+        { "id": "mat_nhua_cay", "name": "Nhựa Cây", "tier": 1, "category": "basic", "description": "Nhựa dính từ Mộc Nhân.", "stackable": true, "sellPrice": 2 },
+        { "id": "mat_hat_moc", "name": "Hạt Mộc", "tier": 1, "category": "basic", "description": "Hạt giống chứa sinh khí.", "stackable": true, "sellPrice": 4 },
+
+        { "id": "mat_linh_khi_nho", "name": "Linh Khí Nhỏ", "tier": 1, "category": "spirit", "description": "Mảnh linh khí ngưng tụ, dùng nâng cấp.", "stackable": true, "sellPrice": 10 },
+        { "id": "mat_hon_tan", "name": "Hồn Tàn", "tier": 1, "category": "rare", "description": "Tàn dư hồn phách, chế đan dược đặc biệt.", "stackable": true, "sellPrice": 15 },
+        { "id": "mat_manh_ky_uc", "name": "Mảnh Ký Ức", "tier": 1, "category": "rare", "description": "Mảnh ký ức từ Ảnh Hồn. Giải mã để unlock skill ẩn.", "stackable": true, "sellPrice": 50 },
+
+        { "id": "mat_long_hoa", "name": "Lông Hỏa", "tier": 2, "category": "elemental", "description": "Lông hồ ly chứa hỏa tinh.", "stackable": true, "sellPrice": 12 },
+        { "id": "mat_noi_dan_nho", "name": "Nội Đan Nhỏ", "tier": 2, "category": "spirit", "description": "Nội đan quái vật cấp thấp, chứa năng lượng.", "stackable": true, "sellPrice": 20 },
+        { "id": "mat_tinh_hoa", "name": "Tinh Hỏa", "tier": 2, "category": "elemental", "description": "Tinh hoa nguyên tố hỏa. Craft vũ khí lửa.", "stackable": true, "sellPrice": 25 },
+        { "id": "mat_vo_cung", "name": "Vỏ Cứng", "tier": 2, "category": "basic", "description": "Mảnh giáp từ Thiết Giáp Trùng.", "stackable": true, "sellPrice": 15 },
+        { "id": "mat_kim_loai_linh", "name": "Kim Loại Linh", "tier": 2, "category": "basic", "description": "Kim loại chứa linh khí, chế giáp tốt.", "stackable": true, "sellPrice": 18 },
+        { "id": "mat_tinh_thach", "name": "Tinh Thạch", "tier": 2, "category": "spirit", "description": "Đá tinh chất, dùng nâng cấp trang bị.", "stackable": true, "sellPrice": 22 },
+        { "id": "mat_linh_hon", "name": "Linh Hồn", "tier": 2, "category": "spirit", "description": "Linh hồn nguyên vẹn, chế đan hoặc đột phá.", "stackable": true, "sellPrice": 30 },
+        { "id": "mat_hu_anh_tinh", "name": "Hư Ảnh Tinh", "tier": 2, "category": "rare", "description": "Tinh chất ảo ảnh, craft hidden items.", "stackable": true, "sellPrice": 45 },
+        { "id": "mat_tan_phach", "name": "Tàn Phách", "tier": 2, "category": "rare", "description": "Tàn tích phách hồn. Unlock skill ẩn.", "stackable": true, "sellPrice": 40 },
+
+        { "id": "mat_huyet_tinh", "name": "Huyết Tinh", "tier": 3, "category": "spirit", "description": "Tinh huyết từ Huyết Lang Vương.", "stackable": true, "sellPrice": 35 },
+        { "id": "mat_rang_soi_vuong", "name": "Răng Sói Vương", "tier": 3, "category": "basic", "description": "Nanh sói vương, chế vũ khí mạnh.", "stackable": true, "sellPrice": 30 },
+        { "id": "mat_noi_dan_trung", "name": "Nội Đan Trung", "tier": 3, "category": "spirit", "description": "Nội đan trung cấp, đột phá hoặc chế đan.", "stackable": true, "sellPrice": 50 },
+        { "id": "mat_loi_vu", "name": "Lôi Vũ", "tier": 3, "category": "elemental", "description": "Lông chim sấm chứa lôi tinh.", "stackable": true, "sellPrice": 28 },
+        { "id": "mat_loi_tinh", "name": "Lôi Tinh", "tier": 3, "category": "elemental", "description": "Tinh hoa nguyên tố lôi. Craft vũ khí sấm.", "stackable": true, "sellPrice": 40 },
+        { "id": "mat_hach_sam", "name": "Hạch Sấm", "tier": 3, "category": "rare", "description": "Hạch năng lượng sấm sét, cực hiếm.", "stackable": true, "sellPrice": 80 },
+        { "id": "mat_xac_khi", "name": "Xác Khí", "tier": 3, "category": "spirit", "description": "Khí từ xác chết cổ đại.", "stackable": true, "sellPrice": 32 },
+        { "id": "mat_am_khi", "name": "Âm Khí", "tier": 3, "category": "spirit", "description": "Năng lượng âm đặc, dùng chế đan tối.", "stackable": true, "sellPrice": 38 },
+        { "id": "mat_tan_hon", "name": "Tàn Hồn", "tier": 3, "category": "rare", "description": "Hồn cổ thi, craft vật phẩm nguyền.", "stackable": true, "sellPrice": 55 },
+
+        { "id": "mat_ma_nhan", "name": "Ma Nhãn", "tier": 4, "category": "rare", "description": "Mắt ma quái, chứa năng lượng khống chế.", "stackable": true, "sellPrice": 80 },
+        { "id": "mat_hac_tinh", "name": "Hắc Tinh", "tier": 4, "category": "elemental", "description": "Tinh hoa hắc ám.", "stackable": true, "sellPrice": 70 },
+        { "id": "mat_linh_hon_di_bien", "name": "Linh Hồn Dị Biến", "tier": 4, "category": "rare", "description": "Linh hồn đã dị biến, craft trang bị huyền thoại.", "stackable": true, "sellPrice": 150 },
+        { "id": "mat_thien_thach", "name": "Thiên Thạch", "tier": 4, "category": "elemental", "description": "Mảnh thiên thạch từ ngoài vũ trụ.", "stackable": true, "sellPrice": 90 },
+        { "id": "mat_tinh_thach_lon", "name": "Tinh Thạch Lớn", "tier": 4, "category": "spirit", "description": "Tinh thạch khổng lồ chứa linh lực dồi dào.", "stackable": true, "sellPrice": 100 },
+        { "id": "mat_loi_dia", "name": "Lõi Địa", "tier": 4, "category": "rare", "description": "Lõi năng lượng từ lòng đất, cực hiếm.", "stackable": true, "sellPrice": 200 }
+    ],
+    "categories": {
+        "basic": { "name": "Cơ bản", "color": "#8e8e8e" },
+        "spirit": { "name": "Linh vật", "color": "#5b8dd9" },
+        "elemental": { "name": "Ngũ hành", "color": "#a77bda" },
+        "rare": { "name": "Hiếm", "color": "#e8a43a" }
+    }
+}

@@ -99,21 +99,24 @@
         }
     ],
     "affixes": [
-        { "id": "sharp",       "type": "flat",     "stat": "strength",  "value": [2, 8],   "weight": 20, "tier": 1, "minLevel": 1, "name": "Sắc" },
-        { "id": "heavy",       "type": "flat",     "stat": "strength",  "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Trọng" },
-        { "id": "crushing",    "type": "flat",     "stat": "strength",  "value": [10, 25], "weight": 5,  "tier": 3, "minLevel": 6, "name": "Hủy Diệt" },
+        { "id": "sharp",       "type": "flat",     "stat": "strength",  "value": [2, 8],   "weight": 20, "tier": 1, "minLevel": 1, "name": "Sắc",       "appliesTo": ["physical"] },
+        { "id": "heavy",       "type": "flat",     "stat": "strength",  "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Trọng",     "appliesTo": ["physical"] },
+        { "id": "crushing",    "type": "flat",     "stat": "strength",  "value": [10, 25], "weight": 5,  "tier": 3, "minLevel": 6, "name": "Hủy Diệt", "appliesTo": ["physical"] },
         { "id": "nimble",      "type": "flat",     "stat": "dexterity", "value": [2, 8],   "weight": 20, "tier": 1, "minLevel": 1, "name": "Linh Hoạt" },
         { "id": "precise",     "type": "flat",     "stat": "dexterity", "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Chính Xác" },
         { "id": "quick",       "type": "flat",     "stat": "speed",     "value": [2, 6],   "weight": 15, "tier": 1, "minLevel": 1, "name": "Tốc" },
         { "id": "windborne",   "type": "flat",     "stat": "speed",     "value": [5, 12],  "weight": 8,  "tier": 2, "minLevel": 4, "name": "Phong Hành" },
         { "id": "sturdy",      "type": "flat",     "stat": "defense",   "value": [3, 10],  "weight": 15, "tier": 1, "minLevel": 1, "name": "Kiên Cố" },
         { "id": "ironclad",    "type": "flat",     "stat": "defense",   "value": [8, 20],  "weight": 8,  "tier": 2, "minLevel": 4, "name": "Thiết Bích" },
-        { "id": "empowered",   "type": "increase", "stat": "strength",  "value": [5, 20],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Cường Hóa" },
+        { "id": "empowered",   "type": "increase", "stat": "strength",  "value": [5, 20],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Cường Hóa", "appliesTo": ["physical"] },
         { "id": "evasive",     "type": "increase", "stat": "dexterity", "value": [5, 15],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Né Tránh" },
         { "id": "fortified",   "type": "increase", "stat": "defense",   "value": [5, 15],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Phòng Thủ" },
-        { "id": "devastating", "type": "more",     "stat": "strength",  "value": [5, 12],  "weight": 5,  "tier": 3, "minLevel": 5, "name": "Tàn Phá" },
+        { "id": "devastating", "type": "more",     "stat": "strength",  "value": [5, 12],  "weight": 5,  "tier": 3, "minLevel": 5, "name": "Tàn Phá",   "appliesTo": ["physical"] },
         { "id": "unyielding",  "type": "more",     "stat": "defense",   "value": [5, 10],  "weight": 5,  "tier": 3, "minLevel": 5, "name": "Bất Khuất" },
         { "id": "swiftness",   "type": "increase", "stat": "speed",     "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Tốc Hành" },
-        { "id": "godly",       "type": "more",     "stat": "strength",  "value": [10, 25], "weight": 2,  "tier": 4, "minLevel": 8, "name": "Thần Thánh" }
+        { "id": "godly",       "type": "more",     "stat": "strength",  "value": [10, 25], "weight": 2,  "tier": 4, "minLevel": 8, "name": "Thần Thánh", "appliesTo": ["physical"] },
+        { "id": "arcane",      "type": "flat",     "stat": "strength",  "value": [3, 10],  "weight": 12, "tier": 1, "minLevel": 2, "name": "Huyền Bí",    "appliesTo": ["magical"] },
+        { "id": "sorcerous",   "type": "increase", "stat": "strength",  "value": [5, 18],  "weight": 8,  "tier": 2, "minLevel": 4, "name": "Phù Thuật",   "appliesTo": ["magical"] },
+        { "id": "elemental",   "type": "more",     "stat": "strength",  "value": [5, 15],  "weight": 4,  "tier": 3, "minLevel": 6, "name": "Nguyên Tố",   "appliesTo": ["magical"] }
     ]
 }

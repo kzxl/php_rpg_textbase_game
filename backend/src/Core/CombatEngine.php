@@ -81,16 +81,37 @@ class CombatEngine
         $bodyPart = $this->rollBodyPart();
         $partMul = $bodyPart['mul'];
 
-        // 4. Base damage = strength
+        // 4. Base damage — depends on skill damage type
         $baseDamage = $aStats['strength'];
+        $skillMul = 1.0;
+        $skillTags = [];
 
-        // Skill modifier
+        // Skill modifier + weapon check
         if ($skillId !== null) {
             $skill = $attacker->getActiveSkill($skillId);
             if ($skill) {
                 $skillMul = $skill['damageMultiplier'] ?? 1.0;
+                $skillTags = $skill['tags'] ?? [];
+                $damageType = $skill['damageType'] ?? 'physical';
+
+                // Weapon type check
+                $weaponTypes = $skill['weaponTypes'] ?? null;
+                if ($weaponTypes !== null) {
+                    $weapon = $attacker->equipment['weapon'] ?? null;
+                    $weaponBase = $weapon ? $weapon->baseType : 'unarmed';
+                    if (!in_array($weaponBase, $weaponTypes)) {
+                        $this->log("❌ {$skill['name']} cần vũ khí: " . implode('/', $weaponTypes));
+                        return $this->result('invalid_weapon', 0, $defender);
+                    }
+                }
+
+                // Magical skills scale with dexterity instead of strength
+                if ($damageType === 'magical') {
+                    $baseDamage = $aStats['dexterity'] * 0.8 + $aStats['strength'] * 0.2;
+                }
+
                 $baseDamage *= $skillMul;
-                $this->log("⚡ Dùng {$skill['name']} (×{$skillMul})");
+                $this->log("⚡ Dùng {$skill['name']} (×{$skillMul}) [{$damageType}]");
             }
         }
 
