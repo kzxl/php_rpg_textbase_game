@@ -418,10 +418,8 @@ function renderGame() {
             <span class="icon">🔍</span> Tìm Người
           </li>
 
+
           <li class="nav-section">THẾ GIỚI</li>
-          <li class="nav-item ${state.currentPage === 'dungeon' ? 'active' : ''}" data-page="dungeon">
-            <span class="icon">🗺️</span> Bí Cảnh
-          </li>
           <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
             <span class="icon">🏠</span> Động Phủ
           </li>
