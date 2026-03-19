@@ -35,7 +35,22 @@ const ctx = {
 }
 
 // ===== RENDER =====
-function render() {
+async function render() {
+  // Auto-login from localStorage
+  const savedId = localStorage.getItem('playerId')
+  if (savedId && !state.playerId) {
+    try {
+      const data = await api.getPlayer(savedId)
+      state.playerId = savedId
+      state.player = data.player
+      await loadGameData()
+      renderGame()
+      return
+    } catch (e) {
+      localStorage.removeItem('playerId')
+    }
+  }
+
   if (!state.playerId) {
     renderIntro()
   } else {
@@ -44,9 +59,10 @@ function render() {
 }
 
 // ==============================
-// INTRO / CHARACTER CREATION
+// INTRO / AUTH (Login + Register)
 // ==============================
 function renderIntro() {
+  const authTab = state.authTab || 'login'
   app.innerHTML = `
     <div class="intro-page">
       <div class="intro-box">
@@ -56,33 +72,89 @@ Không ai có thể vượt qua.
 
 ...Cho đến khi hệ thống xuất hiện lỗi.</div>
 
-        <div class="input-group">
-          <label>Đạo danh</label>
-          <input type="text" id="inpName" placeholder="Nhập tên nhân vật..." />
+        <div class="auth-tabs">
+          <button class="btn btn--sm ${authTab === 'login' ? 'btn--blue' : 'btn--dark'}" data-auth="login">Đăng nhập</button>
+          <button class="btn btn--sm ${authTab === 'register' ? 'btn--blue' : 'btn--dark'}" data-auth="register">Đăng ký</button>
         </div>
-        <div class="input-group">
-          <label>Giới tính</label>
-          <div class="gender-pick">
-            <label class="g-opt"><input type="radio" name="gender" value="male" checked /> ♂ Nam</label>
-            <label class="g-opt"><input type="radio" name="gender" value="female" /> ♀ Nữ</label>
+
+        ${authTab === 'login' ? `
+          <div class="input-group">
+            <label>Tên đăng nhập</label>
+            <input type="text" id="inpUsername" placeholder="Username..." />
           </div>
-        </div>
-        <button class="btn btn--gold btn--lg" id="btnStart">BẮT ĐẦU TU LUYỆN</button>
+          <div class="input-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="inpPassword" placeholder="Password..." />
+          </div>
+          <button class="btn btn--gold btn--lg" id="btnLogin">ĐĂNG NHẬP</button>
+        ` : `
+          <div class="input-group">
+            <label>Tên đăng nhập</label>
+            <input type="text" id="inpUsername" placeholder="Chọn username (3+ ký tự)..." />
+          </div>
+          <div class="input-group">
+            <label>Mật khẩu</label>
+            <input type="password" id="inpPassword" placeholder="Chọn mật khẩu (4+ ký tự)..." />
+          </div>
+          <div class="input-group">
+            <label>Đạo danh</label>
+            <input type="text" id="inpName" placeholder="Tên nhân vật..." />
+          </div>
+          <div class="input-group">
+            <label>Giới tính</label>
+            <div class="gender-pick">
+              <label class="g-opt"><input type="radio" name="gender" value="male" checked /> ♂ Nam</label>
+              <label class="g-opt"><input type="radio" name="gender" value="female" /> ♀ Nữ</label>
+            </div>
+          </div>
+          <button class="btn btn--gold btn--lg" id="btnRegister">BẮT ĐẦU TU LUYỆN</button>
+        `}
       </div>
     </div>`
 
-  document.getElementById('btnStart').addEventListener('click', async () => {
-    const name = document.getElementById('inpName').value.trim() || 'Vô Danh'
-    const gender = document.querySelector('input[name="gender"]:checked').value
+  // Tab switching
+  document.querySelectorAll('[data-auth]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.authTab = btn.dataset.auth
+      renderIntro()
+    })
+  })
+
+  // Login
+  document.getElementById('btnLogin')?.addEventListener('click', async () => {
+    const username = document.getElementById('inpUsername').value.trim()
+    const password = document.getElementById('inpPassword').value
+    if (!username || !password) return notify('Vui lòng nhập đầy đủ', 'error')
     try {
-      const data = await api.createPlayer(name, gender)
+      const data = await api.login(username, password)
       state.playerId = data.id
       state.player = data.player
+      localStorage.setItem('playerId', data.id)
       notify(data.message, 'success')
       await loadGameData()
       renderGame()
     } catch (e) {
-      notify('Lỗi kết nối server!', 'error')
+      notify(e.message || 'Đăng nhập thất bại!', 'error')
+    }
+  })
+
+  // Register
+  document.getElementById('btnRegister')?.addEventListener('click', async () => {
+    const username = document.getElementById('inpUsername').value.trim()
+    const password = document.getElementById('inpPassword').value
+    const name = document.getElementById('inpName')?.value.trim() || 'Vô Danh'
+    const gender = document.querySelector('input[name="gender"]:checked')?.value || 'male'
+    if (!username || !password) return notify('Vui lòng nhập đầy đủ', 'error')
+    try {
+      const data = await api.register(username, password, name, gender)
+      state.playerId = data.id
+      state.player = data.player
+      localStorage.setItem('playerId', data.id)
+      notify(data.message, 'success')
+      await loadGameData()
+      renderGame()
+    } catch (e) {
+      notify(e.message || 'Đăng ký thất bại!', 'error')
     }
   })
 }

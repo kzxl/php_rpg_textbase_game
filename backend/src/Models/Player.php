@@ -11,6 +11,8 @@ use App\Core\ModifierEngine;
 class Player
 {
     public string $name;
+    public string $username = '';
+    public string $passwordHash = '';
     public string $gender; // 'male' | 'female'
     public int $level = 1;
     public int $xp = 0;
@@ -384,6 +386,8 @@ class Player
     {
         $finalStats = $this->getFinalStats();
         return [
+            'username' => $this->username,
+            'passwordHash' => $this->passwordHash,
             'name' => $this->name,
             'gender' => $this->gender,
             'level' => $this->level,
@@ -469,6 +473,8 @@ class Player
         $player->courseEndsAt = $data['courseEndsAt'] ?? 0;
         $player->completedCourses = $data['completedCourses'] ?? [];
         $player->currentArea = $data['currentArea'] ?? 'thanh_lam_tran';
+        $player->username = $data['username'] ?? '';
+        $player->passwordHash = $data['passwordHash'] ?? '';
 
         return $player;
     }

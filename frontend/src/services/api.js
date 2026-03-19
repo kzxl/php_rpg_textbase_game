@@ -19,7 +19,22 @@ class GameAPI {
     }
   }
 
-  // Player
+  // Auth
+  register(username, password, name, gender) {
+    return this.request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password, name, gender }),
+    })
+  }
+
+  login(username, password) {
+    return this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    })
+  }
+
+  // Player (legacy)
   createPlayer(name, gender) {
     return this.request('/player/create', {
       method: 'POST',

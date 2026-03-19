@@ -3,53 +3,37 @@
 namespace App\Systems;
 
 /**
- * Manages skill learning, equipping, and data loading.
+ * SkillSystem — loads skill definitions from skills.json (data-driven).
+ * Used by PlayerRepository to hydrate skill data from player_skills mapping table.
  */
 class SkillSystem
 {
-    private array $skillData = [];
+    private array $skills = [];
 
     public function __construct()
     {
-        $this->loadSkills();
-    }
-
-    private function loadSkills(): void
-    {
-        $path = __DIR__ . '/../../data/skills.json';
-        if (file_exists($path)) {
-            $data = json_decode(file_get_contents($path), true);
-            $this->skillData = $data['skills'] ?? [];
+        $file = __DIR__ . '/../../data/skills.json';
+        if (file_exists($file)) {
+            $data = json_decode(file_get_contents($file), true);
+            foreach (($data['skills'] ?? []) as $skill) {
+                $this->skills[$skill['id']] = $skill;
+            }
         }
     }
 
     /**
-     * Get all available skills.
-     */
-    public function getAll(): array
-    {
-        return $this->skillData;
-    }
-
-    /**
-     * Get skill by ID.
+     * Get skill definition by ID.
      */
     public function getById(string $id): ?array
     {
-        foreach ($this->skillData as $skill) {
-            if ($skill['id'] === $id) return $skill;
-        }
-        return null;
+        return $this->skills[$id] ?? null;
     }
 
     /**
-     * Get skills by type.
+     * Get all skill definitions.
      */
-    public function getByType(string $type): array
+    public function getAll(): array
     {
-        return array_values(array_filter(
-            $this->skillData,
-            fn($s) => ($s['type'] ?? 'active') === $type
-        ));
+        return array_values($this->skills);
     }
 }

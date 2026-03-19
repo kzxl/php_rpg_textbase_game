@@ -23,6 +23,7 @@ return function ($app) {
 
         $player->learnSkill($skill);
         savePlayer($id, $player);
+        \App\Core\PlayerRepository::saveSkills($id, $player);
 
         return jsonResponse($response, [
             'message' => "Đã học {$skill['name']}",

@@ -3,10 +3,12 @@
 namespace App\Core;
 
 use App\Models\Player;
+use App\Systems\SkillSystem;
 
 /**
  * Player persistence via MySQL.
- * Replaces JSON file storage with database queries.
+ * Skills stored in player_skills mapping table (not JSON blob).
+ * Auth via username + password_hash.
  */
 class PlayerRepository
 {
@@ -19,17 +21,17 @@ class PlayerRepository
         $data = $player->toArray();
 
         $sql = "INSERT INTO players (
-            id, name, gender, level, xp, xp_to_next,
+            id, username, password_hash, name, gender, level, xp, xp_to_next,
             current_hp, max_hp, current_energy, max_energy, stat_points,
             allocated_stats, hospital_until, med_cooldown_until, last_hp_regen,
             gold, nerve, max_nerve, crime_exp, crime_skills, jail_until,
-            current_course, course_ends_at, completed_courses, skills, current_area
+            current_course, course_ends_at, completed_courses, current_area
         ) VALUES (
-            :id, :name, :gender, :level, :xp, :xp_to_next,
+            :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
             :current_hp, :max_hp, :current_energy, :max_energy, :stat_points,
             :allocated_stats, :hospital_until, :med_cooldown_until, :last_hp_regen,
             :gold, :nerve, :max_nerve, :crime_exp, :crime_skills, :jail_until,
-            :current_course, :course_ends_at, :completed_courses, :skills, :current_area
+            :current_course, :course_ends_at, :completed_courses, :current_area
         ) ON DUPLICATE KEY UPDATE
             name = VALUES(name), gender = VALUES(gender),
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
@@ -42,12 +44,14 @@ class PlayerRepository
             crime_exp = VALUES(crime_exp), crime_skills = VALUES(crime_skills),
             jail_until = VALUES(jail_until),
             current_course = VALUES(current_course), course_ends_at = VALUES(course_ends_at),
-            completed_courses = VALUES(completed_courses), skills = VALUES(skills),
+            completed_courses = VALUES(completed_courses),
             current_area = VALUES(current_area)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
             'id' => $id,
+            'username' => $data['username'] ?? strtolower(str_replace(' ', '_', $data['name'])) . '_' . substr($id, 0, 4),
+            'password_hash' => $data['passwordHash'] ?? '',
             'name' => $data['name'],
             'gender' => $data['gender'],
             'level' => $data['level'],
@@ -71,7 +75,6 @@ class PlayerRepository
             'current_course' => $data['currentCourse'] ?? '',
             'course_ends_at' => $data['courseEndsAt'] ?? 0,
             'completed_courses' => json_encode($data['completedCourses'] ?? []),
-            'skills' => json_encode($data['skills'] ?? []),
             'current_area' => $data['currentArea'] ?? 'thanh_lam_tran',
         ]);
     }
@@ -113,8 +116,9 @@ class PlayerRepository
             'currentCourse' => $row['current_course'] ?? '',
             'courseEndsAt' => (int) $row['course_ends_at'],
             'completedCourses' => json_decode($row['completed_courses'] ?? '[]', true) ?: [],
-            'skills' => json_decode($row['skills'] ?? '[]', true) ?: [],
             'currentArea' => $row['current_area'] ?? 'thanh_lam_tran',
+            // skills loaded from player_skills table below
+            'skills' => [],
             // equipment/inventory loaded from player_items table
             'equipment' => [],
             'inventory' => [],
@@ -151,6 +155,20 @@ class PlayerRepository
 
         $data['equipment'] = $equipped;
         $data['inventory'] = $inventory;
+
+        // Load skills from player_skills mapping table
+        $skillStmt = $pdo->prepare("SELECT skill_id FROM player_skills WHERE player_id = :id");
+        $skillStmt->execute(['id' => $id]);
+        $skillIds = $skillStmt->fetchAll(\PDO::FETCH_COLUMN);
+
+        // Hydrate skill data from skills.json
+        $skillSystem = new SkillSystem();
+        $skills = [];
+        foreach ($skillIds as $sid) {
+            $skill = $skillSystem->getById($sid);
+            if ($skill) $skills[] = $skill;
+        }
+        $data['skills'] = $skills;
 
         return Player::fromArray($data);
     }
@@ -224,5 +242,76 @@ class PlayerRepository
                 'affixes' => json_encode($arr['affixes'] ?? []),
             ]);
         }
+    }
+
+    /**
+     * Save player skills to mapping table.
+     */
+    public static function saveSkills(string $playerId, Player $player): void
+    {
+        $pdo = Database::pdo();
+
+        // Delete existing skills
+        $del = $pdo->prepare("DELETE FROM player_skills WHERE player_id = :pid");
+        $del->execute(['pid' => $playerId]);
+
+        // Insert current skills
+        $ins = $pdo->prepare("INSERT INTO player_skills (player_id, skill_id) VALUES (:pid, :sid)");
+        foreach ($player->skills as $skill) {
+            $sid = is_array($skill) ? ($skill['id'] ?? '') : $skill;
+            if ($sid) $ins->execute(['pid' => $playerId, 'sid' => $sid]);
+        }
+    }
+
+    // ===== AUTH =====
+
+    /**
+     * Register a new player with username/password.
+     */
+    public static function register(string $username, string $password, string $name, string $gender): array
+    {
+        $pdo = Database::pdo();
+
+        // Check username exists
+        $check = $pdo->prepare("SELECT id FROM players WHERE username = :u");
+        $check->execute(['u' => $username]);
+        if ($check->fetch()) {
+            return ['error' => 'Tên đăng nhập đã tồn tại'];
+        }
+
+        $id = bin2hex(random_bytes(8));
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+
+        $player = new Player($name, $gender);
+
+        // Set auth data on player before saving
+        $player->username = $username;
+        $player->passwordHash = $hash;
+
+        self::save($id, $player);
+
+        return ['id' => $id, 'player' => $player];
+    }
+
+    /**
+     * Login with username/password.
+     */
+    public static function login(string $username, string $password): array
+    {
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare("SELECT id, password_hash FROM players WHERE username = :u");
+        $stmt->execute(['u' => $username]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return ['error' => 'Tên đăng nhập không tồn tại'];
+        }
+
+        if (!password_verify($password, $row['password_hash'])) {
+            return ['error' => 'Sai mật khẩu'];
+        }
+
+        $player = self::load($row['id']);
+        return ['id' => $row['id'], 'player' => $player];
     }
 }
