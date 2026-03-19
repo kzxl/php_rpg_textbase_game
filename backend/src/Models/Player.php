@@ -765,6 +765,7 @@ class Player
     {
         $finalStats = $this->getFinalStats();
         return [
+            'id' => $this->id,
             'username' => $this->username,
             'passwordHash' => $this->passwordHash,
             'name' => $this->name,

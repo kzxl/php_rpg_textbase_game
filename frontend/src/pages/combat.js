@@ -220,6 +220,25 @@ async function doExplore(ctx) {
           <button class="btn btn--blue flex-1" id="btnExploreTrack" data-mid="${ev.monsterId}">👣 Theo Dõi</button>
         </div>
       `
+    } else if (ev.type === 'monster_ambush' && ev.combatResult) {
+      // Monster ambush — forced combat, show result
+      const cr = ev.combatResult
+      const logHtml = (cr.log || []).map(l => {
+        if (l.startsWith('---')) return `<div class="turn">${l}</div>`
+        if (l.includes('hụt')) return `<div class="miss">${l}</div>`
+        if (l.includes('CHÍNH MẠNG') || l.includes('💥')) return `<div class="crit">${l}</div>`
+        if (l.includes('ngã xuống') || l.includes('💀')) return `<div class="death">${l}</div>`
+        if (l.includes('Chiến thắng') || l.includes('🏆')) return `<div class="victory">${l}</div>`
+        return `<div class="hit">${l}</div>`
+      }).join('')
+      const oc = cr.outcome === 'win' ? '🏆 Chiến thắng!' : cr.outcome === 'loss' ? '💀 Bại trận!' : '⏰ Bất phân'
+      const ocColor = cr.outcome === 'win' ? 'var(--green)' : cr.outcome === 'loss' ? 'var(--red)' : 'var(--orange)'
+      html += `
+        <div style="font-size:36px;margin-bottom:8px">⚠️</div>
+        <div class="text-lg bold" style="color:var(--red);margin-bottom:8px">${ev.message}</div>
+        <div style="font-size:16px;font-weight:700;color:${ocColor};margin-bottom:12px">${oc}</div>
+        <div class="combat-log" style="max-height:200px;overflow-y:auto;text-align:left">${logHtml}</div>
+      `
     } else if (ev.type === 'worldBoss') {
       html += `
         <div style="font-size: 48px; margin-bottom: 8px; animation: pulse 1s infinite;">🔥</div>

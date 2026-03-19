@@ -185,11 +185,37 @@ return function ($app) {
                 $areaMonsters = GameDataRepository::getMonstersByArea($player->currentArea);
                 if (empty($areaMonsters)) $areaMonsters = GameDataRepository::getAllMonsters();
                 $foundMonster = $areaMonsters[array_rand($areaMonsters)];
-                $eventResult = [
-                    'type' => 'monster', 
-                    'message' => 'Bạn phát hiện dã thú! (' . $foundMonster['name'] . ')',
-                    'monsterId' => $foundMonster['id']
-                ];
+
+                // 30% chance monster ambushes the player
+                $ambushRoll = mt_rand(1, 100);
+                if ($ambushRoll <= 30) {
+                    // Forced combat — monster attacks first!
+                    $monster = new \App\Models\Monster(
+                        $foundMonster['id'],
+                        $foundMonster['name'],
+                        $foundMonster['stats'],
+                        $foundMonster['xpReward'] ?? 20
+                    );
+                    $monster->level = $foundMonster['tier'] ?? 1;
+                    $combat = new \App\Core\CombatEngine();
+                    $result = $combat->fullCombat($player, $monster);
+
+                    savePlayer($id, $player);
+
+                    $eventResult = [
+                        'type' => 'monster_ambush',
+                        'message' => '⚠️ ' . $foundMonster['name'] . ' bất ngờ tập kích bạn!',
+                        'monsterId' => $foundMonster['id'],
+                        'monsterName' => $foundMonster['name'],
+                        'combatResult' => $result,
+                    ];
+                } else {
+                    $eventResult = [
+                        'type' => 'monster', 
+                        'message' => 'Bạn phát hiện dã thú! (' . $foundMonster['name'] . ')',
+                        'monsterId' => $foundMonster['id']
+                    ];
+                }
 
             } elseif ($type === 'worldBoss') {
                 $areaBosses = GameDataRepository::getWorldBossesByArea($player->currentArea);
