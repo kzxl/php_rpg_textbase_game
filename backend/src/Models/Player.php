@@ -63,6 +63,11 @@ class Player
     public int $createdAt = 0; // Unix timestamp when account was created
     public int $craftingLevel = 1; // Luyện Đan Thuật level (1-100)
     public int $craftingXp = 0; // Crafting XP for current level
+    public string $gymDate = ''; // today's date for session tracking
+    public int $gymSessions = 0; // sessions done today
+    public int $gymCooldownUntil = 0; // unix cooldown timestamp
+    public int $gymStreak = 0; // consecutive training days
+    public string $lastGymDate = ''; // last training date for streak
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -834,6 +839,10 @@ class Player
             'craftingLevel' => $this->craftingLevel,
             'craftingXp' => $this->craftingXp,
             'craftingXpToNext' => $this->craftingLevel * 50,
+            'gymSessions' => $this->gymSessions,
+            'gymSessionCap' => 20 + ($this->realmTier * 5),
+            'gymStreak' => $this->gymStreak,
+            'gymCooldownUntil' => $this->gymCooldownUntil,
         ];
     }
 
@@ -952,6 +961,11 @@ class Player
         $player->createdAt = $data['createdAt'] ?? time();
         $player->craftingLevel = $data['craftingLevel'] ?? 1;
         $player->craftingXp = $data['craftingXp'] ?? 0;
+        $player->gymDate = $data['gymDate'] ?? '';
+        $player->gymSessions = $data['gymSessions'] ?? 0;
+        $player->gymCooldownUntil = $data['gymCooldownUntil'] ?? 0;
+        $player->gymStreak = $data['gymStreak'] ?? 0;
+        $player->lastGymDate = $data['lastGymDate'] ?? '';
 
         return $player;
     }
