@@ -290,11 +290,17 @@ class CombatEngine
                 $prevLevel = $player->level;
                 $xp = $monster->xpReward;
                 $player->gainXp($xp);
+                // Gold reward (Phase 2)
+                $goldMin = 10 * max(1, $monster->level);
+                $goldMax = 30 * max(1, $monster->level);
+                $goldReward = mt_rand($goldMin, $goldMax);
+                $player->gold += $goldReward;
                 $allLogs[] = "🏆 Chiến thắng!";
+                $allLogs[] = "💰 +{$goldReward} Linh Thạch";
                 if ($player->level > $prevLevel) {
                     $allLogs[] = "🎉 Đột phá! Cấp {$player->level}!";
                 }
-                $rewards = ['xp' => $xp, 'prevLevel' => $prevLevel];
+                $rewards = ['xp' => $xp, 'gold' => $goldReward, 'prevLevel' => $prevLevel, 'monsterLevel' => $monster->level ?? 1];
                 break;
 
             case 'flee':
@@ -302,15 +308,17 @@ class CombatEngine
                 break;
 
             case 'stalemate':
-                // Partial XP for stalemate (25%)
+                // Partial XP + gold for stalemate (25%)
                 $partialXp = (int) round($monster->xpReward * 0.25);
+                $partialGold = mt_rand(5, 10) * max(1, $monster->level);
                 $prevLevel = $player->level;
                 $player->gainXp($partialXp);
-                $allLogs[] = "🤝 Bất phân thắng bại. +{$partialXp} XP (25%)";
+                $player->gold += $partialGold;
+                $allLogs[] = "🤝 Bất phân thắng bại. +{$partialXp} XP, +{$partialGold} Linh Thạch";
                 if ($player->level > $prevLevel) {
                     $allLogs[] = "🎉 Đột phá! Cấp {$player->level}!";
                 }
-                $rewards = ['xp' => $partialXp, 'prevLevel' => $prevLevel];
+                $rewards = ['xp' => $partialXp, 'gold' => $partialGold, 'prevLevel' => $prevLevel, 'monsterLevel' => $monster->level ?? 1];
                 break;
 
             case 'loss':

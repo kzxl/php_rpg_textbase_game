@@ -12,6 +12,7 @@ class Monster
     public int $currentHp;
     public int $maxHp;
     public int $xpReward;
+    public int $level = 1;
 
     private array $stats;
 
@@ -58,6 +59,7 @@ class Monster
             'maxHp' => $this->maxHp,
             'stats' => $this->getStats(),
             'alive' => $this->isAlive(),
+            'level' => $this->level,
         ];
     }
 
@@ -76,6 +78,8 @@ class Monster
         ];
 
         $xp = (int) round(($data['xpReward'] ?? 20) * $scale);
-        return new self($data['id'], $data['name'], $stats, $xp);
+        $m = new self($data['id'], $data['name'], $stats, $xp);
+        $m->level = $level;
+        return $m;
     }
 }

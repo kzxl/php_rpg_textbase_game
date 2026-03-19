@@ -287,6 +287,8 @@ async function startCombat(monsterId) {
       if (l.includes('Hết') || l.includes('⏰')) return `<div class="stalemate">${l}</div>`
       if (l.includes('Bất phân') || l.includes('🤝')) return `<div class="stalemate">${l}</div>`
       if (l.includes('Thoát thân') || l.includes('🚪')) return `<div class="flee">${l}</div>`
+      if (l.includes('Linh Thạch') || l.includes('💰')) return `<div class="gold-reward">${l}</div>`
+      if (l.includes('Tịnh dưỡng') || l.includes('🏥')) return `<div class="hospital">${l}</div>`
       return `<div class="hit">${l}</div>`
     }).join('')
 
@@ -302,7 +304,8 @@ async function startCombat(monsterId) {
       'flee': { icon: '🏃', text: 'Thoát thân', cls: 'flee' },
     }
     const oc = outcomeMap[r.outcome] || outcomeMap['loss']
-    const rewardText = r.rewards ? ` · +${r.rewards.xp} XP` : ''
+    const goldText = r.rewards?.gold ? ` · +${r.rewards.gold} 💰` : ''
+    const rewardText = r.rewards ? ` · +${r.rewards.xp} XP${goldText}` : ''
 
     rEl.innerHTML = `
       <div class="panel">
@@ -341,6 +344,7 @@ function updateSidebar() {
 
   const sp = document.querySelector('.sidebar-player')
   if (sp) {
+    const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
       <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
@@ -351,7 +355,12 @@ function updateSidebar() {
       <div class="sidebar-bar" style="margin-top:4px">
         <div class="bar-label"><span>🔮 Linh lực</span><span>${p.currentEnergy}/${p.maxEnergy}</span></div>
         <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
-      </div>`
+      </div>
+      <div class="sidebar-bar" style="margin-top:4px">
+        <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}</span></div>
+        <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
+      </div>
+      <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>`
   }
 
   // Update stat badge

@@ -12,6 +12,7 @@ class Item
     public string $baseType; // 'sword', 'shield', 'helmet', etc.
     public string $slot;     // 'weapon', 'shield', 'head', 'body', 'ring'
     public string $rarity;   // 'common', 'rare', 'epic', 'legendary'
+    public int $itemLevel = 1; // ilvl determines available affix tiers
 
     /** @var array Affix data */
     private array $affixes;
@@ -22,7 +23,8 @@ class Item
         string $baseType,
         string $slot,
         string $rarity = 'common',
-        array $affixes = []
+        array $affixes = [],
+        int $itemLevel = 1
     ) {
         $this->id = $id;
         $this->name = $name;
@@ -30,6 +32,7 @@ class Item
         $this->slot = $slot;
         $this->rarity = $rarity;
         $this->affixes = $affixes;
+        $this->itemLevel = $itemLevel;
     }
 
     /**
@@ -59,6 +62,7 @@ class Item
             'baseType' => $this->baseType,
             'slot' => $this->slot,
             'rarity' => $this->rarity,
+            'itemLevel' => $this->itemLevel,
             'affixes' => $this->affixes,
         ];
     }
@@ -71,7 +75,8 @@ class Item
             baseType: $data['baseType'],
             slot: $data['slot'],
             rarity: $data['rarity'] ?? 'common',
-            affixes: $data['affixes'] ?? []
+            affixes: $data['affixes'] ?? [],
+            itemLevel: $data['itemLevel'] ?? 1
         );
     }
 }

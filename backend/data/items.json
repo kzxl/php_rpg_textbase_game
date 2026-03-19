@@ -6,6 +6,7 @@
             "baseType": "sword",
             "slot": "weapon",
             "rarity": "common",
+            "itemLevel": 1,
             "affixes": [
                 { "type": "flat", "stat": "strength", "value": 3 }
             ]
@@ -16,6 +17,7 @@
             "baseType": "armor",
             "slot": "body",
             "rarity": "common",
+            "itemLevel": 1,
             "affixes": [
                 { "type": "flat", "stat": "defense", "value": 4 }
             ]
@@ -26,6 +28,7 @@
             "baseType": "boots",
             "slot": "feet",
             "rarity": "common",
+            "itemLevel": 1,
             "affixes": [
                 { "type": "flat", "stat": "speed", "value": 3 },
                 { "type": "flat", "stat": "dexterity", "value": 2 }
@@ -37,6 +40,7 @@
             "baseType": "sword",
             "slot": "weapon",
             "rarity": "rare",
+            "itemLevel": 3,
             "affixes": [
                 { "type": "flat", "stat": "strength", "value": 8 },
                 { "type": "increase", "stat": "strength", "value": 10 }
@@ -48,6 +52,7 @@
             "baseType": "cloak",
             "slot": "body",
             "rarity": "rare",
+            "itemLevel": 3,
             "affixes": [
                 { "type": "flat", "stat": "dexterity", "value": 6 },
                 { "type": "increase", "stat": "speed", "value": 8 }
@@ -59,6 +64,7 @@
             "baseType": "shield",
             "slot": "shield",
             "rarity": "rare",
+            "itemLevel": 3,
             "affixes": [
                 { "type": "flat", "stat": "defense", "value": 10 },
                 { "type": "increase", "stat": "defense", "value": 5 }
@@ -70,6 +76,7 @@
             "baseType": "sword",
             "slot": "weapon",
             "rarity": "epic",
+            "itemLevel": 5,
             "affixes": [
                 { "type": "flat", "stat": "strength", "value": 15 },
                 { "type": "increase", "stat": "strength", "value": 20 },
@@ -82,6 +89,7 @@
             "baseType": "robe",
             "slot": "body",
             "rarity": "legendary",
+            "itemLevel": 8,
             "affixes": [
                 { "type": "flat", "stat": "defense", "value": 15 },
                 { "type": "increase", "stat": "defense", "value": 25 },
@@ -91,15 +99,21 @@
         }
     ],
     "affixes": [
-        { "id": "sharp",          "type": "flat",     "stat": "strength",  "value": [2, 8],   "weight": 20 },
-        { "id": "heavy",          "type": "flat",     "stat": "strength",  "value": [5, 15],  "weight": 10 },
-        { "id": "nimble",         "type": "flat",     "stat": "dexterity", "value": [2, 8],   "weight": 20 },
-        { "id": "quick",          "type": "flat",     "stat": "speed",     "value": [2, 6],   "weight": 15 },
-        { "id": "sturdy",         "type": "flat",     "stat": "defense",   "value": [3, 10],  "weight": 15 },
-        { "id": "empowered",      "type": "increase", "stat": "strength",  "value": [5, 20],  "weight": 12 },
-        { "id": "evasive",        "type": "increase", "stat": "dexterity", "value": [5, 15],  "weight": 12 },
-        { "id": "fortified",      "type": "increase", "stat": "defense",   "value": [5, 15],  "weight": 12 },
-        { "id": "devastating",    "type": "more",     "stat": "strength",  "value": [5, 12],  "weight": 5 },
-        { "id": "unyielding",     "type": "more",     "stat": "defense",   "value": [5, 10],  "weight": 5 }
+        { "id": "sharp",       "type": "flat",     "stat": "strength",  "value": [2, 8],   "weight": 20, "tier": 1, "minLevel": 1, "name": "Sắc" },
+        { "id": "heavy",       "type": "flat",     "stat": "strength",  "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Trọng" },
+        { "id": "crushing",    "type": "flat",     "stat": "strength",  "value": [10, 25], "weight": 5,  "tier": 3, "minLevel": 6, "name": "Hủy Diệt" },
+        { "id": "nimble",      "type": "flat",     "stat": "dexterity", "value": [2, 8],   "weight": 20, "tier": 1, "minLevel": 1, "name": "Linh Hoạt" },
+        { "id": "precise",     "type": "flat",     "stat": "dexterity", "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Chính Xác" },
+        { "id": "quick",       "type": "flat",     "stat": "speed",     "value": [2, 6],   "weight": 15, "tier": 1, "minLevel": 1, "name": "Tốc" },
+        { "id": "windborne",   "type": "flat",     "stat": "speed",     "value": [5, 12],  "weight": 8,  "tier": 2, "minLevel": 4, "name": "Phong Hành" },
+        { "id": "sturdy",      "type": "flat",     "stat": "defense",   "value": [3, 10],  "weight": 15, "tier": 1, "minLevel": 1, "name": "Kiên Cố" },
+        { "id": "ironclad",    "type": "flat",     "stat": "defense",   "value": [8, 20],  "weight": 8,  "tier": 2, "minLevel": 4, "name": "Thiết Bích" },
+        { "id": "empowered",   "type": "increase", "stat": "strength",  "value": [5, 20],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Cường Hóa" },
+        { "id": "evasive",     "type": "increase", "stat": "dexterity", "value": [5, 15],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Né Tránh" },
+        { "id": "fortified",   "type": "increase", "stat": "defense",   "value": [5, 15],  "weight": 12, "tier": 2, "minLevel": 2, "name": "Phòng Thủ" },
+        { "id": "devastating", "type": "more",     "stat": "strength",  "value": [5, 12],  "weight": 5,  "tier": 3, "minLevel": 5, "name": "Tàn Phá" },
+        { "id": "unyielding",  "type": "more",     "stat": "defense",   "value": [5, 10],  "weight": 5,  "tier": 3, "minLevel": 5, "name": "Bất Khuất" },
+        { "id": "swiftness",   "type": "increase", "stat": "speed",     "value": [5, 15],  "weight": 10, "tier": 2, "minLevel": 3, "name": "Tốc Hành" },
+        { "id": "godly",       "type": "more",     "stat": "strength",  "value": [10, 25], "weight": 2,  "tier": 4, "minLevel": 8, "name": "Thần Thánh" }
     ]
 }

@@ -57,43 +57,53 @@ class ItemSystem
     }
 
     /**
-     * Generate a random item with random affixes.
+     * Generate a random item with ilvl-gated affixes.
      */
-    public function generateRandomItem(string $rarity = 'common', ?string $slot = null): Item
+    public function generateRandomItem(string $rarity = 'common', ?string $slot = null, int $itemLevel = 1): Item
     {
         $maxAffixes = match ($rarity) {
             'common'    => 1,
-            'rare'      => 2,
-            'epic'      => 3,
-            'legendary' => 4,
+            'rare'      => 3,
+            'epic'      => 5,
+            'legendary' => 6,
             default     => 1,
         };
 
-        $affixes = $this->rollAffixes($maxAffixes);
+        $affixes = $this->rollAffixes($maxAffixes, $itemLevel);
         $id = 'gen_' . bin2hex(random_bytes(4));
-        $name = $this->generateName($rarity, $slot ?? 'weapon');
         $slotVal = $slot ?? $this->randomSlot();
+        $name = $this->generateName($rarity, $slotVal);
 
-        return new Item($id, $name, $slotVal, $slotVal, $rarity, $affixes);
+        return new Item($id, $name, $slotVal, $slotVal, $rarity, $affixes, $itemLevel);
     }
 
     /**
-     * Roll random affixes from the pool.
+     * Roll random affixes, filtered by item level.
      */
-    private function rollAffixes(int $count): array
+    private function rollAffixes(int $count, int $itemLevel = 1): array
     {
         if (empty($this->affixPool)) return [];
 
-        $totalWeight = array_sum(array_column($this->affixPool, 'weight'));
+        // Filter by ilvl
+        $eligible = array_filter($this->affixPool, fn($a) => ($a['minLevel'] ?? 1) <= $itemLevel);
+        if (empty($eligible)) return [];
+
+        $totalWeight = array_sum(array_column($eligible, 'weight'));
         $selected = [];
+        $usedStats = []; // prevent duplicate stat+type combos (PoE-style mod groups)
 
         for ($i = 0; $i < $count; $i++) {
             $roll = mt_rand(1, $totalWeight);
             $cumulative = 0;
 
-            foreach ($this->affixPool as $affix) {
+            foreach ($eligible as $affix) {
                 $cumulative += $affix['weight'];
                 if ($roll <= $cumulative) {
+                    // Skip if same stat+type already rolled
+                    $key = $affix['stat'] . ':' . $affix['type'];
+                    if (in_array($key, $usedStats)) break;
+                    $usedStats[] = $key;
+
                     $valueRange = $affix['value'];
                     $value = is_array($valueRange)
                         ? mt_rand($valueRange[0], $valueRange[1])
@@ -103,6 +113,8 @@ class ItemSystem
                         'type' => $affix['type'],
                         'stat' => $affix['stat'],
                         'value' => $value,
+                        'name' => $affix['name'] ?? $affix['id'],
+                        'tier' => $affix['tier'] ?? 1,
                     ];
                     break;
                 }

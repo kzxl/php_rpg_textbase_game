@@ -391,6 +391,8 @@ html, body {
 .combat-log .heavy { color: var(--orange); }
 .combat-log .flee { color: var(--cyan); font-weight: 700; }
 .combat-log .stalemate { color: var(--gold); font-weight: 700; }
+.combat-log .gold-reward { color: #f0c030; font-weight: 700; }
+.combat-log .hospital { color: var(--red); font-style: italic; }
 
 /* --- Combat Result Banner --- */
 .combat-result {
