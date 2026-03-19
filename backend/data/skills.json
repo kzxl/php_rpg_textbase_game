@@ -81,6 +81,19 @@
                     "condition": { "type": "hp_above", "value": 0.8 }
                 }
             ]
+        },
+        {
+            "id": "toa_thien",
+            "name": "Tọa Thiền Công",
+            "description": "Ngồi thiền điều tức, hồi 1% HP mỗi 10s ngoài chiến đấu. Tăng phòng ngự khi HP cao.",
+            "type": "passive",
+            "damageMultiplier": 1.0,
+            "modifiers": [
+                {
+                    "type": "more", "stat": "defense", "value": 5, "source": "skill",
+                    "condition": { "type": "hp_above", "value": 0.8 }
+                }
+            ]
         }
     ]
 }

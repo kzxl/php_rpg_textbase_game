@@ -73,7 +73,13 @@ function loadPlayer(string $id): ?Player
     if (!file_exists($file)) return null;
     $data = json_decode(file_get_contents($file), true);
     if (!$data) return null;
-    return Player::fromArray($data);
+    $player = Player::fromArray($data);
+    // Auto-apply meditation HP regen
+    $healed = $player->applyMeditation();
+    if ($healed > 0) {
+        savePlayer($id, $player);
+    }
+    return $player;
 }
 
 // ===== ROUTES =====
@@ -191,22 +197,7 @@ $app->post('/api/player/{id}/learn-skill', function (Request $request, Response 
     ]);
 });
 
-$app->post('/api/player/{id}/heal', function (Request $request, Response $response, array $args) {
-    $id = $args['id'];
-    $player = loadPlayer($id);
-    if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
-
-    $player->fullHeal();
-    $player->hospitalUntil = 0; // Clear hospital on full heal
-    savePlayer($id, $player);
-
-    return jsonResponse($response, [
-        'message' => "Đã hồi phục hoàn toàn",
-        'player' => $player->toArray(),
-    ]);
-});
-
-// --- Medicine (đan dược) ---
+// --- Medicine (đan dược) - Torn-style stacking cooldown ---
 $app->post('/api/player/{id}/use-medicine', function (Request $request, Response $response, array $args) {
     $id = $args['id'];
     $player = loadPlayer($id);
@@ -215,7 +206,6 @@ $app->post('/api/player/{id}/use-medicine', function (Request $request, Response
     $body = $request->getParsedBody();
     $medId = $body['medicineId'] ?? '';
 
-    // Load medicines
     $medsFile = __DIR__ . '/../data/medicines.json';
     $medicines = json_decode(file_get_contents($medsFile), true);
     $medicine = null;
@@ -229,7 +219,7 @@ $app->post('/api/player/{id}/use-medicine', function (Request $request, Response
 
     savePlayer($id, $player);
     return jsonResponse($response, [
-        'message' => "Đã dùng {$medicine['name']}: +{$medicine['healPercent']}% HP",
+        'message' => "+{$medicine['healPercent']}% HP · Đan độc +{$medicine['cooldownAdd']}s",
         'player' => $player->toArray(),
     ]);
 });

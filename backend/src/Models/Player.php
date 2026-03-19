@@ -23,8 +23,12 @@ class Player
 
     /** @var int Unix timestamp when hospital ends (0 = not hospitalized) */
     public int $hospitalUntil = 0;
-    /** @var int Unix timestamp when medicine cooldown expires */
+    /** @var int Unix timestamp when shared med cooldown expires (Torn-style stacking) */
     public int $medCooldownUntil = 0;
+    /** @var int Max med cooldown cap in seconds */
+    private const MED_COOLDOWN_CAP = 300; // 5 minutes
+    /** @var int Last HP regen timestamp (meditation) */
+    public int $lastHpRegen = 0;
 
     // --- Phase 1: Crimes + Jail + Education ---
     public int $gold = 0;
@@ -232,40 +236,6 @@ class Player
     }
 
     /**
-     * Use medicine: restore HP%, reduce hospital time, add to med cooldown.
-     * Returns null on success, error string on failure.
-     */
-    public function useMedicine(array $medicine): ?string
-    {
-        // Check med cooldown
-        if ($this->medCooldownUntil > time()) {
-            $remain = $this->medCooldownUntil - time();
-            return "Đan dược chưa hết cooldown! Còn {$remain}s.";
-        }
-
-        // Restore HP
-        $healAmount = (int) round($this->maxHp * ($medicine['healPercent'] / 100));
-        $this->heal($healAmount);
-
-        // Reduce hospital time
-        $reduceSeconds = $medicine['reduceHospital'] ?? 0;
-        if ($this->hospitalUntil > time()) {
-            $this->hospitalUntil = max(time(), $this->hospitalUntil - $reduceSeconds);
-        }
-
-        // If fully healed, leave hospital
-        if ($this->currentHp >= $this->maxHp) {
-            $this->hospitalUntil = 0;
-        }
-
-        // Add medicine cooldown
-        $cooldown = $medicine['cooldown'] ?? 30;
-        $this->medCooldownUntil = time() + $cooldown;
-
-        return null;
-    }
-
-    /**
      * Train a stat in the gym. Costs energy, directly increases stat.
      */
     public function trainStat(string $stat, int $energyCost = 5): ?string
@@ -307,6 +277,55 @@ class Player
         $this->recalcDerived();
         $this->currentHp = $this->maxHp;
         $this->currentEnergy = $this->maxEnergy;
+    }
+
+    /**
+     * Use medicine with Torn-style shared stacking cooldown.
+     * Each use ADDS time to the shared timer. Can't use if timer > cap.
+     */
+    public function useMedicine(array $medicine): ?string
+    {
+        $remaining = max(0, $this->medCooldownUntil - time());
+        $addTime = $medicine['cooldownAdd'] ?? 30;
+
+        if ($remaining + $addTime > self::MED_COOLDOWN_CAP) {
+            return "Đan độc quá nồng! Cần chờ {$remaining}s trước khi dùng tiếp.";
+        }
+
+        // Heal
+        $healAmount = (int) round($this->maxHp * ($medicine['healPercent'] / 100));
+        $this->currentHp = min($this->maxHp, $this->currentHp + $healAmount);
+
+        // Stack cooldown: if timer is still running, add to it; else start fresh
+        $this->medCooldownUntil = max(time(), $this->medCooldownUntil) + $addTime;
+
+        return null;
+    }
+
+    public function medCooldownRemaining(): int
+    {
+        return max(0, $this->medCooldownUntil - time());
+    }
+
+    /**
+     * Apply meditation HP regen (1% maxHP per 10s) if player has Toa Thien skill.
+     */
+    public function applyMeditation(): int
+    {
+        $hasMeditation = in_array('toa_thien', array_column($this->skills, 'id'));
+        if (!$hasMeditation) return 0;
+        if ($this->currentHp >= $this->maxHp) return 0;
+
+        $now = time();
+        $elapsed = $now - $this->lastHpRegen;
+        if ($elapsed < 10) return 0;
+
+        $ticks = (int) floor($elapsed / 10);
+        $healPerTick = max(1, (int) round($this->maxHp * 0.01));
+        $totalHeal = $healPerTick * $ticks;
+        $this->currentHp = min($this->maxHp, $this->currentHp + $totalHeal);
+        $this->lastHpRegen = $now;
+        return $totalHeal;
     }
 
     /**
@@ -377,7 +396,8 @@ class Player
             'hospitalUntil' => $this->hospitalUntil,
             'hospitalRemaining' => $this->hospitalRemaining(),
             'medCooldownUntil' => $this->medCooldownUntil,
-            'medCooldownRemaining' => max(0, $this->medCooldownUntil - time()),
+            'medCooldownRemaining' => $this->medCooldownRemaining(),
+            'lastHpRegen' => $this->lastHpRegen,
             'stats' => $finalStats,
             'allocatedStats' => $this->allocatedStats,
             'equipment' => array_map(fn($i) => $i->toArray(), $this->equipment),
@@ -435,6 +455,7 @@ class Player
         $player->currentEnergy = $data['currentEnergy'] ?? $player->maxEnergy;
         $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
         $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
+        $player->lastHpRegen = $data['lastHpRegen'] ?? time();
         // Phase 1
         $player->gold = $data['gold'] ?? 0;
         $player->nerve = $data['nerve'] ?? 15;
