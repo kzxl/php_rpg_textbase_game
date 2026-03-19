@@ -68,6 +68,9 @@ class Player
     public int $gymCooldownUntil = 0; // unix cooldown timestamp
     public int $gymStreak = 0; // consecutive training days
     public string $lastGymDate = ''; // last training date for streak
+    public array $tienCanhMaps = []; // Tiên Đồ inventory [{mapId, tier, modifiers}]
+    public array $atlasProgress = []; // {mapId: timesCompleted}
+    public int $atlasBonus = 0; // IIQ bonus from atlas completion
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -843,6 +846,9 @@ class Player
             'gymSessionCap' => 20 + ($this->realmTier * 5),
             'gymStreak' => $this->gymStreak,
             'gymCooldownUntil' => $this->gymCooldownUntil,
+            'tienCanhMaps' => $this->tienCanhMaps,
+            'atlasProgress' => $this->atlasProgress,
+            'atlasBonus' => $this->atlasBonus,
         ];
     }
 
@@ -966,6 +972,9 @@ class Player
         $player->gymCooldownUntil = $data['gymCooldownUntil'] ?? 0;
         $player->gymStreak = $data['gymStreak'] ?? 0;
         $player->lastGymDate = $data['lastGymDate'] ?? '';
+        $player->tienCanhMaps = $data['tienCanhMaps'] ?? [];
+        $player->atlasProgress = $data['atlasProgress'] ?? [];
+        $player->atlasBonus = $data['atlasBonus'] ?? 0;
 
         return $player;
     }

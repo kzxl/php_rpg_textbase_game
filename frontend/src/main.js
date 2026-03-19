@@ -22,6 +22,7 @@ import { pageMarket } from './pages/market.js'
 import { pageRealm } from './pages/realm.js'
 import { pageEvents } from './pages/events.js'
 import { pageDungeon } from './pages/dungeon.js'
+import { pageTienCanh } from './pages/tiencanh.js'
 import { pageHousing } from './pages/housing.js'
 import { pageWiki } from './pages/wiki.js'
 import { pageNpcShop } from './pages/npcshop.js'
@@ -423,6 +424,9 @@ function renderGame() {
           <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
             <span class="icon">🐉</span> Boss Thế Giới
           </li>
+          <li class="nav-item ${state.currentPage === 'tiencanh' ? 'active' : ''}" data-page="tiencanh">
+            <span class="icon">🗺️</span> Tiên Cảnh
+          </li>
 
           <li class="nav-section">THẾ GIỚI</li>
           <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
@@ -614,6 +618,7 @@ const pageMap = {
   worldboss: pageWorldBoss,
   gacha: pageGacha,
   leaderboard: pageLeaderboard,
+  tiencanh: pageTienCanh,
 }
 
 function renderPage() {
