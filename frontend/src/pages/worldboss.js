@@ -1,5 +1,5 @@
 /**
- * World Boss — Boss Thế Giới (multi-player, damage tracking)
+ * World Boss — Boss Thế Giới (full combat, no hospital penalty)
  */
 export function pageWorldBoss(el, ctx) {
   const { state, api, notify, updateSidebar } = ctx
@@ -21,7 +21,7 @@ export function pageWorldBoss(el, ctx) {
     el.innerHTML = `
       <div class="page-header">
         <h2>🐉 Boss Thế Giới</h2>
-        <p class="page-sub">Liên kết đánh Boss. Phần thưởng chia theo sát thương đóng góp.</p>
+        <p class="page-sub">Liên kết đánh Boss. Phần thưởng chia theo sát thương đóng góp. <strong>Không phạt tịnh dưỡng!</strong></p>
       </div>
 
       <div class="panel glass" style="margin-bottom:10px">
@@ -43,6 +43,8 @@ export function pageWorldBoss(el, ctx) {
         </div>
       </div>
 
+      <div id="bossCombatResult"></div>
+
       <div class="panel">
         <div class="panel-title">🏆 Top Đóng Góp</div>
         <div class="panel-body no-pad">
@@ -60,12 +62,80 @@ export function pageWorldBoss(el, ctx) {
     `
 
     document.getElementById('btnAttackBoss')?.addEventListener('click', async () => {
+      const btn = document.getElementById('btnAttackBoss')
+      btn.disabled = true
+      btn.textContent = '⏳ Đang giao chiến...'
+      const rEl = document.getElementById('bossCombatResult')
+
       try {
         const r = await api.attackWorldBoss(pid)
-        notify(r.message, r.defeated ? 'success' : 'info')
         state.player = r.player; updateSidebar()
+
+        // Render combat log like exploration combat
+        if (r.log && r.log.length > 0) {
+          const logHtml = r.log.map(l => {
+            if (l.startsWith('---')) return `<div class="turn">${l}</div>`
+            if (l.includes('hụt')) return `<div class="miss">${l}</div>`
+            if (l.includes('né được')) return `<div class="dodge">${l}</div>`
+            if (l.includes('CHÍNH MẠNG') || l.includes('💥')) return `<div class="crit">${l}</div>`
+            if (l.includes('🔥')) return `<div class="heavy text-orange">${l}</div>`
+            if (l.includes('chặn hoàn toàn') || l.includes('🛡')) return `<div class="dodge">${l}</div>`
+            if (l.includes('ngã xuống') || l.includes('💀')) return `<div class="death">${l}</div>`
+            if (l.includes('Chiến thắng') || l.includes('🏆')) return `<div class="victory">${l}</div>`
+            if (l.includes('bỏ chạy') || l.includes('🏃')) return `<div class="flee">${l}</div>`
+            if (l.includes('Bất phân') || l.includes('🤝')) return `<div class="stalemate">${l}</div>`
+            if (l.includes('🧪')) return `<div class="status-effect text-purple">${l}</div>`
+            if (l.includes('💔')) return `<div class="dot-damage text-purple bold">${l}</div>`
+            if (l.includes('✨')) return `<div class="regen text-green">${l}</div>`
+            return `<div class="hit">${l}</div>`
+          }).join('')
+
+          const outcomeMap = {
+            'win': { icon: '🏆', text: 'Chiến thắng', cls: 'win' },
+            'loss': { icon: '💀', text: 'Hết sức (Không phạt)', cls: 'lose' },
+            'stalemate': { icon: '⏰', text: 'Bất phân thắng bại', cls: 'draw' },
+            'flee': { icon: '🏃', text: 'Thoát thân', cls: 'flee' },
+          }
+          const oc = outcomeMap[r.outcome] || outcomeMap['loss']
+
+          const pHp = Math.max(0, (state.player.currentHp / state.player.maxHp) * 100)
+          rEl.innerHTML = `
+            <div class="panel mt-md" style="border-color:var(--red)">
+              <div class="panel-title">${oc.icon} ${oc.text}
+                <span class="subtitle">${r.turns}/${r.maxTurns || 25} lượt · ⚔️ ${r.damage} dmg cho Boss</span>
+              </div>
+              <div class="panel-body combat-result ${oc.cls}">
+                <div class="combat-opponents">
+                  <div class="fighter">
+                    <div class="f-name player-name">${state.player.name}</div>
+                    <div class="mini-hp-bar"><div class="fill hp" style="width:${pHp}%"></div></div>
+                    <div class="mini-hp-val">${state.player.currentHp}/${state.player.maxHp}</div>
+                  </div>
+                  <div class="vs">VS</div>
+                  <div class="fighter">
+                    <div class="f-name monster-name">${boss.name}</div>
+                    <div class="mini-hp-bar"><div class="fill hp" style="width:${(r.bossHp / r.bossMaxHp * 100).toFixed(1)}%"></div></div>
+                    <div class="mini-hp-val">${r.bossHp.toLocaleString()}/${r.bossMaxHp.toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="combat-log">${logHtml}</div>
+            </div>`
+        }
+
+        if (r.defeated) {
+          notify(r.message, 'success')
+        } else {
+          notify(`⚔️ ${r.damage} dmg!`, 'info')
+        }
+
+        // Re-render boss info (HP bar, etc)
         await load()
-      } catch (e) { notify(e.message, 'error') }
+      } catch (e) {
+        notify(e.message, 'error')
+        btn.disabled = false
+        btn.textContent = '⚔️ Tấn Công'
+      }
     })
   }
 

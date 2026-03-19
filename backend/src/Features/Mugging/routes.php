@@ -5,7 +5,7 @@
  *
  * Mechanics:
  * - Attack another player to steal a % of their carried gold.
- * - Level difference gate: Cannot attack players ±10 levels away.
+ * - Newbie protection: Cannot attack players within 7 days of account creation.
  * - Cooldown: 2 minutes between mugging attempts.
  * - Success/Fail based on STR vs DEF combat roll.
  * - On success: steal 5-15% of victim's gold.
@@ -66,10 +66,17 @@ return function ($app) {
             return jsonResponse($response, ['error' => 'Mục tiêu không ở cùng khu vực!'], 400);
         }
 
-        // Level gate: ±10 levels
-        $levelDiff = abs($attacker->level - $victim->level);
-        if ($levelDiff > 10) {
-            return jsonResponse($response, ['error' => 'Chênh lệch tu vi quá lớn! (Tối đa ±10 cấp)'], 400);
+        // Newbie protection: 7 days
+        $victimAge = time() - ($victim->createdAt ?? 0);
+        $newbieDays = 7;
+        if ($victimAge < $newbieDays * 86400) {
+            $daysLeft = ceil(($newbieDays * 86400 - $victimAge) / 86400);
+            return jsonResponse($response, ['error' => "Mục tiêu đang trong thời gian bảo hộ tân thủ! (Còn {$daysLeft} ngày)"], 400);
+        }
+        // Also check attacker is not newbie (can't attack while protected)
+        $attackerAge = time() - ($attacker->createdAt ?? 0);
+        if ($attackerAge < $newbieDays * 86400) {
+            return jsonResponse($response, ['error' => 'Bạn đang trong thời gian bảo hộ tân thủ, không thể tấn công!'], 400);
         }
 
         // Victim has gold?
@@ -180,20 +187,17 @@ return function ($app) {
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
         $pdo = Database::pdo();
-        $minLevel = max(1, $player->level - 10);
-        $maxLevel = $player->level + 10;
-
+        // Show all players in same area (no level filter)
         $stmt = $pdo->prepare("
-            SELECT id, name, gender, level, current_area
+            SELECT id, name, gender, level, current_area, created_at
             FROM players
             WHERE id != ?
               AND current_area = ?
-              AND level BETWEEN ? AND ?
               AND current_hp > 0
             ORDER BY level DESC
             LIMIT 20
         ");
-        $stmt->execute([$id, $player->currentArea, $minLevel, $maxLevel]);
+        $stmt->execute([$id, $player->currentArea]);
         $targets = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         return jsonResponse($response, [

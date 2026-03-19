@@ -257,9 +257,10 @@ async function doExplore(ctx) {
         <div style="font-size: 48px; margin-bottom: 8px;">👤</div>
         <div class="text-lg text-gold bold mb-sm">${ev.message}</div>
         <div class="text-sm text-dim mb-md">Âm thầm lướt qua hay chủ động giao hảo?</div>
-        <div class="flex gap-2 justify-center mt-md w-full">
+        <div class="flex gap-2 justify-center mt-md w-full" style="flex-wrap:wrap">
           <button class="btn btn--blue flex-1" id="btnInteractFriend" data-pid="${ev.player.id}">🤝 Kết Giao</button>
           <button class="btn btn--gold flex-1" id="btnInteractGift" data-pid="${ev.player.id}">💎 Tặng 100 LT</button>
+          <button class="btn btn--red flex-1" id="btnInteractMug" data-pid="${ev.player.id}">⚔️ Cướp Linh Thạch</button>
         </div>
       `
     } else if (ev.type === 'npc') {
@@ -313,6 +314,35 @@ async function doExplore(ctx) {
             document.getElementById('btnExploreContinueAfterGift')?.addEventListener('click', () => { rEl.innerHTML = ''; });
           }
         } catch (err) { notify(err.message, 'error'); }
+      });
+      document.getElementById('btnInteractMug')?.addEventListener('click', async (e) => {
+        const victimId = e.target.dataset.pid
+        e.target.disabled = true
+        e.target.textContent = '⏳ Đang tấn công...'
+        try {
+          const res = await api.request(`/player/${state.playerId}/mug`, {
+            method: 'POST', body: JSON.stringify({ victimId })
+          })
+          state.player = res.player; updateSidebar()
+          const pbody = e.target.closest('.panel-body')
+          if (pbody) {
+            const resultColor = res.success ? 'var(--green)' : 'var(--red)'
+            const resultIcon = res.success ? '💰' : '💀'
+            pbody.innerHTML = `
+              <div style="font-size:36px;margin-bottom:8px">${resultIcon}</div>
+              <div style="color:${resultColor};font-size:16px;font-weight:700;margin-bottom:8px">${res.message}</div>
+              ${res.goldStolen > 0 ? `<div class="text-gold">+${res.goldStolen} 💎 Linh Thạch</div>` : ''}
+              <div style="font-size:11px;opacity:0.5;margin-top:8px">Tỉ lệ: ${res.successChance}%</div>
+              <button class="btn btn--blue mt-md" id="btnExploreContinueAfterMug">Tiếp tục</button>
+            `
+            document.getElementById('btnExploreContinueAfterMug')?.addEventListener('click', () => { rEl.innerHTML = '' })
+          }
+          notify(res.message, res.success ? 'success' : 'error')
+        } catch (err) {
+          notify(err.message, 'error')
+          e.target.disabled = false
+          e.target.textContent = '⚔️ Cướp Linh Thạch'
+        }
       });
     }
 

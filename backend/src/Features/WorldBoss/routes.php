@@ -1,10 +1,12 @@
 <?php
 /**
- * World Boss — Boss Thế Giới (multi-player damage, rewards by contribution)
+ * World Boss — Boss Thế Giới (multi-player damage, full combat, no hospital)
  */
 use Slim\Psr7\Request;
 use Slim\Psr7\Response;
+use App\Core\CombatEngine;
 use App\Core\Database;
+use App\Models\Monster;
 
 return function ($app) {
 
@@ -21,7 +23,6 @@ return function ($app) {
         $boss = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$boss) {
-            // Auto-spawn a random boss
             $template = $BOSS_TEMPLATES[array_rand($BOSS_TEMPLATES)];
             $pdo->prepare("INSERT INTO world_bosses (boss_id, name, max_hp, current_hp, level, rewards) VALUES (?, ?, ?, ?, ?, ?)")
                 ->execute([$template['id'], $template['name'], $template['hp'], $template['hp'], $template['level'], json_encode($template['rewards'])]);
@@ -31,7 +32,6 @@ return function ($app) {
             $boss = $boss->fetch(\PDO::FETCH_ASSOC);
         }
 
-        // Top contributors
         $topStmt = $pdo->prepare("
             SELECT d.total_damage, d.hits, p.name
             FROM world_boss_damage d
@@ -52,11 +52,17 @@ return function ($app) {
         ]);
     });
 
-    // === ATTACK WORLD BOSS ===
+    // === ATTACK WORLD BOSS — Full Combat, No Hospital ===
     $app->post('/api/player/{id}/world-boss/attack', function (Request $request, Response $response, array $args) use ($BOSS_TEMPLATES) {
         $id = $args['id'];
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        // World boss: NO hospital check — can fight even while "hospitalized"
+        // But need HP > 0
+        if ($player->currentHp <= 0) {
+            return jsonResponse($response, ['error' => 'Đã kiệt sức! HP = 0.'], 400);
+        }
 
         $staminaCost = 5;
         if (($player->currentStamina ?? 0) < $staminaCost) {
@@ -69,34 +75,67 @@ return function ($app) {
         if (!$boss) return jsonResponse($response, ['error' => 'Không có Boss!'], 400);
         if ((int)$boss['current_hp'] <= 0) return jsonResponse($response, ['error' => 'Boss đã bị đánh bại!'], 400);
 
-        // Calculate damage based on player stats
-        $str = $player->stats['strength'] ?? 10;
-        $dex = $player->stats['dexterity'] ?? 10;
-        $baseDmg = $str * 2 + $dex + $player->level * 3;
-        $variance = rand(80, 120) / 100;
-        $damage = (int)($baseDmg * $variance);
-
         $player->currentStamina -= $staminaCost;
 
-        // Apply damage
-        $newHp = max(0, (int)$boss['current_hp'] - $damage);
-        $pdo->prepare("UPDATE world_bosses SET current_hp = ? WHERE id = ?")->execute([$newHp, $boss['id']]);
+        // Build a temporary monster object for CombatEngine
+        // Boss stats scaled from its DB data
+        $bossLevel = (int)$boss['level'];
+        $bossStats = [
+            'hp' => min((int)$boss['current_hp'], 99999), // Use remaining HP as combat HP
+            'strength' => 10 + $bossLevel * 2,
+            'speed' => 5 + $bossLevel,
+            'dexterity' => 5 + $bossLevel,
+            'defense' => 10 + $bossLevel * 2,
+        ];
+        $tempMonster = new Monster($boss['boss_id'], $boss['name'], $bossStats, 0);
+        $tempMonster->level = $bossLevel;
+
+        // Remember hospital state before combat
+        $hospitalBefore = $player->hospitalUntil;
+
+        // Run full combat
+        $combat = new CombatEngine();
+        $result = $combat->fullCombat($player, $tempMonster);
+
+        // === KEY: CLEAR HOSPITAL PENALTY for world boss ===
+        $player->hospitalUntil = $hospitalBefore; // Restore pre-combat state
+
+        // Calculate damage dealt to boss
+        $damageToBoss = 0;
+        if ($result['outcome'] === 'win' || $result['outcome'] === 'stalemate') {
+            // Boss HP change = monster starting HP - remaining HP
+            $monsterEndHp = $result['monster']['currentHp'] ?? 0;
+            $damageToBoss = max(0, $bossStats['hp'] - $monsterEndHp);
+        } elseif ($result['outcome'] === 'loss') {
+            // Player lost but still did damage
+            $monsterEndHp = $result['monster']['currentHp'] ?? 0;
+            $damageToBoss = max(0, $bossStats['hp'] - $monsterEndHp);
+        } elseif ($result['outcome'] === 'flee') {
+            $monsterEndHp = $result['monster']['currentHp'] ?? 0;
+            $damageToBoss = max(0, $bossStats['hp'] - $monsterEndHp);
+        }
+
+        // Apply damage to world boss DB
+        $newBossHp = max(0, (int)$boss['current_hp'] - $damageToBoss);
+        $pdo->prepare("UPDATE world_bosses SET current_hp = ? WHERE id = ?")->execute([$newBossHp, $boss['id']]);
 
         // Track contribution
-        $pdo->prepare("
-            INSERT INTO world_boss_damage (boss_instance_id, player_id, total_damage, hits)
-            VALUES (?, ?, ?, 1)
-            ON DUPLICATE KEY UPDATE total_damage = total_damage + ?, hits = hits + 1, last_hit = NOW()
-        ")->execute([$boss['id'], $id, $damage, $damage]);
+        if ($damageToBoss > 0) {
+            $pdo->prepare("
+                INSERT INTO world_boss_damage (boss_instance_id, player_id, total_damage, hits)
+                VALUES (?, ?, ?, 1)
+                ON DUPLICATE KEY UPDATE total_damage = total_damage + ?, hits = hits + 1, last_hit = NOW()
+            ")->execute([$boss['id'], $id, $damageToBoss, $damageToBoss]);
+        }
 
-        $message = "⚔️ Gây {$damage} sát thương cho {$boss['name']}!";
+        $message = "⚔️ Gây {$damageToBoss} sát thương cho {$boss['name']}!";
+        $defeated = false;
 
         // Check if boss defeated
-        if ($newHp <= 0) {
+        if ($newBossHp <= 0) {
             $pdo->prepare("UPDATE world_bosses SET status = 'defeated', defeated_at = NOW() WHERE id = ?")->execute([$boss['id']]);
             $rewards = json_decode($boss['rewards'] ?? '{}', true);
 
-            // Distribute rewards to top contributors
             $contribs = $pdo->prepare("SELECT * FROM world_boss_damage WHERE boss_instance_id = ? ORDER BY total_damage DESC");
             $contribs->execute([$boss['id']]);
             $allContribs = $contribs->fetchAll(\PDO::FETCH_ASSOC);
@@ -114,20 +153,25 @@ return function ($app) {
                 }
             }
             $message .= " 🎉 BOSS BỊ ĐÁNH BẠI! Phần thưởng đã phát!";
-
-            // Reload player data
-            $player = loadPlayer($id);
+            $defeated = true;
+            $player = loadPlayer($id); // Reload for rewards
         }
 
         savePlayer($id, $player);
 
         return jsonResponse($response, [
             'message' => $message,
-            'damage' => $damage,
-            'bossHp' => $newHp,
+            'damage' => $damageToBoss,
+            'bossHp' => $newBossHp,
             'bossMaxHp' => (int)$boss['max_hp'],
-            'defeated' => $newHp <= 0,
+            'defeated' => $defeated,
             'player' => $player->toArray(),
+            // Combat log for frontend display
+            'outcome' => $result['outcome'],
+            'log' => $result['log'] ?? [],
+            'turns' => $result['turns'] ?? 0,
+            'maxTurns' => $result['maxTurns'] ?? 25,
+            'monster' => $result['monster'] ?? ['name' => $boss['name'], 'currentHp' => $newBossHp, 'maxHp' => (int)$boss['max_hp']],
         ]);
     });
 };

@@ -58,6 +58,7 @@ class Player
     public array $activeQuests = []; // Phase 9: [{npc_id, quest_id, status, progress, accepted_at}]
     public string $role = 'player'; // Phase 10: 'player' | 'admin'
     public int $realmTier = 1; // Cảnh giới hiện tại (1-8), cần đột phá để lên tier
+    public int $createdAt = 0; // Unix timestamp when account was created
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -821,6 +822,7 @@ class Player
             'talents' => $this->talents,
             'talentDisplay' => $this->getTalentDisplay(),
             'mugCooldownUntil' => $this->mugCooldownUntil,
+            'createdAt' => $this->createdAt,
         ];
     }
 
@@ -934,6 +936,7 @@ class Player
         $player->realmTier = $data['realmTier'] ?? \App\Systems\RealmSystem::getRealmTier($player->level);
         $player->talents = $data['talents'] ?? self::generateRandomTalents();
         $player->mugCooldownUntil = $data['mugCooldownUntil'] ?? 0;
+        $player->createdAt = $data['createdAt'] ?? time();
 
         return $player;
     }
