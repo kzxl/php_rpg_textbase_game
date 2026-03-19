@@ -1,0 +1,246 @@
+{
+  "npcs": [
+    {
+      "id": "duoc_su_lao_vuong",
+      "name": "Lão Vương Dược Sư",
+      "profession": "herbalist",
+      "icon": "🧓",
+      "areaIds": ["thanh_lam_tran", "hac_phong_lam", "co_moc_linh_vien"],
+      "greeting": "Hừm, ngươi có vẻ là tu sĩ mới nhập môn. Ta có vài việc cần giúp đỡ...",
+      "quests": [
+        {
+          "id": "q_thu_thap_linh_thao",
+          "name": "Thu Thập Linh Thảo",
+          "description": "Hái 5 cây Linh Thảo trong khu vực này.",
+          "type": "collect",
+          "target": "linh_thao",
+          "amount": 5,
+          "rewards": { "gold": 50, "xp": 80, "skillChance": { "id": "duoc_ly", "chance": 25 } },
+          "dialogue": {
+            "accept": "Tốt lắm! Cứ hái đủ 5 cây Linh Thảo rồi quay lại đây.",
+            "progress": "Chưa đủ à? Cố gắng lên, Linh Thảo mọc nhiều quanh rừng rậm.",
+            "complete": "Rất tốt! Đây, nhận lấy. Ta sẽ truyền cho ngươi vài kiến thức về Dược Lý."
+          }
+        },
+        {
+          "id": "q_diet_thanh_xa",
+          "name": "Trừ Nọc Xà",
+          "description": "Giết 3 con Thanh Xà để lấy nọc độc tinh luyện.",
+          "type": "kill",
+          "target": "thanh_xa",
+          "amount": 3,
+          "rewards": { "gold": 80, "xp": 120, "materials": { "mat_noc_xa": 5 } },
+          "dialogue": {
+            "accept": "Loài Thanh Xà ở đây rất hung hãn. Diệt 3 con, ta sẽ hậu tạ.",
+            "progress": "Vẫn chưa xong sao? Cẩn thận nọc độc của chúng.",
+            "complete": "Tuyệt vời! Ngươi quả thật có bản lĩnh. Đây là phần thưởng xứng đáng."
+          }
+        }
+      ],
+      "teachableSkills": ["duoc_ly", "hai_duoc"]
+    },
+    {
+      "id": "tho_ren_thiet_tong",
+      "name": "Thiết Tông Đại Sư",
+      "profession": "blacksmith",
+      "icon": "⚒️",
+      "areaIds": ["thiet_huyet_son", "bac_suong_canh"],
+      "greeting": "Ngọn lửa rèn kiếm cần nguyên liệu tốt. Ngươi có thể giúp ta không?",
+      "quests": [
+        {
+          "id": "q_khai_khoang_tinh_thach",
+          "name": "Khai Khoáng Tinh Thạch",
+          "description": "Thu thập 3 Tinh Thạch từ lòng núi.",
+          "type": "collect",
+          "target": "mat_tinh_thach",
+          "amount": 3,
+          "rewards": { "gold": 100, "xp": 150, "skillChance": { "id": "khai_khoang", "chance": 30 } },
+          "dialogue": {
+            "accept": "Tinh Thạch ẩn sâu trong lòng Thiết Huyết Sơn. Hãy cẩn thận.",
+            "progress": "Vẫn chưa đủ. Đào sâu hơn nữa!",
+            "complete": "Hảo! Tinh Thạch chất lượng tốt. Nhận lấy thù lao và một ít kiến thức khai khoáng."
+          }
+        },
+        {
+          "id": "q_diet_thiet_giap_trung",
+          "name": "Phá Giáp Trùng",
+          "description": "Tiêu diệt 2 Thiết Giáp Trùng để lấy vỏ cứng rèn vũ khí.",
+          "type": "kill",
+          "target": "thiet_giap_trung",
+          "amount": 2,
+          "rewards": { "gold": 120, "xp": 180, "materials": { "mat_vo_cung": 3 } },
+          "dialogue": {
+            "accept": "Vỏ giáp của Thiết Giáp Trùng cứng hơn thép. Mang về cho ta 2 bộ.",
+            "progress": "Chưa đủ! Lớp giáp đó rèn vũ khí sẽ rất lợi hại.",
+            "complete": "Hoàn hảo! Với nguyên liệu này, ta có thể rèn được bảo kiếm thượng phẩm."
+          }
+        }
+      ],
+      "teachableSkills": ["khai_khoang"]
+    },
+    {
+      "id": "hoc_gia_minh_nguyet",
+      "name": "Minh Nguyệt Tiên Sinh",
+      "profession": "scholar",
+      "icon": "📖",
+      "areaIds": ["vong_linh_coc", "thien_dao_tan_tich"],
+      "greeting": "Ta đã nghiên cứu những tàn tích này nhiều năm. Ngươi có hứng thú với tri thức cổ đại?",
+      "quests": [
+        {
+          "id": "q_thu_thap_manh_ky_uc",
+          "name": "Ký Ức Cổ Đại",
+          "description": "Thu thập 4 Mảnh Ký Ức từ Vong Linh.",
+          "type": "collect",
+          "target": "mat_manh_ky_uc",
+          "amount": 4,
+          "rewards": { "gold": 150, "xp": 200, "skillChance": { "id": "nhan_thuat", "chance": 20 } },
+          "dialogue": {
+            "accept": "Mảnh Ký Ức chứa bí mật của cổ nhân. Hãy mang về cho ta nghiên cứu.",
+            "progress": "Chưa đủ. Vong Linh thường ẩn giấu ký ức ở nơi sâu nhất.",
+            "complete": "Phi thường! Với những mảnh này, ta có thể giải mã một phần Thiên Đạo cổ."
+          }
+        }
+      ],
+      "teachableSkills": ["nhan_thuat"]
+    },
+    {
+      "id": "tan_tu_phong_van",
+      "name": "Phong Vân Tán Tu",
+      "profession": "wanderer",
+      "icon": "🌪️",
+      "areaIds": ["am_sat_hoang", "huyet_ma_chien_truong", "thien_kiep_uyen"],
+      "greeting": "Haha, gặp đồng đạo giữa chốn hiểm nạn này! Ta có một thương vụ, ngươi có muốn nghe?",
+      "quests": [
+        {
+          "id": "q_diet_huyet_lang_vuong",
+          "name": "Thủ Cấp Huyết Lang",
+          "description": "Tiêu diệt 1 Huyết Lang Vương để chứng minh bản lĩnh.",
+          "type": "kill",
+          "target": "huyet_lang_vuong",
+          "amount": 1,
+          "rewards": { "gold": 200, "xp": 300, "skillChance": { "id": "than_hanh_thuat", "chance": 15 } },
+          "dialogue": {
+            "accept": "Huyết Lang Vương hoành hành vùng này lâu rồi. Giết nó đi!",
+            "progress": "Sao? Chưa hạ được à? Huyết Lang Vương không dễ đối phó đâu.",
+            "complete": "Ngươi thật sự hạ được nó! Đáng nể, đáng nể! Đây, ta truyền cho ngươi một chút tâm đắc."
+          }
+        },
+        {
+          "id": "q_thu_thap_am_khi",
+          "name": "Nghiên Cứu Âm Khí",
+          "description": "Thu thập 6 Âm Khí từ vùng Huyết Ma Chiến Trường.",
+          "type": "collect",
+          "target": "mat_am_khi",
+          "amount": 6,
+          "rewards": { "gold": 180, "xp": 250 },
+          "dialogue": {
+            "accept": "Âm Khí ở Chiến Trường rất đặc biệt. Thu thập 6 phần cho ta.",
+            "progress": "Chưa đủ! Âm Khí thường tụ tập vào ban đêm.",
+            "complete": "Tốt lắm! Đây là thù lao xứng đáng. Hẹn gặp lại trên giang hồ."
+          }
+        }
+      ],
+      "teachableSkills": ["than_hanh_thuat"]
+    },
+    {
+      "id": "sat_thu_am_anh",
+      "name": "Ám Ảnh Sát Thủ",
+      "profession": "assassin",
+      "icon": "🗡️",
+      "areaIds": ["am_sat_hoang", "u_minh_quy_vuc"],
+      "greeting": "...Ngươi cũng đến nơi này? Hoặc là ngươi rất mạnh, hoặc là rất ngu.",
+      "quests": [
+        {
+          "id": "q_diet_ma_nhan",
+          "name": "Diệt Ma Nhãn",
+          "description": "Tiêu diệt 2 Ma Nhãn ở U Minh Quỷ Vực.",
+          "type": "kill",
+          "target": "ma_nhan",
+          "amount": 2,
+          "rewards": { "gold": 250, "xp": 400, "skillChance": { "id": "am_sat_thuat", "chance": 10 } },
+          "dialogue": {
+            "accept": "Ma Nhãn kiểm soát tâm trí kẻ yếu. Chứng minh ngươi không yếu.",
+            "progress": "Chưa xong? Tưởng ngươi mạnh hơn cơ.",
+            "complete": "Hừ, cũng được. Ngươi xứng đáng học vài chiêu sát thủ."
+          }
+        }
+      ],
+      "teachableSkills": ["am_sat_thuat"]
+    },
+    {
+      "id": "linh_muc_thanh_quang",
+      "name": "Thánh Quang Linh Mục",
+      "profession": "healer",
+      "icon": "✝️",
+      "areaIds": ["thanh_lam_tran", "co_moc_linh_vien", "bac_suong_canh"],
+      "greeting": "Ánh sáng Thiên Đạo soi rọi muôn loài. Ngươi cần sự giúp đỡ chăng?",
+      "quests": [
+        {
+          "id": "q_thu_thap_huyet_thao",
+          "name": "Hái Huyết Thảo Cứu Bệnh",
+          "description": "Thu thập 8 Huyết Thảo để bào chế thuốc cho dân làng.",
+          "type": "collect",
+          "target": "huyet_thao",
+          "amount": 8,
+          "rewards": { "gold": 60, "xp": 100, "medicines": { "hoi_luc_dan": 3 } },
+          "dialogue": {
+            "accept": "Dân làng đang bệnh, cần Huyết Thảo gấp. Giúp ta nhé!",
+            "progress": "Nhanh lên, bệnh nhân đang chờ!",
+            "complete": "Cảm ơn ngươi! Đây, nhận lấy vài viên Hồi Lực Đan ta luyện từ Huyết Thảo."
+          }
+        }
+      ],
+      "teachableSkills": []
+    },
+    {
+      "id": "thuong_nhan_kim_bao",
+      "name": "Kim Bảo Thương Nhân",
+      "profession": "merchant",
+      "icon": "💰",
+      "areaIds": ["thanh_lam_tran", "thiet_huyet_son", "thien_kiep_uyen"],
+      "greeting": "Mua bán gì không? Ta có hàng tốt, giá hời!",
+      "quests": [
+        {
+          "id": "q_giao_hang_noi_dan",
+          "name": "Giao Hàng Nội Đan",
+          "description": "Thu thập 3 Nội Đan Nhỏ để ta bán cho khách.",
+          "type": "collect",
+          "target": "mat_noi_dan_nho",
+          "amount": 3,
+          "rewards": { "gold": 200, "xp": 50 },
+          "dialogue": {
+            "accept": "Khách hàng đặt 3 Nội Đan Nhỏ. Kiếm cho ta, thù lao hậu hĩnh!",
+            "progress": "Chưa đủ à? Nhanh lên, khách đang sốt ruột!",
+            "complete": "Tuyệt vời! Đây là tiền thù lao. Lần sau có gì hay ho lại hợp tác nhé!"
+          }
+        }
+      ],
+      "teachableSkills": []
+    },
+    {
+      "id": "bi_an_truong_lao",
+      "name": "Trưởng Lão Bí Ẩn",
+      "profession": "elder",
+      "icon": "🌟",
+      "areaIds": ["thien_dao_tan_tich", "vo_tan_hu_khong"],
+      "greeting": "...Ngươi có thể nhìn thấy ta? Interesting. Có lẽ ngươi là người Thiên Đạo chọn.",
+      "quests": [
+        {
+          "id": "q_diet_thien_thach_thu",
+          "name": "Thử Thách Thiên Thạch",
+          "description": "Hạ 1 Thiên Thạch Thú để chứng minh ngươi xứng đáng.",
+          "type": "kill",
+          "target": "thien_thach_thu",
+          "amount": 1,
+          "rewards": { "gold": 500, "xp": 600, "skillChance": { "id": "thien_nhan", "chance": 40 } },
+          "dialogue": {
+            "accept": "Thiên Thạch Thú là thử thách cuối cùng. Hạ nó, ta sẽ truyền cho ngươi Thiên Nhãn.",
+            "progress": "Chưa xong? Thiên Thạch Thú khó đối phó lắm, phải dùng cả trí lẫn lực.",
+            "complete": "Tiền bối gật đầu mỉm cười. Tay chạm trán ngươi, một luồng ký ức cổ xưa tràn vào tâm thức."
+          }
+        }
+      ],
+      "teachableSkills": ["thien_nhan"]
+    }
+  ]
+}

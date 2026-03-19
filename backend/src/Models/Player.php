@@ -45,9 +45,13 @@ class Player
     public int $studyEndsAt = 0; // unix timestamp
     public array $unlockedNodes = []; // array of learned node ids
     public array $treeProgress = []; // points per tree, e.g. ['internal_cultivation' => 5]
+    public array $trackedMonsters = []; // [{instance_id, monster_id, hp_current}]
+    public int $lastMonsterSpawn = 0; // unix
     public string $currentArea = 'thanh_lam_tran'; // Ngao Du — current area
     public ?string $travelingTo = null; // Travel destination area ID
     public int $travelArrivesAt = 0; // Unix timestamp when travel completes
+    public array $activeQuests = []; // Phase 9: [{npc_id, quest_id, status, progress, accepted_at}]
+    public string $role = 'player'; // Phase 10: 'player' | 'admin'
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -63,8 +67,17 @@ class Player
     /** @var Item[] Inventory */
     public array $inventory = [];
 
+    /** @var array Stash for stackable materials (id => amount) */
+    public array $materials = [];
+
+    /** @var array Owned medicines (id => amount) */
+    public array $medicines = [];
+
     /** @var array Active/passive skills */
     public array $skills = [];
+
+    /** @var array Temporary buffs from pills e.g. [{id, type, stat, value, duration}] */
+    public array $combatBuffs = [];
 
     /** @var Modifier[] Extra modifiers (title, hidden, etc.) */
     private array $extraModifiers = [];
@@ -111,8 +124,33 @@ class Player
             }
         }
 
+        // Pill combat buffs
+        foreach ($this->combatBuffs as $buff) {
+            $mods[] = new Modifier($buff['type'], $buff['stat'], $buff['value'], null, $buff['id'] ?? 'pill');
+        }
+
         // Extra modifiers (titles, hidden, etc.)
         $mods = array_merge($mods, $this->extraModifiers);
+
+        // Environment modifiers
+        $envMods = [
+            'hac_phong_lam' => [new Modifier('increase', 'speed', 0.05, null, 'env_forest')],
+            'vong_linh_coc' => [new Modifier('increase', 'dexterity', 0.1, null, 'env_dark')],
+            'thiet_huyet_son' => [new Modifier('increase', 'fireDamage', 0.1, null, 'env_fire')],
+            'thien_kiep_uyen' => [new Modifier('increase', 'speed', 0.15, null, 'env_lightning')],
+            'bac_suong_canh' => [new Modifier('decrease', 'speed', 0.1, null, 'env_freeze')],
+            'am_sat_hoang' => [new Modifier('more', 'dexterity', 15, null, 'env_crit')],
+            'co_moc_linh_vien' => [new Modifier('increase', 'defense', 0.15, null, 'env_wood')],
+            'huyet_ma_chien_truong' => [new Modifier('increase', 'damage', 0.3, null, 'env_blood'), new Modifier('increase', 'damageTaken', 0.2, null, 'env_blood_vuln')],
+            'thien_hoa_linh_dia' => [new Modifier('increase', 'fireDamage', 0.25, null, 'env_hellfire')],
+            'u_minh_quy_vuc' => [new Modifier('decrease', 'defense', 0.15, null, 'env_soul')],
+            'thien_dao_tan_tich' => [new Modifier('increase', 'allStats', 0.15, null, 'env_law')],
+            'vo_tan_hu_khong' => [new Modifier('increase', 'damage', 0.5, null, 'env_void'), new Modifier('increase', 'damageTaken', 0.3, null, 'env_void')]
+        ];
+
+        if (isset($envMods[$this->currentArea])) {
+            $mods = array_merge($mods, $envMods[$this->currentArea]);
+        }
 
         return $mods;
     }
@@ -290,6 +328,35 @@ class Player
     }
 
     /**
+     * Gain XP for a specific skill and handle leveling up.
+     */
+    public function gainSkillXp(string $skillId, int $amount = 1): ?array
+    {
+        $levelUpData = null;
+        foreach ($this->skills as &$sk) {
+            $sid = is_array($sk) ? ($sk['id'] ?? '') : $sk;
+            if ($sid === $skillId && is_array($sk)) {
+                $sk['currentXp'] = (int)($sk['currentXp'] ?? 0) + $amount;
+                $level = (int)($sk['level'] ?? 1);
+                // Require more XP for higher levels (Lv1->2: 100XP, Lv2->3: 200XP)
+                $xpRequired = $level * 100;
+
+                if ($sk['currentXp'] >= $xpRequired) {
+                    $sk['level'] = $level + 1;
+                    $sk['currentXp'] -= $xpRequired;
+                    $levelUpData = [
+                        'skillId' => $sid,
+                        'name' => $sk['name'] ?? $sid,
+                        'newLevel' => $sk['level']
+                    ];
+                }
+                break;
+            }
+        }
+        return $levelUpData;
+    }
+
+    /**
      * Heal.
      */
     public function heal(int $amount): void
@@ -308,11 +375,54 @@ class Player
     }
 
     /**
-     * Use medicine with Torn-style shared stacking cooldown.
-     * Each use ADDS time to the shared timer. Can't use if timer > cap.
+     * Get Xianxia Realm based on level.
+     */
+    public function getRealm(): int
+    {
+        if ($this->level >= 15) return 4; // Nguyên Anh
+        if ($this->level >= 10) return 3; // Kim Đan
+        if ($this->level >= 5) return 2;  // Trúc Cơ
+        return 1; // Luyện Khí
+    }
+
+    /**
+     * Use medicine with logic engine (Tiers, HP Below, Penalties).
      */
     public function useMedicine(array $medicine): ?string
     {
+        $reqs = $medicine['requirements'] ?? [];
+        
+        // 1. Check realm
+        $reqRealm = $reqs['realm'] ?? 1;
+        if ($this->getRealm() < $reqRealm) {
+            return "Cảnh giới chưa đủ để hấp thụ đan dược này!";
+        }
+        
+        // 2. Check HP below
+        if (isset($reqs['hpBelow'])) {
+            $hpPercent = $this->maxHp > 0 ? $this->currentHp / $this->maxHp : 1;
+            if ($hpPercent > floatval($reqs['hpBelow'])) {
+                return "Chỉ có thể dùng khi sinh mệnh dưới " . ($reqs['hpBelow'] * 100) . "%!";
+            }
+        }
+
+        // 2.5 Toxicity / Overdose Check
+        if (isset($medicine['toxicity'])) {
+            $tox = $medicine['toxicity'];
+            $chance = $tox['chance'] ?? 0;
+            if (mt_rand(1, 100) <= $chance) {
+                $this->currentHp = 1;
+                $this->currentEnergy = 0;
+                $duration = ($tox['duration'] ?? 5) * 60;
+                $this->hospitalize($duration);
+                // Still add the cooldown so they can't spam
+                $addTime = $medicine['cooldownAdd'] ?? 30;
+                $this->medCooldownUntil = max(time(), $this->medCooldownUntil) + $addTime;
+                return "Phản phệ! Dược lực hung hãn xé rách kinh mạch. Bạn bị tẩu hỏa nhập ma, phải tịnh dưỡng {$duration}s.";
+            }
+        }
+
+        // Shared cooldown check
         $remaining = max(0, $this->medCooldownUntil - time());
         $addTime = $medicine['cooldownAdd'] ?? 30;
 
@@ -320,11 +430,45 @@ class Player
             return "Đan độc quá nồng! Cần chờ {$remaining}s trước khi dùng tiếp.";
         }
 
-        // Heal
-        $healAmount = (int) round($this->maxHp * ($medicine['healPercent'] / 100));
-        $this->currentHp = min($this->maxHp, $this->currentHp + $healAmount);
+        // 3. Apply Effects
+        $effects = $medicine['effects'] ?? [];
+        $duration = $medicine['duration'] ?? 1; // Default 1 combat
 
-        // Stack cooldown: if timer is still running, add to it; else start fresh
+        foreach ($effects as $eff) {
+            $type = $eff['type'] ?? '';
+            $stat = $eff['stat'] ?? '';
+            $val = $eff['value'] ?? 0;
+            
+            if ($type === 'flat' && $stat === 'hp') {
+                $this->currentHp = min($this->maxHp, $this->currentHp + $val);
+            } elseif ($type === 'increase' || $type === 'more') {
+                // Add as combat buff
+                $this->combatBuffs[] = [
+                    'id' => $medicine['id'],
+                    'type' => $type,
+                    'stat' => $stat,
+                    'value' => $val,
+                    'duration' => $duration
+                ];
+            }
+        }
+        
+        // 4. Handle penalties
+        $penalties = $medicine['penalty'] ?? [];
+        foreach ($penalties as $pen) {
+             if (($pen['stat'] ?? '') === 'hp') {
+                 $drop = (int)($this->maxHp * abs(floatval($pen['value'] ?? 0)));
+                 $this->currentHp = max(1, $this->currentHp - $drop);
+             }
+        }
+
+        // 5. Old Heal Percent for compatibility
+        if (isset($medicine['healPercent'])) {
+            $healAmount = (int) round($this->maxHp * ($medicine['healPercent'] / 100));
+            $this->currentHp = min($this->maxHp, $this->currentHp + $healAmount);
+        }
+
+        // Stack cooldown
         $this->medCooldownUntil = max(time(), $this->medCooldownUntil) + $addTime;
 
         return null;
@@ -434,6 +578,8 @@ class Player
             'allocatedStats' => $this->allocatedStats,
             'equipment' => array_map(fn($i) => $i->toArray(), $this->equipment),
             'inventory' => array_map(fn($i) => $i->toArray(), $this->inventory),
+            'materials' => $this->materials,
+            'medicines' => $this->medicines,
             'skills' => array_values($this->skills),
             // Phase 1
             'gold' => $this->gold,
@@ -448,10 +594,15 @@ class Player
             'studyRemaining' => max(0, $this->studyEndsAt - time()),
             'unlockedNodes' => $this->unlockedNodes,
             'treeProgress' => $this->treeProgress,
+            'trackedMonsters' => $this->trackedMonsters,
+            'combatBuffs' => $this->combatBuffs,
+            'lastMonsterSpawn' => $this->lastMonsterSpawn,
             'currentArea' => $this->currentArea,
             'travelingTo' => $this->travelingTo,
             'travelArrivesAt' => $this->travelArrivesAt,
             'travelRemaining' => $this->travelRemaining(),
+            'activeQuests' => $this->activeQuests,
+            'role' => $this->role,
         ];
     }
 
@@ -486,6 +637,12 @@ class Player
             }
         }
 
+        // Restore materials
+        $player->materials = $data['materials'] ?? [];
+
+        // Restore medicines
+        $player->medicines = $data['medicines'] ?? [];
+
         // Recalculate maxHp/maxEnergy after restoring all equipment/stats
         $player->recalcDerived();
         $player->currentHp = $data['currentHp'] ?? $player->maxHp;
@@ -504,11 +661,16 @@ class Player
         $player->studyEndsAt = $data['studyEndsAt'] ?? 0;
         $player->unlockedNodes = $data['unlockedNodes'] ?? [];
         $player->treeProgress = $data['treeProgress'] ?? [];
+        $player->trackedMonsters = $data['trackedMonsters'] ?? [];
+        $player->combatBuffs = $data['combatBuffs'] ?? [];
+        $player->lastMonsterSpawn = $data['lastMonsterSpawn'] ?? 0;
         $player->currentArea = $data['currentArea'] ?? 'thanh_lam_tran';
         $player->travelingTo = $data['travelingTo'] ?? null;
         $player->travelArrivesAt = $data['travelArrivesAt'] ?? 0;
         $player->username = $data['username'] ?? '';
         $player->passwordHash = $data['passwordHash'] ?? '';
+        $player->activeQuests = $data['activeQuests'] ?? [];
+        $player->role = $data['role'] ?? 'player';
 
         return $player;
     }
@@ -700,5 +862,67 @@ class Player
     public function getTreeProgress(string $treeId): int
     {
         return $this->treeProgress[$treeId] ?? 0;
+    }
+
+    // === Phase 9: Quest Methods ===
+
+    /**
+     * Accept a quest from an NPC.
+     */
+    public function acceptQuest(string $npcId, string $questId): ?string
+    {
+        // Check if already active
+        foreach ($this->activeQuests as $q) {
+            if ($q['quest_id'] === $questId && $q['status'] === 'active') {
+                return 'Đã nhận nhiệm vụ này rồi!';
+            }
+        }
+        // Max 5 active quests
+        $activeCount = count(array_filter($this->activeQuests, fn($q) => $q['status'] === 'active'));
+        if ($activeCount >= 5) {
+            return 'Tối đa 5 nhiệm vụ cùng lúc!';
+        }
+        $this->activeQuests[] = [
+            'npc_id' => $npcId,
+            'quest_id' => $questId,
+            'status' => 'active',
+            'progress' => 0,
+            'accepted_at' => time(),
+            'completed_at' => null,
+        ];
+        return null;
+    }
+
+    /**
+     * Update quest progress for kill/collect type events.
+     */
+    public function updateQuestProgress(string $type, string $targetId, int $amount, array $npcsData): array
+    {
+        $notifications = [];
+        foreach ($this->activeQuests as &$q) {
+            if ($q['status'] !== 'active') continue;
+            // Find the quest definition from NPC data
+            $questDef = null;
+            foreach ($npcsData as $npc) {
+                if ($npc['id'] !== $q['npc_id']) continue;
+                foreach ($npc['quests'] as $quest) {
+                    if ($quest['id'] === $q['quest_id'] && $quest['type'] === $type && $quest['target'] === $targetId) {
+                        $questDef = $quest;
+                        break 2;
+                    }
+                }
+            }
+            if (!$questDef) continue;
+            $q['progress'] = min($q['progress'] + $amount, $questDef['amount']);
+            if ($q['progress'] >= $questDef['amount']) {
+                $notifications[] = [
+                    'questId' => $q['quest_id'],
+                    'questName' => $questDef['name'],
+                    'message' => '✅ Nhiệm vụ "' . $questDef['name'] . '" đã hoàn thành! Hãy tìm NPC để trả quest.'
+                ];
+            }
+        }
+        unset($q);
+        return $notifications;
     }
 }

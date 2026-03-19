@@ -881,3 +881,339 @@ html, body {
   min-width: 120px;
   text-align: right;
 }
+
+/* ===== PHASE 9: QUEST & NPC UI ===== */
+
+/* Quest Container */
+.quest-container {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Quest Card */
+.quest-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  transition: all 0.2s;
+}
+
+.quest-card:hover {
+  border-color: var(--border-light);
+  background: rgba(255,255,255,0.03);
+}
+
+.quest-card.quest-done {
+  border-color: rgba(106, 176, 76, 0.4);
+  background: rgba(106, 176, 76, 0.05);
+}
+
+.quest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.quest-npc {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.quest-type {
+  font-size: 11px;
+  color: var(--text-dim);
+  background: rgba(255,255,255,0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.quest-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+
+.quest-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.quest-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quest-progress .bar-track {
+  flex: 1;
+  background: #0d0f13;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.quest-progress-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  min-width: 40px;
+  text-align: right;
+}
+
+.quest-complete-btn {
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.empty-state p {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+/* Page subtitle */
+.page-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* NPC Quest Modal */
+.quest-offer {
+  transition: all 0.2s;
+}
+.quest-offer:hover {
+  background: rgba(255,255,255,0.08) !important;
+  border-color: rgba(208, 165, 48, 0.3) !important;
+}
+
+/* World Boss Pulse */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Extra layout utilities */
+.ml-sm { margin-left: 8px; }
+.mb-sm { margin-bottom: 6px; }
+.w-full { width: 100%; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.text-xs { font-size: 11px; }
+.text-lg { font-size: 16px; }
+.text-md { font-size: 14px; }
+.text-center { text-align: center; }
+.text-orange { color: var(--orange); }
+.text-cyan { color: var(--cyan); }
+.text-blue { color: var(--blue); }
+.text-purple { color: var(--purple); }
+.bold { font-weight: 700; }
+.rounded { border-radius: var(--radius); }
+.bg-darker { background: #0d0f13; }
+.bg-dark { background: var(--bg-main); }
+.bg-red { background: var(--red); }
+.h-full { height: 100%; }
+.border-red { border-color: var(--red); }
+.loading-spinner {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+/* Bar fill sizes */
+.bar-fill { border-radius: 4px; transition: width 0.4s ease; }
+
+/* ===== PHASE 10: ADMIN PANEL UI ===== */
+
+.admin-layout {
+  padding: 12px;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.admin-tab {
+  padding: 8px 14px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-tab:hover {
+  background: var(--bg-hover);
+  color: var(--text-bright);
+}
+
+.admin-tab.active {
+  background: rgba(208, 165, 48, 0.1);
+  color: var(--gold);
+  border-color: rgba(208, 165, 48, 0.4);
+}
+
+.admin-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.admin-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.admin-card:hover {
+  border-color: var(--border-light);
+  background: rgba(255,255,255,0.03);
+}
+
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.admin-card-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.admin-card-stats {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.admin-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.admin-json-editor {
+  width: 100%;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--text-bright);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  resize: vertical;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+.admin-json-editor:focus {
+  border-color: var(--gold);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(208, 165, 48, 0.15);
+}
+
+/* Admin Modal */
+.admin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fadeIn 0.2s;
+}
+
+.admin-modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.admin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--bg-panel-alt);
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.admin-modal .admin-json-editor {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+.admin-modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}

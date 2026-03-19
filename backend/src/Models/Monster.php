@@ -15,6 +15,7 @@ class Monster
     public int $level = 1;
 
     private array $stats;
+    private array $rawData = [];
 
     public function __construct(
         string $id,
@@ -63,6 +64,11 @@ class Monster
         ];
     }
 
+    public function getRawData(): array
+    {
+        return $this->rawData;
+    }
+
     /**
      * Create from JSON data with optional level scaling.
      */
@@ -80,6 +86,7 @@ class Monster
         $xp = (int) round(($data['xpReward'] ?? 20) * $scale);
         $m = new self($data['id'], $data['name'], $stats, $xp);
         $m->level = $level;
+        $m->rawData = $data;
         return $m;
     }
 }

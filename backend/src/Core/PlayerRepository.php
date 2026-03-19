@@ -26,14 +26,14 @@ class PlayerRepository
             allocated_stats, hospital_until, med_cooldown_until, last_hp_regen,
             gold, nerve, max_nerve, crime_exp, crime_skills, jail_until,
             studying_node, study_ends_at, unlocked_nodes, tree_progress, current_area,
-            traveling_to, travel_arrives_at
+            traveling_to, travel_arrives_at, role
         ) VALUES (
             :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
             :current_hp, :max_hp, :current_energy, :max_energy, :current_stamina, :max_stamina, :stat_points,
             :allocated_stats, :hospital_until, :med_cooldown_until, :last_hp_regen,
             :gold, :nerve, :max_nerve, :crime_exp, :crime_skills, :jail_until,
             :studying_node, :study_ends_at, :unlocked_nodes, :tree_progress, :current_area,
-            :traveling_to, :travel_arrives_at
+            :traveling_to, :travel_arrives_at, :role
         ) ON DUPLICATE KEY UPDATE
             name = VALUES(name), gender = VALUES(gender),
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
@@ -50,7 +50,8 @@ class PlayerRepository
             unlocked_nodes = VALUES(unlocked_nodes), tree_progress = VALUES(tree_progress),
             current_area = VALUES(current_area),
             traveling_to = VALUES(traveling_to),
-            travel_arrives_at = VALUES(travel_arrives_at)";
+            travel_arrives_at = VALUES(travel_arrives_at),
+            role = VALUES(role)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -86,7 +87,22 @@ class PlayerRepository
             'current_area' => $data['currentArea'] ?? 'thanh_lam_tran',
             'traveling_to' => $data['travelingTo'] ?? null,
             'travel_arrives_at' => $data['travelArrivesAt'] ?? 0,
+            'role' => $data['role'] ?? 'player',
         ]);
+
+        // Phase 5: Normalized Tracking Tables
+        $stmtEx = $pdo->prepare("INSERT INTO player_exploration (player_id, last_monster_spawn) VALUES (?, ?) ON DUPLICATE KEY UPDATE last_monster_spawn = VALUES(last_monster_spawn)");
+        $stmtEx->execute([$id, $data['lastMonsterSpawn'] ?? 0]);
+
+        $pdo->prepare("DELETE FROM player_tracked_monsters WHERE player_id = ? AND area_id = ?")->execute([$id, $data['currentArea']]);
+        if (!empty($data['trackedMonsters'])) {
+            $stmtM = $pdo->prepare("INSERT INTO player_tracked_monsters (player_id, area_id, monster_id, current_hp, spawned_at) VALUES (?, ?, ?, ?, ?)");
+            foreach ($data['trackedMonsters'] as $tm) {
+                if (($tm['area_id'] ?? $data['currentArea']) === $data['currentArea']) {
+                    $stmtM->execute([$id, $data['currentArea'], $tm['monster_id'], $tm['current_hp'], $tm['spawned_at'] ?? time()]);
+                }
+            }
+        }
     }
 
     /**
@@ -130,6 +146,7 @@ class PlayerRepository
             'unlockedNodes' => json_decode($row['unlocked_nodes'] ?? '[]', true) ?: [],
             'treeProgress' => json_decode($row['tree_progress'] ?? '{}', true) ?: [],
             'currentArea' => $row['current_area'] ?? 'thanh_lam_tran',
+            'role' => $row['role'] ?? 'player',
             // skills loaded from player_skills table below
             'skills' => [],
             // equipment/inventory loaded from player_items table
@@ -170,18 +187,38 @@ class PlayerRepository
         $data['inventory'] = $inventory;
 
         // Load skills from player_skills mapping table
-        $skillStmt = $pdo->prepare("SELECT skill_id FROM player_skills WHERE player_id = :id");
+        $skillStmt = $pdo->prepare("SELECT skill_id, level, current_xp, is_equipped FROM player_skills WHERE player_id = :id");
         $skillStmt->execute(['id' => $id]);
-        $skillIds = $skillStmt->fetchAll(\PDO::FETCH_COLUMN);
+        $skillRows = $skillStmt->fetchAll(\PDO::FETCH_ASSOC);
 
         // Hydrate skill data from skills.json
         $skillSystem = new SkillSystem();
         $skills = [];
-        foreach ($skillIds as $sid) {
-            $skill = $skillSystem->getById($sid);
-            if ($skill) $skills[] = $skill;
+        foreach ($skillRows as $row) {
+            $skill = $skillSystem->getById($row['skill_id']);
+            if ($skill) {
+                // Attach dynamic progression data to the static JSON definition
+                $skill['level'] = (int)$row['level'];
+                $skill['currentXp'] = (int)$row['current_xp'];
+                $skill['isEquipped'] = (bool)$row['is_equipped'];
+                $skills[] = $skill;
+            }
         }
         $data['skills'] = $skills;
+
+        // Phase 5: Load Normalized Tracked Monsters and Exploration State
+        $stmtEx = $pdo->prepare("SELECT last_monster_spawn FROM player_exploration WHERE player_id = ?");
+        $stmtEx->execute([$id]);
+        if ($exRow = $stmtEx->fetch(\PDO::FETCH_ASSOC)) {
+            $data['lastMonsterSpawn'] = (int) $exRow['last_monster_spawn'];
+        }
+
+        $stmtM = $pdo->prepare("SELECT id as instance_id, area_id, monster_id, current_hp, spawned_at FROM player_tracked_monsters WHERE player_id = ? AND area_id = ?");
+        $stmtM->execute([$id, $data['currentArea'] ?? 'thanh_lam_tran']);
+        $data['trackedMonsters'] = $stmtM->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
+        // Phase 9: Load active quests
+        $data['activeQuests'] = self::loadQuests($id);
 
         return Player::fromArray($data);
     }
@@ -269,10 +306,57 @@ class PlayerRepository
         $del->execute(['pid' => $playerId]);
 
         // Insert current skills
-        $ins = $pdo->prepare("INSERT INTO player_skills (player_id, skill_id) VALUES (:pid, :sid)");
+        $ins = $pdo->prepare("INSERT INTO player_skills (player_id, skill_id, level, current_xp, is_equipped) VALUES (:pid, :sid, :level, :xp, :eq)");
         foreach ($player->skills as $skill) {
             $sid = is_array($skill) ? ($skill['id'] ?? '') : $skill;
-            if ($sid) $ins->execute(['pid' => $playerId, 'sid' => $sid]);
+            $level = is_array($skill) ? ($skill['level'] ?? 1) : 1;
+            $xp = is_array($skill) ? ($skill['currentXp'] ?? 0) : 0;
+            $eq = is_array($skill) ? (isset($skill['isEquipped']) && $skill['isEquipped'] ? 1 : 0) : 0;
+            if ($sid) {
+                $ins->execute([
+                    'pid' => $playerId,
+                    'sid' => $sid,
+                    'level' => $level,
+                    'xp' => $xp,
+                    'eq' => $eq
+                ]);
+            }
+        }
+    }
+
+    // ===== QUESTS =====
+
+    /**
+     * Load active quests for a player.
+     */
+    public static function loadQuests(string $playerId): array
+    {
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare("SELECT npc_id, quest_id, status, progress, accepted_at, completed_at FROM player_quests WHERE player_id = ? AND status = 'active'");
+        $stmt->execute([$playerId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Save quests for a player (upsert).
+     */
+    public static function saveQuests(string $playerId, array $quests): void
+    {
+        $pdo = Database::pdo();
+        $sql = "INSERT INTO player_quests (player_id, npc_id, quest_id, status, progress, accepted_at, completed_at)
+                VALUES (:pid, :npc, :qid, :status, :prog, :at, :ct)
+                ON DUPLICATE KEY UPDATE status = VALUES(status), progress = VALUES(progress), completed_at = VALUES(completed_at)";
+        $stmt = $pdo->prepare($sql);
+        foreach ($quests as $q) {
+            $stmt->execute([
+                'pid' => $playerId,
+                'npc' => $q['npc_id'],
+                'qid' => $q['quest_id'],
+                'status' => $q['status'] ?? 'active',
+                'prog' => $q['progress'] ?? 0,
+                'at' => $q['accepted_at'] ?? time(),
+                'ct' => $q['completed_at'] ?? null,
+            ]);
         }
     }
 

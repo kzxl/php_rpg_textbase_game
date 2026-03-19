@@ -51,8 +51,14 @@ return function ($app) {
         if ($error) return jsonResponse($response, ['error' => $error], 400);
 
         savePlayer($id, $player);
+
+        $msgParts = [];
+        if (isset($medicine['healPercent'])) $msgParts[] = "+{$medicine['healPercent']}% HP";
+        if (isset($medicine['cooldownAdd'])) $msgParts[] = "Đan độc +{$medicine['cooldownAdd']}s";
+        $msg = empty($msgParts) ? "Đã dùng {$medicine['name']}" : implode(' · ', $msgParts);
+
         return jsonResponse($response, [
-            'message' => "+{$medicine['healPercent']}% HP · Đan độc +{$medicine['cooldownAdd']}s",
+            'message' => $msg,
             'player' => $player->toArray(),
         ]);
     });

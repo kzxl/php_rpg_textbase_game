@@ -1,220 +1,827 @@
 {
-    "monsters": [
+  "monsters": [
+    {
+      "id": "tho_lang",
+      "name": "Thổ Lang",
+      "description": "Sói đất chạy theo bầy, sát thương thấp nhưng hay gank.",
+      "tier": 1,
+      "tierName": "Luyện Khí",
+      "tags": [
+        "beast",
+        "physical",
+        "pack"
+      ],
+      "stats": {
+        "hp": 30,
+        "strength": 5,
+        "speed": 6,
+        "dexterity": 4,
+        "defense": 2
+      },
+      "xpReward": 15,
+      "goldReward": [
+        2,
+        5
+      ],
+      "effects": [],
+      "drops": [
         {
-            "id": "tho_lang",
-            "name": "Thổ Lang",
-            "description": "Sói đất chạy theo bầy, sát thương thấp nhưng hay gank.",
-            "tier": 1,
-            "tierName": "Luyện Khí",
-            "tags": ["beast", "physical", "pack"],
-            "stats": { "hp": 30, "strength": 5, "speed": 6, "dexterity": 4, "defense": 2 },
-            "xpReward": 15,
-            "goldReward": [2, 5],
-            "effects": [],
-            "drops": [
-                { "itemId": "mat_thit_tho", "chance": 70, "qty": [1, 2] },
-                { "itemId": "mat_da_tho", "chance": 50, "qty": [1, 1] },
-                { "itemId": "mat_xuong_vun", "chance": 30, "qty": [1, 2] }
-            ]
+          "itemId": "mat_thit_tho",
+          "chance": 70,
+          "qty": [
+            1,
+            2
+          ]
         },
         {
-            "id": "thanh_xa",
-            "name": "Thanh Xà",
-            "description": "Rắn xanh độc, tấn công nhanh kèm nọc độc.",
-            "tier": 1,
-            "tierName": "Luyện Khí",
-            "tags": ["beast", "physical", "poison"],
-            "stats": { "hp": 25, "strength": 7, "speed": 9, "dexterity": 8, "defense": 1 },
-            "xpReward": 20,
-            "goldReward": [3, 6],
-            "effects": [{"type": "poison", "chance": 30, "damage": 2, "duration": 3}],
-            "drops": [
-                { "itemId": "mat_noc_xa", "chance": 60, "qty": [1, 2] },
-                { "itemId": "mat_da_ran", "chance": 40, "qty": [1, 1] },
-                { "itemId": "mat_linh_khi_nho", "chance": 5, "qty": [1, 1] }
-            ]
+          "itemId": "mat_da_tho",
+          "chance": 50,
+          "qty": [
+            1,
+            1
+          ]
         },
         {
-            "id": "moc_nhan",
-            "name": "Mộc Nhân",
-            "description": "Quái cây cổ thụ, phòng thủ cao và có khả năng hồi phục.",
-            "tier": 1,
-            "tierName": "Luyện Khí",
-            "tags": ["elemental", "physical", "regen"],
-            "stats": { "hp": 55, "strength": 4, "speed": 2, "dexterity": 2, "defense": 8 },
-            "xpReward": 25,
-            "goldReward": [2, 4],
-            "effects": [{"type": "regen", "value": 3, "perTurn": true}],
-            "drops": [
-                { "itemId": "mat_go_linh", "chance": 55, "qty": [1, 2] },
-                { "itemId": "mat_nhua_cay", "chance": 40, "qty": [1, 1] },
-                { "itemId": "mat_hat_moc", "chance": 20, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "anh_hon",
-            "name": "Ảnh Hồn",
-            "description": "Hồn ma ẩn trong bóng tối, khó gặp nhưng sát thương cao.",
-            "tier": 1,
-            "tierName": "Luyện Khí",
-            "tags": ["spirit", "magical", "hidden"],
-            "stats": { "hp": 15, "strength": 12, "speed": 14, "dexterity": 12, "defense": 0 },
-            "xpReward": 40,
-            "goldReward": [5, 10],
-            "effects": [],
-            "spawnWeight": 5,
-            "drops": [
-                { "itemId": "mat_hon_tan", "chance": 60, "qty": [1, 1] },
-                { "itemId": "mat_manh_ky_uc", "chance": 8, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "hoa_ho",
-            "name": "Hỏa Hồ",
-            "description": "Hồ ly lửa, tấn công nhanh với sát thương hỏa diện rộng.",
-            "tier": 2,
-            "tierName": "Trúc Cơ",
-            "tags": ["beast", "magical", "fire"],
-            "stats": { "hp": 60, "strength": 14, "speed": 16, "dexterity": 12, "defense": 5 },
-            "xpReward": 60,
-            "goldReward": [8, 15],
-            "effects": [{"type": "burn", "chance": 25, "damage": 4, "duration": 2}],
-            "drops": [
-                { "itemId": "mat_long_hoa", "chance": 50, "qty": [1, 2] },
-                { "itemId": "mat_noi_dan_nho", "chance": 30, "qty": [1, 1] },
-                { "itemId": "mat_tinh_hoa", "chance": 15, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "thiet_giap_trung",
-            "name": "Thiết Giáp Trùng",
-            "description": "Côn trùng bọc giáp sắt, phòng thủ cực cao.",
-            "tier": 2,
-            "tierName": "Trúc Cơ",
-            "tags": ["beast", "physical", "tank"],
-            "stats": { "hp": 120, "strength": 10, "speed": 3, "dexterity": 2, "defense": 25 },
-            "xpReward": 70,
-            "goldReward": [10, 18],
-            "effects": [],
-            "drops": [
-                { "itemId": "mat_vo_cung", "chance": 60, "qty": [1, 2] },
-                { "itemId": "mat_kim_loai_linh", "chance": 35, "qty": [1, 1] },
-                { "itemId": "mat_tinh_thach", "chance": 15, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "u_linh",
-            "name": "U Linh",
-            "description": "Linh hồn u ám, né giỏi và gây sát thương phép.",
-            "tier": 2,
-            "tierName": "Trúc Cơ",
-            "tags": ["spirit", "magical", "evasion"],
-            "stats": { "hp": 45, "strength": 12, "speed": 18, "dexterity": 20, "defense": 3 },
-            "xpReward": 65,
-            "goldReward": [8, 14],
-            "effects": [],
-            "drops": [
-                { "itemId": "mat_linh_hon", "chance": 45, "qty": [1, 1] },
-                { "itemId": "mat_hu_anh_tinh", "chance": 20, "qty": [1, 1] },
-                { "itemId": "mat_tan_phach", "chance": 10, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "huyet_lang_vuong",
-            "name": "Huyết Lang Vương",
-            "description": "Sói vương máu, mini-boss với crit cao và sát thương khủng.",
-            "tier": 3,
-            "tierName": "Kim Đan",
-            "tags": ["beast", "physical", "boss", "crit"],
-            "stats": { "hp": 150, "strength": 22, "speed": 14, "dexterity": 18, "defense": 12 },
-            "xpReward": 120,
-            "goldReward": [20, 40],
-            "effects": [{"type": "crit_bonus", "value": 20}],
-            "drops": [
-                { "itemId": "mat_huyet_tinh", "chance": 50, "qty": [1, 2] },
-                { "itemId": "mat_rang_soi_vuong", "chance": 35, "qty": [1, 1] },
-                { "itemId": "mat_noi_dan_trung", "chance": 20, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "loi_dieu",
-            "name": "Lôi Điểu",
-            "description": "Chim sấm cực nhanh, tấn công bằng lôi điện.",
-            "tier": 3,
-            "tierName": "Kim Đan",
-            "tags": ["beast", "magical", "lightning", "speed"],
-            "stats": { "hp": 90, "strength": 18, "speed": 25, "dexterity": 20, "defense": 8 },
-            "xpReward": 110,
-            "goldReward": [18, 35],
-            "effects": [{"type": "stun", "chance": 15, "duration": 1}],
-            "drops": [
-                { "itemId": "mat_loi_vu", "chance": 45, "qty": [1, 2] },
-                { "itemId": "mat_loi_tinh", "chance": 25, "qty": [1, 1] },
-                { "itemId": "mat_hach_sam", "chance": 10, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "co_thi",
-            "name": "Cổ Thi",
-            "description": "Xác chết cổ đại, HP cao kèm hiệu ứng độc và nguyền.",
-            "tier": 3,
-            "tierName": "Kim Đan",
-            "tags": ["undead", "magical", "poison", "curse"],
-            "stats": { "hp": 180, "strength": 16, "speed": 5, "dexterity": 6, "defense": 18 },
-            "xpReward": 130,
-            "goldReward": [22, 45],
-            "effects": [
-                {"type": "poison", "chance": 40, "damage": 5, "duration": 3},
-                {"type": "curse", "chance": 15, "stat": "defense", "value": -5, "duration": 2}
-            ],
-            "drops": [
-                { "itemId": "mat_xac_khi", "chance": 55, "qty": [1, 2] },
-                { "itemId": "mat_am_khi", "chance": 35, "qty": [1, 1] },
-                { "itemId": "mat_tan_hon", "chance": 15, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "ma_nhan",
-            "name": "Ma Nhãn",
-            "description": "Con mắt ma quái, gây debuff và kiểm soát kẻ thù.",
-            "tier": 4,
-            "tierName": "Nguyên Anh",
-            "tags": ["demon", "magical", "debuff", "control"],
-            "stats": { "hp": 120, "strength": 20, "speed": 16, "dexterity": 22, "defense": 15 },
-            "xpReward": 200,
-            "goldReward": [35, 60],
-            "effects": [
-                {"type": "curse", "chance": 50, "stat": "strength", "value": -8, "duration": 3},
-                {"type": "stun", "chance": 20, "duration": 1}
-            ],
-            "drops": [
-                { "itemId": "mat_ma_nhan", "chance": 40, "qty": [1, 1] },
-                { "itemId": "mat_hac_tinh", "chance": 30, "qty": [1, 1] },
-                { "itemId": "mat_linh_hon_di_bien", "chance": 10, "qty": [1, 1] }
-            ]
-        },
-        {
-            "id": "thien_thach_thu",
-            "name": "Thiên Thạch Thú",
-            "description": "Quái thú từ thiên thạch, HP và phòng thủ cực cao.",
-            "tier": 4,
-            "tierName": "Nguyên Anh",
-            "tags": ["elemental", "physical", "tank", "boss"],
-            "stats": { "hp": 300, "strength": 28, "speed": 6, "dexterity": 8, "defense": 35 },
-            "xpReward": 250,
-            "goldReward": [40, 80],
-            "effects": [],
-            "drops": [
-                { "itemId": "mat_thien_thach", "chance": 45, "qty": [1, 2] },
-                { "itemId": "mat_tinh_thach_lon", "chance": 25, "qty": [1, 1] },
-                { "itemId": "mat_loi_dia", "chance": 10, "qty": [1, 1] }
-            ]
+          "itemId": "mat_xuong_vun",
+          "chance": 30,
+          "qty": [
+            1,
+            2
+          ]
         }
-    ],
-    "tierInfo": {
-        "1": { "name": "Luyện Khí", "color": "#7fba4c", "minLevel": 1 },
-        "2": { "name": "Trúc Cơ", "color": "#5b8dd9", "minLevel": 5 },
-        "3": { "name": "Kim Đan", "color": "#a77bda", "minLevel": 10 },
-        "4": { "name": "Nguyên Anh", "color": "#e8a43a", "minLevel": 15 }
+      ]
+    },
+    {
+      "id": "thanh_xa",
+      "name": "Thanh Xà",
+      "description": "Rắn xanh độc, tấn công nhanh kèm nọc độc.",
+      "tier": 1,
+      "tierName": "Luyện Khí",
+      "tags": [
+        "beast",
+        "physical",
+        "poison"
+      ],
+      "stats": {
+        "hp": 25,
+        "strength": 7,
+        "speed": 9,
+        "dexterity": 8,
+        "defense": 1
+      },
+      "xpReward": 20,
+      "goldReward": [
+        3,
+        6
+      ],
+      "effects": [
+        {
+          "type": "poison",
+          "chance": 30,
+          "damage": 2,
+          "duration": 3
+        }
+      ],
+      "drops": [
+        {
+          "itemId": "mat_noc_xa",
+          "chance": 60,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_da_ran",
+          "chance": 40,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_linh_khi_nho",
+          "chance": 5,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "moc_nhan",
+      "name": "Mộc Nhân",
+      "description": "Quái cây cổ thụ, phòng thủ cao và có khả năng hồi phục.",
+      "tier": 1,
+      "tierName": "Luyện Khí",
+      "tags": [
+        "elemental",
+        "physical",
+        "regen"
+      ],
+      "stats": {
+        "hp": 55,
+        "strength": 4,
+        "speed": 2,
+        "dexterity": 2,
+        "defense": 8
+      },
+      "xpReward": 25,
+      "goldReward": [
+        2,
+        4
+      ],
+      "effects": [
+        {
+          "type": "regen",
+          "value": 3,
+          "perTurn": true
+        }
+      ],
+      "drops": [
+        {
+          "itemId": "mat_go_linh",
+          "chance": 55,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_nhua_cay",
+          "chance": 40,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_hat_moc",
+          "chance": 20,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "anh_hon",
+      "name": "Ảnh Hồn",
+      "description": "Hồn ma ẩn trong bóng tối, khó gặp nhưng sát thương cao.",
+      "tier": 1,
+      "tierName": "Luyện Khí",
+      "tags": [
+        "spirit",
+        "magical",
+        "hidden"
+      ],
+      "stats": {
+        "hp": 15,
+        "strength": 12,
+        "speed": 14,
+        "dexterity": 12,
+        "defense": 0
+      },
+      "xpReward": 40,
+      "goldReward": [
+        5,
+        10
+      ],
+      "effects": [],
+      "spawnWeight": 5,
+      "drops": [
+        {
+          "itemId": "mat_hon_tan",
+          "chance": 60,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_manh_ky_uc",
+          "chance": 8,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoa_ho",
+      "name": "Hỏa Hồ",
+      "description": "Hồ ly lửa, tấn công nhanh với sát thương hỏa diện rộng.",
+      "tier": 2,
+      "tierName": "Trúc Cơ",
+      "tags": [
+        "beast",
+        "magical",
+        "fire"
+      ],
+      "stats": {
+        "hp": 60,
+        "strength": 14,
+        "speed": 16,
+        "dexterity": 12,
+        "defense": 5
+      },
+      "xpReward": 60,
+      "goldReward": [
+        8,
+        15
+      ],
+      "effects": [
+        {
+          "type": "burn",
+          "chance": 25,
+          "damage": 4,
+          "duration": 2
+        }
+      ],
+      "drops": [
+        {
+          "itemId": "mat_long_hoa",
+          "chance": 50,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_noi_dan_nho",
+          "chance": 30,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_tinh_hoa",
+          "chance": 15,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thiet_giap_trung",
+      "name": "Thiết Giáp Trùng",
+      "description": "Côn trùng bọc giáp sắt, phòng thủ cực cao.",
+      "tier": 2,
+      "tierName": "Trúc Cơ",
+      "tags": [
+        "beast",
+        "physical",
+        "tank"
+      ],
+      "stats": {
+        "hp": 120,
+        "strength": 10,
+        "speed": 3,
+        "dexterity": 2,
+        "defense": 25
+      },
+      "xpReward": 70,
+      "goldReward": [
+        10,
+        18
+      ],
+      "effects": [],
+      "drops": [
+        {
+          "itemId": "mat_vo_cung",
+          "chance": 60,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_kim_loai_linh",
+          "chance": 35,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_tinh_thach",
+          "chance": 15,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "u_linh",
+      "name": "U Linh",
+      "description": "Linh hồn u ám, né giỏi và gây sát thương phép.",
+      "tier": 2,
+      "tierName": "Trúc Cơ",
+      "tags": [
+        "spirit",
+        "magical",
+        "evasion"
+      ],
+      "stats": {
+        "hp": 45,
+        "strength": 12,
+        "speed": 18,
+        "dexterity": 20,
+        "defense": 3
+      },
+      "xpReward": 65,
+      "goldReward": [
+        8,
+        14
+      ],
+      "effects": [],
+      "drops": [
+        {
+          "itemId": "mat_linh_hon",
+          "chance": 45,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_hu_anh_tinh",
+          "chance": 20,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_tan_phach",
+          "chance": 10,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "huyet_lang_vuong",
+      "name": "Huyết Lang Vương",
+      "description": "Sói vương máu, mini-boss với crit cao và sát thương khủng.",
+      "tier": 3,
+      "tierName": "Kim Đan",
+      "tags": [
+        "beast",
+        "physical",
+        "boss",
+        "crit"
+      ],
+      "stats": {
+        "hp": 150,
+        "strength": 22,
+        "speed": 14,
+        "dexterity": 18,
+        "defense": 12
+      },
+      "xpReward": 120,
+      "goldReward": [
+        20,
+        40
+      ],
+      "effects": [
+        {
+          "type": "crit_bonus",
+          "value": 20
+        }
+      ],
+      "resistances": {
+        "fire": -0.2,
+        "poison": 0.5
+      },
+      "regenPerHour": 100,
+      "drops": [
+        {
+          "itemId": "mat_huyet_tinh",
+          "chance": 50,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_rang_soi_vuong",
+          "chance": 35,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_noi_dan_trung",
+          "chance": 20,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "loi_dieu",
+      "name": "Lôi Điểu",
+      "description": "Chim sấm cực nhanh, tấn công bằng lôi điện.",
+      "tier": 3,
+      "tierName": "Kim Đan",
+      "tags": [
+        "beast",
+        "magical",
+        "lightning",
+        "speed"
+      ],
+      "stats": {
+        "hp": 90,
+        "strength": 18,
+        "speed": 25,
+        "dexterity": 20,
+        "defense": 8
+      },
+      "xpReward": 110,
+      "goldReward": [
+        18,
+        35
+      ],
+      "effects": [
+        {
+          "type": "stun",
+          "chance": 15,
+          "duration": 1
+        }
+      ],
+      "resistances": {
+        "lightning": 1.0,
+        "water": -0.5
+      },
+      "drops": [
+        {
+          "itemId": "mat_loi_vu",
+          "chance": 45,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_loi_tinh",
+          "chance": 25,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_hach_sam",
+          "chance": 10,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "co_thi",
+      "name": "Cổ Thi",
+      "description": "Xác chết cổ đại, HP cao kèm hiệu ứng độc và nguyền.",
+      "tier": 3,
+      "tierName": "Kim Đan",
+      "tags": [
+        "undead",
+        "magical",
+        "poison",
+        "curse"
+      ],
+      "stats": {
+        "hp": 180,
+        "strength": 16,
+        "speed": 5,
+        "dexterity": 6,
+        "defense": 18
+      },
+      "xpReward": 130,
+      "goldReward": [
+        22,
+        45
+      ],
+      "effects": [
+        {
+          "type": "poison",
+          "chance": 40,
+          "damage": 5,
+          "duration": 3
+        },
+        {
+          "type": "curse",
+          "chance": 15,
+          "stat": "defense",
+          "value": -5,
+          "duration": 2
+        }
+      ],
+      "resistances": {
+        "poison": 1.0,
+        "fire": -0.5
+      },
+      "drops": [
+        {
+          "itemId": "mat_xac_khi",
+          "chance": 55,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_am_khi",
+          "chance": 35,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_tan_hon",
+          "chance": 15,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ma_nhan",
+      "name": "Ma Nhãn",
+      "description": "Con mắt ma quái, gây debuff và kiểm soát kẻ thù.",
+      "tier": 4,
+      "tierName": "Nguyên Anh",
+      "tags": [
+        "demon",
+        "magical",
+        "debuff",
+        "control"
+      ],
+      "stats": {
+        "hp": 120,
+        "strength": 20,
+        "speed": 16,
+        "dexterity": 22,
+        "defense": 15
+      },
+      "xpReward": 200,
+      "goldReward": [
+        35,
+        60
+      ],
+      "effects": [
+        {
+          "type": "curse",
+          "chance": 50,
+          "stat": "strength",
+          "value": -8,
+          "duration": 3
+        },
+        {
+          "type": "stun",
+          "chance": 20,
+          "duration": 1
+        }
+      ],
+      "resistances": {
+        "physical": 0.3,
+        "magical": 0.5
+      },
+      "drops": [
+        {
+          "itemId": "mat_ma_nhan",
+          "chance": 40,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_hac_tinh",
+          "chance": 30,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_linh_hon_di_bien",
+          "chance": 10,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "thien_thach_thu",
+      "name": "Thiên Thạch Thú",
+      "description": "Quái thú từ thiên thạch, HP và phòng thủ cực cao.",
+      "tier": 4,
+      "tierName": "Nguyên Anh",
+      "tags": [
+        "elemental",
+        "physical",
+        "tank",
+        "boss"
+      ],
+      "stats": {
+        "hp": 300,
+        "strength": 28,
+        "speed": 6,
+        "dexterity": 8,
+        "defense": 35
+      },
+      "xpReward": 250,
+      "goldReward": [
+        40,
+        80
+      ],
+      "effects": [],
+      "resistances": {
+        "physical": 0.8,
+        "fire": 0.5,
+        "water": 0.5,
+        "lightning": 0.5
+      },
+      "regenPerHour": 500,
+      "drops": [
+        {
+          "itemId": "mat_thien_thach",
+          "chance": 45,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "itemId": "mat_tinh_thach_lon",
+          "chance": 25,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "itemId": "mat_loi_dia",
+          "chance": 10,
+          "qty": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "huyet_bat_yeu_vuong",
+      "name": "Huyết Bát Yêu Vương",
+      "description": "Bá chủ Thanh Lam Trấn. Sói vương cổ đại với sức mạnh khủng khiếp, hồi máu theo thời gian.",
+      "tier": 3,
+      "tierName": "Kim Đan",
+      "areaId": "thanh_lam_tran",
+      "isWorldBoss": true,
+      "tags": ["beast", "physical", "boss", "worldboss"],
+      "stats": { "hp": 800, "strength": 35, "speed": 18, "dexterity": 20, "defense": 25 },
+      "xpReward": 500,
+      "goldReward": [100, 200],
+      "effects": [{ "type": "crit_bonus", "value": 25 }],
+      "resistances": { "fire": -0.3, "poison": 0.5 },
+      "regenPerHour": 200,
+      "drops": [
+        { "itemId": "mat_huyet_tinh", "chance": 80, "qty": [3, 5] },
+        { "itemId": "mat_noi_dan_lon", "chance": 50, "qty": [1, 2] },
+        { "itemId": "mat_ba_vuong_nanh", "chance": 25, "qty": [1, 1] }
+      ]
+    },
+    {
+      "id": "moc_yeu_hoang",
+      "name": "Mộc Yêu Hoàng",
+      "description": "Cổ thụ ngàn năm hóa yêu, trấn thủ Hắc Phong Lâm. Phòng thủ và hồi phục kinh hoàng.",
+      "tier": 3,
+      "tierName": "Kim Đan",
+      "areaId": "hac_phong_lam",
+      "isWorldBoss": true,
+      "tags": ["elemental", "physical", "boss", "worldboss", "regen"],
+      "stats": { "hp": 1200, "strength": 20, "speed": 5, "dexterity": 8, "defense": 40 },
+      "xpReward": 600,
+      "goldReward": [120, 250],
+      "effects": [{ "type": "regen", "value": 15, "perTurn": true }],
+      "resistances": { "fire": -0.5, "water": 0.3, "physical": 0.2 },
+      "regenPerHour": 400,
+      "drops": [
+        { "itemId": "mat_go_linh", "chance": 90, "qty": [5, 8] },
+        { "itemId": "mat_noi_dan_trung", "chance": 60, "qty": [1, 3] },
+        { "itemId": "mat_moc_hoang_tinh", "chance": 20, "qty": [1, 1] }
+      ]
+    },
+    {
+      "id": "hoa_diem_vuong",
+      "name": "Hỏa Diệm Vương",
+      "description": "Quỷ lửa cổ đại ẩn trong lòng Thiết Huyết Sơn. Sát thương hỏa cực cao, đốt cháy mọi thứ.",
+      "tier": 4,
+      "tierName": "Nguyên Anh",
+      "areaId": "thiet_huyet_son",
+      "isWorldBoss": true,
+      "tags": ["demon", "magical", "boss", "worldboss", "fire"],
+      "stats": { "hp": 1000, "strength": 40, "speed": 15, "dexterity": 16, "defense": 20 },
+      "xpReward": 800,
+      "goldReward": [200, 400],
+      "effects": [{ "type": "burn", "chance": 60, "damage": 12, "duration": 3 }],
+      "resistances": { "fire": 1.0, "water": -0.5, "ice": -0.3 },
+      "regenPerHour": 300,
+      "drops": [
+        { "itemId": "mat_tinh_hoa", "chance": 80, "qty": [3, 5] },
+        { "itemId": "mat_noi_dan_lon", "chance": 50, "qty": [2, 3] },
+        { "itemId": "mat_hoa_diem_tinh", "chance": 15, "qty": [1, 1] }
+      ]
+    },
+    {
+      "id": "loi_de_than_ung",
+      "name": "Lôi Đế Thần Ưng",
+      "description": "Chúa tể bầu trời Thiên Kiếp Uyên. Tốc độ tuyệt đối, mỗi đòn tấn công kèm thiên lôi.",
+      "tier": 4,
+      "tierName": "Nguyên Anh",
+      "areaId": "thien_kiep_uyen",
+      "isWorldBoss": true,
+      "tags": ["beast", "magical", "boss", "worldboss", "lightning", "speed"],
+      "stats": { "hp": 700, "strength": 35, "speed": 40, "dexterity": 35, "defense": 15 },
+      "xpReward": 900,
+      "goldReward": [250, 500],
+      "effects": [{ "type": "stun", "chance": 30, "duration": 1 }, { "type": "burn", "chance": 40, "damage": 8, "duration": 2 }],
+      "resistances": { "lightning": 1.0, "water": -0.5, "physical": 0.3 },
+      "regenPerHour": 250,
+      "drops": [
+        { "itemId": "mat_loi_tinh", "chance": 85, "qty": [3, 6] },
+        { "itemId": "mat_thien_thach", "chance": 40, "qty": [1, 2] },
+        { "itemId": "mat_loi_de_vu", "chance": 10, "qty": [1, 1] }
+      ]
+    },
+    {
+      "id": "huyet_ma_dai_tuong",
+      "name": "Huyết Ma Đại Tướng",
+      "description": "Vong linh đại tướng bất tử, trấn thủ Huyết Ma Chiến Trường từ vạn năm trước.",
+      "tier": 4,
+      "tierName": "Nguyên Anh",
+      "areaId": "huyet_ma_chien_truong",
+      "isWorldBoss": true,
+      "tags": ["undead", "magical", "boss", "worldboss", "curse"],
+      "stats": { "hp": 1500, "strength": 30, "speed": 12, "dexterity": 18, "defense": 30 },
+      "xpReward": 1000,
+      "goldReward": [300, 600],
+      "effects": [
+        { "type": "curse", "chance": 40, "stat": "strength", "value": -10, "duration": 3 },
+        { "type": "poison", "chance": 30, "damage": 8, "duration": 4 }
+      ],
+      "resistances": { "poison": 1.0, "physical": 0.4, "fire": -0.3 },
+      "regenPerHour": 500,
+      "drops": [
+        { "itemId": "mat_am_khi", "chance": 90, "qty": [5, 8] },
+        { "itemId": "mat_noi_dan_cuc", "chance": 40, "qty": [1, 2] },
+        { "itemId": "mat_huyet_ma_ban_giap", "chance": 8, "qty": [1, 1] }
+      ]
     }
+  ],
+  "tierInfo": {
+    "1": {
+      "name": "Luyện Khí",
+      "color": "#7fba4c",
+      "minLevel": 1
+    },
+    "2": {
+      "name": "Trúc Cơ",
+      "color": "#5b8dd9",
+      "minLevel": 5
+    },
+    "3": {
+      "name": "Kim Đan",
+      "color": "#a77bda",
+      "minLevel": 10
+    },
+    "4": {
+      "name": "Nguyên Anh",
+      "color": "#e8a43a",
+      "minLevel": 15
+    }
+  },
+  "knowledgeLevel": 1
 }

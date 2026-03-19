@@ -29,30 +29,78 @@ export function pageCombat(el, ctx) {
 
     <div id="exploreResult"></div>
 
-    <!-- ĐÁNH THEO ĐỊA ĐIỂM CŨ -->
+    <div id="exploreResult"></div>
+
+    <!-- DẤU VẾT YÊU THÚ -->
     <div class="panel mt-md">
-      <div class="panel-title">Bản Địa Yêu Thú <span class="subtitle">(Đánh Chủ Động)</span></div>
-      <div class="panel-body no-pad">
-        ${state.monsters.map(m => `
-          <div class="list-item clickable" data-mid="${m.id}">
-            <div class="item-info">
-              <div class="item-name">${m.name}</div>
-              <div class="item-desc">${m.description || ''}</div>
-              <div class="item-meta">
-                <span>❤${m.stats.hp}</span>
-                <span>💪${m.stats.strength}</span>
-                <span>🏃${m.stats.speed}</span>
-                <span>🎯${m.stats.dexterity}</span>
-                <span>🛡${m.stats.defense}</span>
-              </div>
-            </div>
-            <button class="btn btn--red btn--sm">Chiến</button>
-          </div>
-        `).join('')}
+      <div class="panel-title">Bản Địa Yêu Thú <span class="subtitle">(Tối đa 5 con rình rập)</span></div>
+      <div class="panel-body no-pad" id="trackedMonstersList" style="max-height: 400px; overflow-y: auto;">
+        <div style="padding: 16px; text-align: center;" class="text-dim">Đang rà soát dấu vết...</div>
       </div>
     </div>
     
     <div id="combatResult"></div>`
+
+  // Phase 5: Fetch active tracked monsters and render with Sương Mù
+  const hasPerception = p.skills && p.skills.some(s => {
+    const sid = typeof s === 'string' ? s : s.id;
+    return sid === 'thien_nhan' || sid === 'nhan_thuat';
+  });
+  const renderStat = (val) => hasPerception ? val : '???';
+
+  const loadTrackedMonsters = async () => {
+    try {
+      const res = await api.getAreaMonsters(p.id);
+      if (res.monsters) {
+        state.player.trackedMonsters = res.monsters; // cache locally
+        const listEl = document.getElementById('trackedMonstersList');
+        if (!listEl) return;
+        
+        if (res.monsters.length === 0) {
+           listEl.innerHTML = `<div style="padding: 16px; text-align: center;" class="text-dim">Không có dấu vết yêu thú nào quanh đây.</div>`;
+           return;
+        }
+
+        listEl.innerHTML = res.monsters.map(m => `
+          <div class="list-item flex flex-col items-start gap-4">
+            <div class="item-info" style="width: 100%;">
+              <div class="flex justify-between items-center mb-sm">
+                <div class="item-name text-lg">${m.name} <span class="text-xs text-dim">(${m.instance_id.substring(0,8)})</span></div>
+                <button class="btn btn--red btn--sm btn-attack-tracked" data-inst="${m.instance_id}" data-mid="${m.id}">Giao Chiến</button>
+              </div>
+              <div class="item-desc text-sm text-dim mb-sm">${hasPerception ? (m.description || '') : 'Bản thể mờ ảo, không rõ căn cơ.'}</div>
+              
+              <!-- HP Bar -->
+              <div class="w-full bg-darker rounded mb-sm" style="height: 6px; overflow: hidden;">
+                <div class="bg-red h-full" style="width: ${(m.currentHp / m.stats.hp) * 100}%"></div>
+              </div>
+
+              <div class="item-meta flex gap-4 text-xs">
+                <span class="text-red">❤ ${m.currentHp} / ${renderStat(m.stats.hp)}</span>
+                <span class="text-orange">💪 ${renderStat(m.stats.strength)}</span>
+                <span class="text-cyan">🏃 ${renderStat(m.stats.speed)}</span>
+                <span class="text-green">🎯 ${renderStat(m.stats.dexterity)}</span>
+                <span class="text-blue">🛡 ${renderStat(m.stats.defense)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('')
+
+        // Bind Attack Buttons
+        const attackBtns = listEl.querySelectorAll('.btn-attack-tracked');
+        attackBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const btnTarget = e.currentTarget;
+            doCombat(ctx, btnTarget.dataset.mid, btnTarget.dataset.inst);
+          });
+        });
+      }
+    } catch (e) {
+      console.error("Lỗi tải dấu vết:", e)
+    }
+  }
+
+  loadTrackedMonsters();
 
   // Attach Explore Event
   const btnExplore = document.getElementById('btnExplore')
@@ -88,11 +136,35 @@ async function doExplore(ctx) {
       html += `
         <div style="font-size: 32px; margin-bottom: 8px;">🐉</div>
         <div class="text-lg text-red bold mb-sm">${ev.message}</div>
+        <div class="flex gap-2 justify-center mt-md w-full">
+          <button class="btn btn--red flex-1" id="btnExploreCombat" data-mid="${ev.monsterId}">🗡️ Giao Chiến</button>
+          <button class="btn btn--blue flex-1" id="btnExploreTrack" data-mid="${ev.monsterId}">👣 Theo Dõi</button>
+        </div>
       `
-      // Pick random monster (simplified logic for now)
-      const available = state.monsters || []
-      const m = available[Math.floor(Math.random() * available.length)]
-      html += `<button class="btn btn--red btn--lg mt-sm w-full" id="btnExploreCombat" data-mid="${m.id}">🗡️ Nghênh Chiến: ${m.name}</button>`
+    } else if (ev.type === 'worldBoss') {
+      html += `
+        <div style="font-size: 48px; margin-bottom: 8px; animation: pulse 1s infinite;">🔥</div>
+        <div class="text-lg text-red bold mb-sm" style="text-shadow: 0 0 10px rgba(255,0,0,0.5);">${ev.message}</div>
+        <div class="text-sm text-dim mb-md">Lãnh Chúa Bản Đồ — Sinh vật cực kỳ mạnh!</div>
+        <div class="flex gap-2 justify-center mt-md w-full">
+          <button class="btn btn--red flex-1" id="btnExploreCombat" data-mid="${ev.monsterId}">⚔️ Thách Đấu</button>
+          <button class="btn btn--blue flex-1" id="btnExploreTrack" data-mid="${ev.monsterId}">👣 Ghi Dấu</button>
+        </div>
+      `
+    } else if (ev.type === 'npc' && ev.npcId) {
+      // Phase 9: Real NPC encounter with quest system
+      html += `
+        <div style="font-size: 48px; margin-bottom: 8px;">${ev.npcIcon || '🧓'}</div>
+        <div class="text-lg text-gold bold mb-sm">${ev.message}</div>
+        <div class="text-sm text-dim mb-md" style="font-style:italic;">"${ev.greeting}"</div>
+      `
+      if (ev.hasQuests) {
+        html += `<button class="btn btn--gold btn--sm mt-sm" id="btnNpcInteract" data-npc="${ev.npcId}">💬 Nói Chuyện</button>`
+      }
+      html += `<button class="btn btn--blue btn--sm mt-sm ml-sm" id="btnExploreContinue">Tiếp Tục</button>`
+      html += `</div></div>`
+      // NPC quest modal placeholder
+      html += `<div id="npcQuestModal"></div>`
     } else if (ev.type === 'npc') {
       html += `
         <div style="font-size: 32px; margin-bottom: 8px;">👴</div>
@@ -103,6 +175,12 @@ async function doExplore(ctx) {
         <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
         <div class="text-lg text-green bold mb-sm">${ev.message}</div>
       `
+      // Show quest notifications if any
+      if (ev.questNotifications && ev.questNotifications.length > 0) {
+        ev.questNotifications.forEach(qn => {
+          html += `<div class="text-sm text-gold mt-sm" style="animation: fadeIn 0.5s;">🏷️ ${qn.message}</div>`
+        })
+      }
     } else {
       html += `
         <div style="font-size: 32px; margin-bottom: 8px;">💨</div>
@@ -110,31 +188,113 @@ async function doExplore(ctx) {
       `
     }
 
-    if (ev.type !== 'monster') {
+    if (ev.type !== 'monster' && ev.type !== 'worldBoss' && !(ev.type === 'npc' && ev.npcId)) {
       html += `<button class="btn btn--blue mt-sm" id="btnExploreContinue">Tiếp tục tìm kiếm</button>`
     }
 
-    html += `</div></div>`
+    if (!(ev.type === 'npc' && ev.npcId)) {
+      html += `</div></div>`
+    }
     rEl.innerHTML = html
 
-    if (ev.type === 'monster') {
+    if (ev.type === 'monster' || ev.type === 'worldBoss') {
       document.getElementById('btnExploreCombat').addEventListener('click', (e) => {
-        // Clear explore msg and start combat
         rEl.innerHTML = ''
-        startCombat(e.target.dataset.mid, ctx)
+        doCombat(ctx, e.target.dataset.mid, null)
       })
-    } else {
-      document.getElementById('btnExploreContinue').addEventListener('click', () => {
-        rEl.innerHTML = ''
+      document.getElementById('btnExploreTrack').addEventListener('click', async (e) => {
+        try {
+          const res = await api.trackMonster(state.playerId, e.target.dataset.mid);
+          if (res.success) {
+            notify(res.message, 'success');
+            rEl.innerHTML = '';
+            if (typeof ctx.renderGame === 'function') ctx.renderGame();
+          } else if (res.error) {
+            notify(res.error, 'error');
+          }
+        } catch (err) {
+          notify('Lỗi theo dõi: ' + err.message, 'error');
+        }
       })
     }
+
+    // NPC interact button
+    if (ev.type === 'npc' && ev.npcId) {
+      document.getElementById('btnNpcInteract')?.addEventListener('click', async () => {
+        await showNpcQuests(ctx, ev.npcId, rEl)
+      })
+    }
+    
+    document.getElementById('btnExploreContinue')?.addEventListener('click', () => {
+      rEl.innerHTML = ''
+    })
   } catch (e) {
     rEl.innerHTML = `<div class="panel"><div class="panel-body text-red text-center">Lỗi: ${e.message}</div></div>`
   }
 }
 
-async function startCombat(monsterId, ctx) {
-  const { state, api, notify, updateSidebar } = ctx
+/** Show NPC quest list modal */
+async function showNpcQuests(ctx, npcId, parentEl) {
+  const { state, api, notify, renderGame } = ctx
+  const modalEl = document.getElementById('npcQuestModal') || parentEl
+
+  try {
+    const data = await api.getNpc(npcId)
+    const npc = data.npc
+    if (!npc) return
+
+    const playerQuests = (state.player.activeQuests || []).map(q => q.quest_id)
+
+    let questsHtml = npc.quests.map(q => {
+      const alreadyAccepted = playerQuests.includes(q.id)
+      return `
+        <div class="quest-offer" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px;margin-bottom:8px;">
+          <div class="flex justify-between items-center mb-sm">
+            <span class="text-gold bold">${q.name}</span>
+            <span class="text-xs badge" style="background:${q.type==='kill'?'var(--red)':'var(--green)'}">${q.type==='kill'?'⚔️ Tiêu Diệt':'📦 Thu Thập'}</span>
+          </div>
+          <div class="text-sm text-dim mb-sm">${q.description}</div>
+          <div class="text-xs text-dim mb-sm">Phần thưởng: ${q.rewards.gold ? q.rewards.gold + '💎 ' : ''}${q.rewards.xp ? q.rewards.xp + '✨ ' : ''}${q.rewards.skillChance ? '🎯 ' + q.rewards.skillChance.chance + '% kỹ năng' : ''}</div>
+          ${alreadyAccepted 
+            ? '<span class="text-xs text-dim">✅ Đã nhận</span>' 
+            : `<button class="btn btn--gold btn--sm btn-accept-quest" data-npc="${npcId}" data-qid="${q.id}">📜 Nhận Nhiệm Vụ</button>`
+          }
+        </div>
+      `
+    }).join('')
+
+    modalEl.innerHTML = `
+      <div class="panel mt-md" style="border-color:var(--gold);">
+        <div class="panel-title">${npc.icon || '🧓'} ${npc.name} <span class="subtitle">${npc.profession}</span></div>
+        <div class="panel-body">
+          ${questsHtml || '<div class="text-dim">Không có nhiệm vụ nào.</div>'}
+        </div>
+      </div>
+    `
+
+    modalEl.querySelectorAll('.btn-accept-quest').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        btn.disabled = true
+        btn.textContent = '⏳...'
+        try {
+          const res = await api.acceptQuest(state.playerId, btn.dataset.npc, btn.dataset.qid)
+          state.player = res.player
+          notify(res.message, 'success')
+          renderGame()
+        } catch (err) {
+          notify(err.message || 'Lỗi nhận quest', 'error')
+          btn.disabled = false
+          btn.textContent = '📜 Nhận Nhiệm Vụ'
+        }
+      })
+    })
+  } catch (e) {
+    console.error('NPC load error:', e)
+  }
+}
+
+async function doCombat(ctx, monsterId, instanceId = null) {
+  const { state, api, notify, updateSidebar, renderGame } = ctx
   const rEl = document.getElementById('combatResult')
   if (!rEl) return
 
@@ -148,11 +308,18 @@ async function startCombat(monsterId, ctx) {
     return notify(`Đang tịnh dưỡng! Còn ${state.player.hospitalRemaining}s`, 'error')
   }
 
-  rEl.innerHTML = `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--gold)">⏳ Đang chiến đấu...</div></div>`
+  rEl.innerHTML = `<div class="panel border-red bg-dark"><div class="panel-body text-center text-red">⚔️ Đang giao chiến...</div></div>`
   rEl.scrollIntoView({ behavior: 'smooth' })
 
   try {
-    const r = await api.fullCombat(state.playerId, monsterId)
+    const r = await api.request('/combat/full', {
+      method: 'POST',
+      body: JSON.stringify({ 
+        playerId: state.playerId, 
+        monsterId: !instanceId ? monsterId : null,
+        trackedMonsterId: instanceId 
+      })
+    })
     state.player = r.player
 
     if (r.outcome === 'no_energy') {
@@ -169,7 +336,7 @@ async function startCombat(monsterId, ctx) {
       if (l.includes('hụt')) return `<div class="miss">${l}</div>`
       if (l.includes('né được')) return `<div class="dodge">${l}</div>`
       if (l.includes('CHÍNH MẠNG') || l.includes('💥')) return `<div class="crit">${l}</div>`
-      if (l.includes('🔥')) return `<div class="heavy">${l}</div>`
+      if (l.includes('🔥')) return `<div class="heavy text-orange">${l}</div>`
       if (l.includes('chặn hoàn toàn') || l.includes('🛡')) return `<div class="dodge">${l}</div>`
       if (l.includes('ngã xuống') || l.includes('💀')) return `<div class="death">${l}</div>`
       if (l.includes('Chiến thắng') || l.includes('🏆')) return `<div class="victory">${l}</div>`
@@ -180,6 +347,10 @@ async function startCombat(monsterId, ctx) {
       if (l.includes('Thoát thân') || l.includes('🚪')) return `<div class="flee">${l}</div>`
       if (l.includes('Linh Thạch') || l.includes('💰')) return `<div class="gold-reward">${l}</div>`
       if (l.includes('Tịnh dưỡng') || l.includes('🏥')) return `<div class="hospital">${l}</div>`
+      if (l.includes('🧪')) return `<div class="status-effect text-purple">${l}</div>`
+      if (l.includes('💔')) return `<div class="dot-damage text-purple bold">${l}</div>`
+      if (l.includes('✨')) return `<div class="regen text-green">${l}</div>`
+      if (l.includes('♻️')) return `<div class="reflect text-red">${l}</div>`
       return `<div class="hit">${l}</div>`
     }).join('')
 
@@ -221,6 +392,9 @@ async function startCombat(monsterId, ctx) {
       </div>`
 
     updateSidebar()
+    if (instanceId && typeof renderGame === 'function') {
+      setTimeout(() => renderGame(), 1500)
+    }
   } catch (e) {
     rEl.innerHTML = `<div class="panel"><div class="panel-body text-red">Lỗi: ${e.message}</div></div>`
   }

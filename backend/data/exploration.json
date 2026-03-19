@@ -4,10 +4,11 @@
     "staminaCost": 10,
     "rates": [
       { "type": "monster", "weight": 40 },
-      { "type": "material", "weight": 25, "pools": ["thit_tho", "da_tho", "duoc_thao"] },
+      { "type": "material", "weight": 25, "pools": ["mat_thit_tho", "mat_da_tho", "linh_thao", "huyet_thao", "doc_thao"] },
       { "type": "item", "weight": 10, "rarities": ["common"] },
       { "type": "npc", "weight": 5, "events": ["old_man_buff", "merchant", "found_gold"] },
-      { "type": "nothing", "weight": 20 }
+      { "type": "worldBoss", "weight": 1 },
+      { "type": "nothing", "weight": 19 }
     ]
   },
   "hac_phong_lam": {
@@ -15,10 +16,11 @@
     "staminaCost": 12,
     "rates": [
       { "type": "monster", "weight": 50 },
-      { "type": "material", "weight": 20, "pools": ["go_tieu_linh", "doc_nhan", "da_ran"] },
+      { "type": "material", "weight": 20, "pools": ["mat_go_linh", "mat_nhua_cay", "mat_da_ran", "thanh_linh_thao", "hoa_linh_chi", "bang_linh_thao"] },
       { "type": "item", "weight": 10, "rarities": ["common", "uncommon"] },
       { "type": "npc", "weight": 5, "events": ["trap_damage", "hidden_chest"] },
-      { "type": "nothing", "weight": 15 }
+      { "type": "worldBoss", "weight": 1 },
+      { "type": "nothing", "weight": 14 }
     ]
   },
   "vong_linh_coc": {
@@ -26,7 +28,7 @@
     "staminaCost": 15,
     "rates": [
       { "type": "monster", "weight": 55 },
-      { "type": "material", "weight": 15, "pools": ["hon_tan_1", "manh_ky_uc", "xuong_vun"] },
+      { "type": "material", "weight": 15, "pools": ["mat_hon_tan", "mat_manh_ky_uc", "mat_xuong_vun", "kim_linh_thao", "mat_noi_dan_nho"] },
       { "type": "item", "weight": 15, "rarities": ["uncommon", "rare"] },
       { "type": "npc", "weight": 5, "events": ["ghost_encounter", "ancient_shrine"] },
       { "type": "nothing", "weight": 10 }
@@ -37,10 +39,11 @@
     "staminaCost": 20,
     "rates": [
       { "type": "monster", "weight": 60 },
-      { "type": "material", "weight": 15, "pools": ["quang_thiet_huyet", "hoa_tinh", "loi_quang"] },
+      { "type": "material", "weight": 15, "pools": ["mat_tinh_thach", "mat_tinh_hoa", "mat_loi_tinh", "kim_linh_thao", "mat_huyet_tinh"] },
       { "type": "item", "weight": 15, "rarities": ["uncommon", "rare"] },
       { "type": "npc", "weight": 5, "events": ["lava_burn", "volcano_eruption_loot"] },
-      { "type": "nothing", "weight": 5 }
+      { "type": "worldBoss", "weight": 2 },
+      { "type": "nothing", "weight": 3 }
     ]
   },
   "thien_kiep_uyen": {
@@ -48,10 +51,100 @@
     "staminaCost": 25,
     "rates": [
       { "type": "monster", "weight": 70 },
-      { "type": "material", "weight": 10, "pools": ["ma_thach", "loi_quang_thach", "thien_thach_van"] },
+      { "type": "material", "weight": 10, "pools": ["mat_ma_nhan", "mat_hac_tinh", "mat_thien_thach", "thien_linh_thao", "mat_linh_hon_di_bien"] },
       { "type": "item", "weight": 10, "rarities": ["rare", "epic"] },
       { "type": "npc", "weight": 5, "events": ["lightning_strike", "demonic_whisper"] },
+      { "type": "worldBoss", "weight": 2 },
+      { "type": "nothing", "weight": 3 }
+    ]
+  },
+  "bac_suong_canh": {
+    "name": "Bắc Sương Cảnh",
+    "staminaCost": 18,
+    "rates": [
+      { "type": "monster", "weight": 55 },
+      { "type": "material", "weight": 20, "pools": ["bang_linh_thao", "mat_huyen_bang_hoa", "mat_xuong_vun", "mat_noi_dan_trung"] },
+      { "type": "item", "weight": 10, "rarities": ["common", "uncommon"] },
+      { "type": "npc", "weight": 5, "events": ["freeze_slow", "lost_traveler"] },
+      { "type": "nothing", "weight": 10 }
+    ]
+  },
+  "am_sat_hoang": {
+    "name": "Ám Sát Hoang",
+    "staminaCost": 22,
+    "rates": [
+      { "type": "monster", "weight": 60 },
+      { "type": "material", "weight": 15, "pools": ["doc_thao", "mat_am_hon_thao", "mat_huyet_tinh", "mat_noi_dan_trung"] },
+      { "type": "item", "weight": 15, "rarities": ["uncommon", "rare"] },
+      { "type": "npc", "weight": 5, "events": ["assassin_attack", "hidden_poison_cache"] },
       { "type": "nothing", "weight": 5 }
+    ]
+  },
+  "co_moc_linh_vien": {
+    "name": "Cổ Mộc Linh Viên",
+    "staminaCost": 20,
+    "rates": [
+      { "type": "monster", "weight": 50 },
+      { "type": "material", "weight": 25, "pools": ["mat_go_linh", "mat_nhua_cay", "thanh_linh_thao", "mat_huyen_thien_hoa"] },
+      { "type": "item", "weight": 10, "rarities": ["common", "uncommon"] },
+      { "type": "npc", "weight": 10, "events": ["forest_spirit_buff", "ancient_tree"] },
+      { "type": "nothing", "weight": 5 }
+    ]
+  },
+  "huyet_ma_chien_truong": {
+    "name": "Huyết Ma Chiến Trường",
+    "staminaCost": 28,
+    "rates": [
+      { "type": "monster", "weight": 65 },
+      { "type": "material", "weight": 15, "pools": ["mat_huyet_tinh", "mat_am_khi", "mat_loi_tinh", "mat_noi_dan_lon"] },
+      { "type": "item", "weight": 15, "rarities": ["rare", "epic"] },
+      { "type": "npc", "weight": 3, "events": ["blood_rage", "fallen_general_loot"] },
+      { "type": "worldBoss", "weight": 1 },
+      { "type": "nothing", "weight": 1 }
+    ]
+  },
+  "thien_hoa_linh_dia": {
+    "name": "Thiên Hỏa Linh Địa",
+    "staminaCost": 30,
+    "rates": [
+      { "type": "monster", "weight": 65 },
+      { "type": "material", "weight": 15, "pools": ["hoa_linh_chi", "mat_tinh_hoa", "mat_huyen_thien_hoa", "mat_loi_tinh"] },
+      { "type": "item", "weight": 15, "rarities": ["rare", "epic"] },
+      { "type": "npc", "weight": 3, "events": ["fire_burn_zone", "phoenix_remnant"] },
+      { "type": "nothing", "weight": 2 }
+    ]
+  },
+  "u_minh_quy_vuc": {
+    "name": "U Minh Quỷ Vực",
+    "staminaCost": 32,
+    "rates": [
+      { "type": "monster", "weight": 70 },
+      { "type": "material", "weight": 15, "pools": ["mat_ma_nhan", "mat_linh_hon_di_bien", "mat_tan_phach", "mat_noi_dan_cuc"] },
+      { "type": "item", "weight": 10, "rarities": ["rare", "epic"] },
+      { "type": "npc", "weight": 3, "events": ["ghost_possession", "soul_exchange"] },
+      { "type": "nothing", "weight": 2 }
+    ]
+  },
+  "thien_dao_tan_tich": {
+    "name": "Thiên Đạo Tàn Tích",
+    "staminaCost": 35,
+    "rates": [
+      { "type": "monster", "weight": 75 },
+      { "type": "material", "weight": 10, "pools": ["thien_linh_thao", "ban_nguyen_tinh", "mat_hac_tinh", "mat_thien_thach"] },
+      { "type": "item", "weight": 10, "rarities": ["epic"] },
+      { "type": "npc", "weight": 3, "events": ["law_distortion", "hidden_trial"] },
+      { "type": "nothing", "weight": 2 }
+    ]
+  },
+  "vo_tan_hu_khong": {
+    "name": "Vô Tận Hư Không",
+    "staminaCost": 40,
+    "rates": [
+      { "type": "monster", "weight": 80 },
+      { "type": "material", "weight": 10, "pools": ["mat_hu_khong", "ban_nguyen_tinh", "mat_linh_hon_di_bien"] },
+      { "type": "item", "weight": 8, "rarities": ["epic"] },
+      { "type": "npc", "weight": 1, "events": ["void_collapse", "ancient_entity"] },
+      { "type": "nothing", "weight": 1 }
     ]
   }
 }

@@ -67,6 +67,13 @@ class GameAPI {
     })
   }
 
+  equipSkill(id, skillId, equip = true) {
+    return this.request(`/player/${id}/equip-skill`, {
+      method: 'POST',
+      body: JSON.stringify({ skillId, equip }),
+    })
+  }
+
   healPlayer(id) {
     return this.request(`/player/${id}/heal`, { method: 'POST' })
   }
@@ -101,6 +108,14 @@ class GameAPI {
   getCrimes() { return this.request('/data/crimes') }
   getEducation() { return this.request('/data/education') }
   getExploration() { return this.request('/data/exploration') }
+  getRecipes() { return this.request('/recipes') }
+
+  // Crafting
+  craftItem(id, recipeId) {
+    return this.request(`/player/${id}/craft`, {
+      method: 'POST', body: JSON.stringify({ recipeId })
+    })
+  }
 
   // Crimes
   commitCrime(id, crimeId) {
@@ -138,6 +153,29 @@ class GameAPI {
   explore(id) {
     return this.request(`/player/${id}/explore`, { method: 'POST' })
   }
+  trackMonster(id, monsterId) {
+    return this.request(`/player/${id}/track-monster`, {
+      method: 'POST', body: JSON.stringify({ monsterId }),
+    })
+  }
+  getAreaMonsters(id) {
+    return this.request(`/player/${id}/area-monsters`)
+  }
+
+  // NPC & Quests
+  getNpc(npcId) { return this.request(`/npc/${npcId}`) }
+  getNpcs() { return this.request('/data/npcs') }
+  acceptQuest(id, npcId, questId) {
+    return this.request(`/player/${id}/accept-quest`, {
+      method: 'POST', body: JSON.stringify({ npcId, questId }),
+    })
+  }
+  completeQuest(id, questId) {
+    return this.request(`/player/${id}/complete-quest`, {
+      method: 'POST', body: JSON.stringify({ questId }),
+    })
+  }
+  getQuests(id) { return this.request(`/player/${id}/quests`) }
 }
 
 export const api = new GameAPI()

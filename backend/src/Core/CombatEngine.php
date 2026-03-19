@@ -18,6 +18,8 @@ use App\Models\Monster;
 class CombatEngine
 {
     private array $log = [];
+    public array $playerStatus = [];
+    public array $monsterStatus = [];
 
     /** Max turns before stalemate */
     private const MAX_TURNS = 25;
@@ -63,36 +65,33 @@ class CombatEngine
         $aStats = $attacker->getFinalStats();
         $dStats = $defender->getStats();
 
-        // 1. Hit check (Speed vs Dexterity)
-        $hitChance = StatEngine::calcHitChance($aStats['speed'], $dStats['dexterity']);
-        if ($this->roll(100) > $hitChance) {
-            $this->log("💨 {$attacker->name} chém hụt!");
-            return $this->result('miss', 0, $defender);
-        }
-
-        // 2. Dodge check
-        $dodgeChance = StatEngine::calcDodgeChance($dStats['dexterity'], $aStats['speed']);
-        if ($this->roll(100) <= $dodgeChance) {
-            $this->log("🌀 {$defender->name} né được!");
-            return $this->result('dodge', 0, $defender);
-        }
-
-        // 3. Body part targeting (Torn-style)
-        $bodyPart = $this->rollBodyPart();
-        $partMul = $bodyPart['mul'];
-
-        // 4. Base damage — depends on skill damage type
-        $baseDamage = $aStats['strength'];
+        // Mechanical flags
         $skillMul = 1.0;
-        $skillTags = [];
+        $lifesteal = 0.0;
+        $multiHit = 1;
+        $executeScaling = 0.0;
+        $guaranteedCrit = false;
+        $ignoreDefense = false;
+        $damageType = 'physical';
+        $statusEffect = null;
 
-        // Skill modifier + weapon check
         if ($skillId !== null) {
             $skill = $attacker->getActiveSkill($skillId);
             if ($skill) {
+                // Phase 5.5: Skill Mastery Leveling
+                $levelUp = $attacker->gainSkillXp($skillId, 1);
+                if ($levelUp) {
+                    $this->log("🎉 Đột phá! {$levelUp['name']} đạt tầng {$levelUp['newLevel']}!");
+                }
+
                 $skillMul = $skill['damageMultiplier'] ?? 1.0;
-                $skillTags = $skill['tags'] ?? [];
                 $damageType = $skill['damageType'] ?? 'physical';
+                $statusEffect = $skill['statusEffect'] ?? null;
+                $lifesteal = floatval($skill['lifesteal'] ?? 0);
+                $multiHit = intval($skill['multiHit'] ?? 1);
+                $executeScaling = floatval($skill['executeScaling'] ?? 0);
+                $guaranteedCrit = (bool)($skill['guaranteedCrit'] ?? false);
+                $ignoreDefense = (bool)($skill['ignoreDefense'] ?? false);
 
                 // Weapon type check
                 $weaponTypes = $skill['weaponTypes'] ?? null;
@@ -105,60 +104,98 @@ class CombatEngine
                     }
                 }
 
-                // Magical skills scale with dexterity instead of strength
-                if ($damageType === 'magical') {
-                    $baseDamage = $aStats['dexterity'] * 0.8 + $aStats['strength'] * 0.2;
-                }
-
-                $baseDamage *= $skillMul;
-                $this->log("⚡ Dùng {$skill['name']} (×{$skillMul}) [{$damageType}]");
+                $this->log("⚡ Xuất chiêu: [{$skill['name']}]");
             }
         }
 
-        // 5. Crit check (Torn: 12% base, amplified by body part)
-        $isCrit = false;
-        $critChance = $aStats['critChance'];
-        if ($this->roll(100) <= $critChance) {
-            $isCrit = true;
+        // Base Stat Damage
+        $baseStat = $damageType === 'magical' ? ($aStats['dexterity'] * 0.8 + $aStats['strength'] * 0.2) : $aStats['strength'];
+        $baseStat *= $skillMul;
+        $totalDamage = 0;
+        $finalHitLabel = 'hit';
+
+        for ($i = 0; $i < $multiHit; $i++) {
+            if (!$defender->isAlive()) break;
+
+            // 1. Hit check
+            $hitChance = StatEngine::calcHitChance($aStats['speed'], $dStats['dexterity']);
+            if ($this->roll(100) > $hitChance) {
+                $this->log("💨 Nhịp " . ($i+1) . ": {$attacker->name} chém hụt!");
+                continue;
+            }
+
+            // 2. Dodge check
+            $dodgeChance = StatEngine::calcDodgeChance($dStats['dexterity'], $aStats['speed']);
+            // Ignore defense Tiên cấp also ignores dodge!
+            if (!$ignoreDefense && $this->roll(100) <= $dodgeChance) {
+                $this->log("🌀 Nhịp " . ($i+1) . ": {$defender->name} né được!");
+                continue;
+            }
+
+            // 3. Body part
+            $bodyPart = $this->rollBodyPart();
+            $partMul = $bodyPart['mul'];
+            $currentDamage = $baseStat * $partMul;
+
+            // Execute Scaling (Thiên Cấp)
+            if ($executeScaling > 0) {
+                $missingHpPct = 1 - ($defender->currentHp / $defender->maxHp);
+                $currentDamage *= (1.0 + ($missingHpPct * $executeScaling));
+            }
+
+            // 4. Crit check
+            $isCrit = $guaranteedCrit || ($this->roll(100) <= $aStats['critChance']);
+            if ($isCrit) {
+                $currentDamage *= $aStats['critMultiplier'];
+                $finalHitLabel = 'crit';
+            }
+
+            // 5. Defense reduction
+            $def = $ignoreDefense ? 0 : $dStats['defense'];
+            $reduction = StatEngine::calcDamageReduction($def);
+            $finalDamage = max(0, (int) round($currentDamage * (1 - $reduction / 100)));
+
+            // 6. Elemental Resistance (Phase 7)
+            if ($damageType !== 'physical' && $damageType !== 'magical') {
+                $resistances = $defender->getRawData()['resistances'] ?? [];
+                $resVal = floatval($resistances[$damageType] ?? 0);
+                if ($resVal !== 0.0) {
+                    $finalDamage = max(0, (int) round($finalDamage * (1 - $resVal)));
+                    if ($resVal > 0) $this->log("🛡 {$defender->name} kháng " . ($resVal*100) . "% sát thương {$damageType}!");
+                    if ($resVal < 0) $this->log("🔥 {$defender->name} chịu thêm " . abs($resVal*100) . "% sát thương {$damageType}!");
+                }
+            }
+
+            if ($finalDamage === 0) {
+                $this->log("🛡 Nhịp " . ($i+1) . ": Đánh vào {$bodyPart['name']} nhưng bị chặn!");
+            } else {
+                $icon = $isCrit ? '💥' : ($ignoreDefense ? '🌌' : '⚔️');
+                $critText = $isCrit ? ' CHÍNH MẠNG!' : '';
+                $ignoreText = $ignoreDefense ? ' [Xuyên Giáp]' : '';
+                $this->log("{$icon} Nhịp " . ($i+1) . ": Trúng {$bodyPart['name']} — {$finalDamage} sát thương{$critText}{$ignoreText}");
+                
+                $defender->takeDamage($finalDamage);
+                $totalDamage += $finalDamage;
+
+                // Lifesteal (Huyền Cấp)
+                if ($lifesteal > 0) {
+                    $heal = (int)($finalDamage * $lifesteal);
+                    $attacker->currentHp = min($attacker->maxHp, $attacker->currentHp + $heal);
+                    $this->log("🩸 Hấp Huyết: +{$heal} HP");
+                }
+            }
+        } // end hit loop
+
+        // Apply Status effect if condition met
+        if ($statusEffect && $totalDamage > 0) {
+            $chance = $statusEffect['chance'] ?? 100;
+            if ($this->roll(100) <= $chance) {
+                $this->monsterStatus[] = $statusEffect;
+                $typeMap = ['burn' => 'Bốc Cháy', 'poison' => 'Trúng Độc', 'freeze' => 'Đóng Băng'];
+                $sName = $typeMap[$statusEffect['type'] ?? ''] ?? $statusEffect['type'];
+                $this->log("🧪 {$defender->name} bị [{$sName}] ({$statusEffect['duration']} lượt)!");
+            }
         }
-
-        // Apply body part multiplier
-        $baseDamage *= $partMul;
-
-        // Apply crit multiplier on top
-        if ($isCrit) {
-            $baseDamage *= $aStats['critMultiplier'];
-        }
-
-        // 6. Defense reduction
-        $reduction = StatEngine::calcDamageReduction($dStats['defense']);
-        $finalDamage = max(0, (int) round($baseDamage * (1 - $reduction / 100)));
-
-        // Determine hit type label
-        $hitLabel = match (true) {
-            $finalDamage === 0 => 'glancing',
-            $isCrit && $partMul >= 3.5 => 'crit',   // Critical vital hit
-            $isCrit => 'crit',
-            $partMul >= 2.0 => 'heavy',              // Strong hit
-            $partMul <= 0.7 => 'graze',              // Weak hit
-            default => 'hit',
-        };
-
-        // Log
-        if ($finalDamage === 0) {
-            $this->log("🛡 {$attacker->name} đánh vào {$bodyPart['name']} nhưng bị chặn hoàn toàn!");
-        } else {
-            $hitIcon = match ($hitLabel) {
-                'crit' => '💥',
-                'heavy' => '🔥',
-                'graze' => '➰',
-                default => '⚔️',
-            };
-            $critText = $isCrit ? ' CHÍNH MẠNG!' : '';
-            $this->log("{$hitIcon} {$attacker->name} → {$bodyPart['name']} ({$defender->name}): {$finalDamage} sát thương{$critText} [×{$partMul}]");
-        }
-
-        $defender->takeDamage($finalDamage);
 
         if (!$defender->isAlive()) {
             $this->log("💀 {$defender->name} đã ngã xuống!");
@@ -166,7 +203,7 @@ class CombatEngine
             $this->log("❤️ {$defender->name}: {$defender->currentHp}/{$defender->maxHp}");
         }
 
-        return $this->result($hitLabel, $finalDamage, $defender);
+        return $this->result($finalHitLabel, $totalDamage, $defender);
     }
 
     /**
@@ -214,12 +251,41 @@ class CombatEngine
             $this->log("{$icon} {$attacker->name} → {$bodyPart['name']} ({$defender->name}): {$finalDamage} sát thương" . ($isCrit ? ' CHÍNH MẠNG!' : ''));
         }
 
+        // Thần Cấp: Thiên Đạo Luân Hồi - Reflect Damage
+        $reflectDamagePercent = 0.0;
+        foreach ($defender->skills as $ps) {
+            $sId = $ps['id'] ?? $ps;
+            $s = $defender->getActiveSkill($sId);
+            if ($s && ($s['reflectDamage'] ?? 0) > 0) {
+                $reflectDamagePercent += floatval($s['reflectDamage']);
+            }
+        }
+
         $defender->takeDamage($finalDamage);
+
+        if ($finalDamage > 0 && $reflectDamagePercent > 0) {
+            $reflectAmt = (int)($finalDamage * $reflectDamagePercent);
+            $attacker->currentHp -= $reflectAmt;
+            $this->log("♻️ Thiên Đạo Luân Hồi: Trả lại {$reflectAmt} Chuẩn Sát Thương cho {$attacker->name}!");
+            if ($attacker->currentHp <= 0) $attacker->currentHp = 0;
+        }
 
         if (!$defender->isAlive()) {
             $this->log("💀 {$defender->name} đã ngã xuống!");
         } else {
             $this->log("❤️ {$defender->name}: {$defender->currentHp}/{$defender->maxHp}");
+            
+            // Monster apply effect (poison, etc)
+            $mEffects = $attacker->getRawData()['effects'] ?? [];
+            foreach ($mEffects as $me) {
+                if (in_array($me['type'] ?? '', ['poison', 'burn', 'curse', 'stun'])) {
+                    if ($this->roll(100) <= ($me['chance'] ?? 100)) {
+                        $this->playerStatus[] = $me;
+                        $tName = $me['type'] === 'poison' ? 'Trúng Độc' : ($me['type'] === 'burn' ? 'Bốc Cháy' : $me['type']);
+                        $this->log("🧪 {$defender->name} bị [{$tName}] ({$me['duration']} lượt)!");
+                    }
+                }
+            }
         }
 
         return $this->playerResult($isCrit ? 'crit' : 'hit', $finalDamage, $defender);
@@ -262,8 +328,45 @@ class CombatEngine
             $turn++;
             $allLogs[] = "--- Lượt {$turn}/{$maxTurns} ---";
 
-            // Player attacks (no per-turn energy cost)
-            $this->attack($player, $monster);
+            // Process Status Effects & Regen
+            $this->processStatus($player, $this->playerStatus, $allLogs);
+            $this->processStatus($monster, $this->monsterStatus, $allLogs);
+
+            // Boss Regen (Phase 9 mechanic)
+            $mRegen = $monster->getRawData()['regenPerHour'] ?? 0;
+            if ($mRegen > 0) {
+                // Regen per turn (assume 1 fight = 5 minutes of in-game time = 12 turns, so ~10% of regenPerHour per turn)
+                $tickHeal = (int)ceil($mRegen / 12);
+                $monster->currentHp = min($monster->maxHp, $monster->currentHp + $tickHeal);
+                $allLogs[] = "✨ Yêu thú ngưng kết sinh mệnh lực: +{$tickHeal} HP";
+            }
+            // Check alive after DoT
+            if (!$player->isAlive() || !$monster->isAlive()) {
+                $outcome = $player->isAlive() ? 'win' : 'loss';
+                break;
+            }
+
+            // AI Skill Selection (Tự động tự chọn skill tốn năng lượng)
+            $skillToUse = null;
+            $activeSkills = array_filter($player->skills ?? [], function($ps) use ($player) {
+                $s = $player->getActiveSkill($ps['id'] ?? $ps);
+                return $s && ($s['type'] ?? '') === 'active';
+            });
+            if (!empty($activeSkills)) {
+                $affordable = array_filter($activeSkills, function($ps) use ($player) {
+                     $s = $player->getActiveSkill($ps['id'] ?? $ps);
+                     return $s && $player->currentEnergy >= ($s['cost'] ?? 0);
+                });
+                if (!empty($affordable)) {
+                    $chosenPs = $affordable[array_rand($affordable)];
+                    $skillToUse = $chosenPs['id'] ?? $chosenPs;
+                    $sData = $player->getActiveSkill($skillToUse);
+                    $player->currentEnergy -= ($sData['cost'] ?? 0);
+                }
+            }
+
+            // Player attacks
+            $this->attack($player, $monster, $skillToUse);
             $allLogs = array_merge($allLogs, $this->log);
 
             if (!$monster->isAlive()) {
@@ -351,6 +454,17 @@ class CombatEngine
                 break;
         }
 
+        // --- Phase 8: Decrement combat buffs duration ---
+        if (!empty($player->combatBuffs)) {
+            foreach ($player->combatBuffs as $k => &$buff) {
+                $buff['duration']--;
+                if ($buff['duration'] <= 0) {
+                    unset($player->combatBuffs[$k]);
+                }
+            }
+            $player->combatBuffs = array_values($player->combatBuffs);
+        }
+
         return [
             'outcome' => $outcome,
             'won' => $outcome === 'win',
@@ -361,6 +475,27 @@ class CombatEngine
             'rewards' => $rewards,
             'log' => $allLogs,
         ];
+    }
+
+    private function processStatus($target, array &$statuses, array &$logs): void
+    {
+        foreach ($statuses as $k => &$s) {
+            if (($s['duration'] ?? 0) <= 0) {
+                unset($statuses[$k]);
+                continue;
+            }
+            if (in_array($s['type'], ['poison', 'burn'])) {
+                $dmg = $s['damage'] ?? 5;
+                $target->takeDamage($dmg);
+                $name = $s['type'] === 'poison' ? 'Độc' : 'Lửa';
+                $logs[] = "💔 {$target->name} mất {$dmg} HP do {$name} phát tác!";
+            }
+            // Decrement duration
+            $s['duration']--;
+            if ($s['duration'] <= 0) {
+                unset($statuses[$k]);
+            }
+        }
     }
 
     private function roll(int $max): float

@@ -1,5 +1,18 @@
 {
     "materials": [
+        { "id": "linh_thao", "name": "Linh Thảo", "tier": 1, "category": "herb", "description": "Cỏ linh khí nhạt, nền tảng của Luyện Đan.", "stackable": true, "sellPrice": 5 },
+        { "id": "huyet_thao", "name": "Huyết Thảo", "tier": 1, "category": "herb", "description": "Cỏ đỏ như máu, chứa sinh khí dương.", "stackable": true, "sellPrice": 8 },
+        { "id": "doc_thao", "name": "Độc Thảo", "tier": 1, "category": "herb", "description": "Sinh trưởng trong đầm lầy, kịch độc.", "stackable": true, "sellPrice": 5 },
+        { "id": "linh_dich", "name": "Linh Dịch", "tier": 1, "category": "essence", "description": "Chất lỏng tinh khiết ngưng tụ từ thiên địa.", "stackable": true, "sellPrice": 10 },
+        
+        { "id": "thanh_linh_thao", "name": "Thanh Linh Thảo", "tier": 2, "category": "herb", "description": "Linh thảo thanh sạch, nâng cao hiệu suất.", "stackable": true, "sellPrice": 20 },
+        { "id": "hoa_linh_chi", "name": "Hỏa Linh Chi", "tier": 2, "category": "herb", "description": "Linh chi mang hỏa cực dương.", "stackable": true, "sellPrice": 25 },
+        { "id": "bang_linh_thao", "name": "Băng Linh Thảo", "tier": 2, "category": "herb", "description": "Thảo mộc lạnh lẽo, hái từ đỉnh tuyết.", "stackable": true, "sellPrice": 30 },
+        
+        { "id": "kim_linh_thao", "name": "Kim Linh Thảo", "tier": 3, "category": "herb", "description": "Linh thảo hấp thụ tinh quang nhật nguyệt.", "stackable": true, "sellPrice": 60 },
+        
+        { "id": "thien_linh_thao", "name": "Thiên Linh Thảo", "tier": 4, "category": "herb", "description": "Tuyệt phẩm thảo mộc, tụ tập tinh hoa vũ trụ.", "stackable": true, "sellPrice": 200 },
+
         { "id": "mat_thit_tho", "name": "Thịt Thô", "tier": 1, "category": "basic", "description": "Thịt thường, dùng hồi máu hoặc chế đồ basic.", "stackable": true, "sellPrice": 1 },
         { "id": "mat_da_tho", "name": "Da Thô", "tier": 1, "category": "basic", "description": "Da thú bình thường, chế giáp cơ bản.", "stackable": true, "sellPrice": 2 },
         { "id": "mat_xuong_vun", "name": "Xương Vụn", "tier": 1, "category": "basic", "description": "Mảnh xương vỡ, dùng chế vũ khí đơn giản.", "stackable": true, "sellPrice": 1 },
@@ -42,8 +55,10 @@
     ],
     "categories": {
         "basic": { "name": "Cơ bản", "color": "#8e8e8e" },
+        "herb": { "name": "Dược thảo", "color": "#51d16c" },
         "spirit": { "name": "Linh vật", "color": "#5b8dd9" },
         "elemental": { "name": "Ngũ hành", "color": "#a77bda" },
+        "essence": { "name": "Tinh túy", "color": "#4da6ff" },
         "rare": { "name": "Hiếm", "color": "#e8a43a" }
     }
 }

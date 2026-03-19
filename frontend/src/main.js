@@ -13,6 +13,9 @@ import { pageGym } from './pages/gym.js'
 import { pageCrimes } from './pages/crimes.js'
 import { pageEducation } from './pages/education.js'
 import { pageTravel } from './pages/travel.js'
+import { pageAlchemy } from './pages/alchemy.js'
+import { pageQuests } from './pages/quests.js'
+import { pageAdmin } from './pages/admin.js'
 
 // ===== STATE =====
 const state = {
@@ -163,6 +166,45 @@ Không ai có thể vượt qua.
 // ==============================
 // GAME SHELL
 // ==============================
+function renderPlayerBuffs(p) {
+  let html = '';
+  // Môi trường
+  const envMap = {
+    'hac_phong_lam': { icon: '🌲', tooltip: 'Rừng Rậm: Tăng 5% Tốc Độ' },
+    'vong_linh_coc': { icon: '👻', tooltip: 'Âm Khí: Tăng 10% Nhanh Nhẹn' },
+    'thiet_huyet_son': { icon: '🌋', tooltip: 'Nóng Bức: Tăng 10% Sát Thương Hỏa' },
+    'thien_kiep_uyen': { icon: '⚡', tooltip: 'Lôi Điện: Tăng 15% Tốc Độ' },
+    'bac_suong_canh': { icon: '❄️', tooltip: 'Đóng Băng: Giảm 10% Tốc Độ' },
+    'am_sat_hoang': { icon: '🎯', tooltip: 'Sát Khí: Tăng 15 Nhanh Nhẹn Nhận Vào (More Dexterity)' },
+    'co_moc_linh_vien': { icon: '🌳', tooltip: 'Linh Khí Mộc: Tăng 15% Phòng Ngự' },
+    'huyet_ma_chien_truong': { icon: '🩸', tooltip: 'Huyết Chiến: Tăng 30% ST Giữ Thân, Tăng 20% ST Nhận' },
+    'thien_hoa_linh_dia': { icon: '🔥', tooltip: 'Địa Hỏa Cự Phệ: Tăng 25% Sát Thương Hỏa' },
+    'u_minh_quy_vuc': { icon: '💀', tooltip: 'U Ám Hút Hồn: Giảm 15% Phòng Ngự' },
+    'thien_dao_tan_tich': { icon: '✨', tooltip: 'Thiên Đạo Ban Phước: Tăng 15% Toàn Chỉ Số' },
+    'vo_tan_hu_khong': { icon: '🌀', tooltip: 'Hỗn Loạn Cực Hạn: Tăng 50% ST Gây Ra & Nhận Vào' },
+  };
+  const env = envMap[p.currentArea];
+  if (env) {
+    html += `<span style="cursor:help; background:rgba(255,255,255,0.08); padding:1px 4px; border-radius:4px; font-size:12px; border:1px solid rgba(255,255,255,0.1);" title="${env.tooltip}">${env.icon} Cảnh Vực</span>`;
+  }
+  
+  // Đan dược
+  if (p.combatBuffs && p.combatBuffs.length > 0) {
+    p.combatBuffs.forEach(b => {
+      let icon = '💊 Cường Hóa';
+      let title = `Buff Hóa Tố: ${b.stat} +${b.value}`;
+      if (b.type === 'status' && b.stat === 'poison') {
+        icon = '☠️ Phản Phệ';
+        title = `Tẩu hỏa nhập ma! Độc tính phá hoại cơ thể over-time, duy trì ${b.duration} trận`;
+      }
+      html += `<span style="cursor:help; background:rgba(255,255,255,0.08); padding:1px 4px; border-radius:4px; font-size:12px; border:1px solid rgba(255,255,255,0.1);" title="${title}">${icon}</span>`;
+    })
+  }
+
+  if (!html) return '';
+  return `<div class="player-buffs" style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;">${html}</div>`;
+}
+
 function renderGame() {
   const p = state.player
   if (!p) return
@@ -186,7 +228,8 @@ function renderGame() {
         <div class="sidebar-player">
           <div class="player-name">${p.name}</div>
           <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
-          <div class="sidebar-bar">
+          ${renderPlayerBuffs(p)}
+          <div class="sidebar-bar" style="margin-top:8px">
             <div class="bar-label"><span>❤️ Khí Huyết</span><span>${p.currentHp}/${p.maxHp}</span></div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
           </div>
@@ -218,9 +261,23 @@ function renderGame() {
           <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
             <span class="icon">💀</span> Phá Luật
           </li>
+          <li class="nav-item ${state.currentPage === 'library' ? 'active' : ''}" data-page="library">
+            <span class="icon">📚</span> Tàng Kinh Các
+          </li>
           <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
             <span class="icon">📜</span> Tu Luyện
           </li>
+          <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
+            <span class="icon">⚗️</span> Lò Luyện Đan
+          </li>
+          <li class="nav-item ${state.currentPage === 'quests' ? 'active' : ''}" data-page="quests">
+            <span class="icon">🏷️</span> Nhiệm Vụ
+            ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
+          </li>
+          ${p.role === 'admin' ? `
+          <li class="nav-item ${state.currentPage === 'admin' ? 'active' : ''}" data-page="admin">
+            <span class="icon">🛠</span> Thiên Đạo Đài
+          </li>` : ''}
           <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
             <span class="icon">🗺️</span> Ngao Du
             ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">🚶</span>` : ''}
@@ -273,6 +330,9 @@ const pageMap = {
   skills: pageSkills,
   inventory: pageInventory,
   travel: pageTravel,
+  alchemy: pageAlchemy,
+  quests: pageQuests,
+  admin: pageAdmin,
 }
 
 function renderPage() {
@@ -295,7 +355,8 @@ function updateSidebar() {
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
       <div class="player-meta">Lv.${p.level} · ${p.gender === 'male' ? '♂ Nam' : '♀ Nữ'}</div>
-      <div class="sidebar-bar">
+      ${renderPlayerBuffs(p)}
+      <div class="sidebar-bar" style="margin-top:8px">
         <div class="bar-label"><span>❤️ Khí Huyết</span><span>${p.currentHp}/${p.maxHp}</span></div>
         <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
       </div>
@@ -339,7 +400,13 @@ async function loadGameData() {
     state.medicines = medsD.medicines || []
     state.crimes = crimesD.crimes || []
     state.courses = eduD.courses || []
-  } catch (e) { console.error('Load data failed:', e) }
+    state.education = (await api.getEducation())
+    state.exploration = (await api.getExploration())
+    state.recipes = (await api.getRecipes()).recipes
+    state.npcs = (await api.getNpcs()).npcs || []
+  } catch (e) {
+    console.error('Lỗi tải dữ liệu:', e)
+  }
 }
 
 function notify(msg, type = 'info') {

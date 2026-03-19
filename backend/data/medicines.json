@@ -1,29 +1,224 @@
 [
   {
-    "id": "hoi_xuan_dan",
-    "name": "Hồi Xuân Đan",
-    "description": "Đan dược cơ bản, hồi phục ít HP.",
+    "id": "hoi_luc_dan",
+    "name": "Hồi Lực Đan",
+    "description": "Đan dược cơ bản, hồi phục 50 HP nhanh chóng.",
     "tier": 1,
-    "healPercent": 15,
-    "cooldownAdd": 30,
+    "effects": [
+      { "type": "flat", "stat": "hp", "value": 50 }
+    ],
+    "requirements": {
+       "realm": 1,
+       "cooldown": 1
+    },
     "icon": "💊"
   },
   {
-    "id": "tuc_mach_dan",
-    "name": "Tục Mạch Đan",
-    "description": "Đan dược trung cấp, hồi phục đáng kể.",
-    "tier": 2,
-    "healPercent": 35,
-    "cooldownAdd": 90,
-    "icon": "💉"
+    "id": "tang_luc_dan",
+    "name": "Tăng Lực Đan",
+    "description": "Tạm thời gia tăng sát thương vật lý.",
+    "tier": 1,
+    "effects": [
+      { "type": "increase", "stat": "damage", "value": 0.1 }
+    ],
+    "duration": 3,
+    "requirements": {
+      "realm": 1
+    },
+    "icon": "💪"
   },
   {
-    "id": "cuu_chuyen_dai_hoan",
-    "name": "Cửu Chuyển Đại Hoàn",
-    "description": "Thần dược cực phẩm, hồi phục gần hết HP.",
+    "id": "giai_doc_dan",
+    "name": "Giải Độc Đan",
+    "description": "Thanh nhiệt giải độc, loại bỏ trạng thái dị thường.",
+    "tier": 1,
+    "effects": [
+      { "type": "remove_status", "value": "poison" }
+    ],
+    "requirements": {
+      "status": "poison"
+    },
+    "icon": "🌿"
+  },
+  {
+    "id": "cuong_the_dan",
+    "name": "Cường Thể Đan",
+    "description": "Da cứng như sắt, giảm sát thương nhận vào.",
+    "tier": 2,
+    "effects": [
+      { "type": "increase", "stat": "defense", "value": 0.15 }
+    ],
+    "duration": 5,
+    "toxicity": { "chance": 10, "damage": 5, "duration": 3 },
+    "requirements": {
+      "realm": 2
+    },
+    "icon": "🛡️"
+  },
+  {
+    "id": "bao_kich_dan",
+    "name": "Bạo Kích Đan",
+    "description": "Tăng mạnh tỷ lệ chí mạng trong thời gian ngắn.",
+    "tier": 2,
+    "effects": [
+      { "type": "increase", "stat": "critChance", "value": 0.15 }
+    ],
+    "duration": 3,
+    "requirements": {
+      "realm": 2,
+      "cooldown": 3
+    },
+    "icon": "💥"
+  },
+  {
+    "id": "linh_nhan_dan",
+    "name": "Linh Nhãn Đan",
+    "description": "Sáng tỏ vạn vật, tăng độ chính xác và nhìn thấu yếu điểm.",
+    "tier": 2,
+    "effects": [
+      { "type": "increase", "stat": "accuracy", "value": 0.2 }
+    ],
+    "requirements": {
+      "realm": 2
+    },
+    "special": ["reveal_hidden"],
+    "icon": "👁️"
+  },
+  {
+    "id": "kim_dan",
+    "name": "Kim Đan",
+    "description": "Đan dược thượng phẩm, gia tăng toàn bộ thuộc tính.",
     "tier": 3,
-    "healPercent": 80,
-    "cooldownAdd": 180,
-    "icon": "🔮"
+    "effects": [
+      { "type": "increase", "stat": "allStats", "value": 0.2 }
+    ],
+    "duration": 5,
+    "toxicity": { "chance": 15, "damage": 10, "duration": 5 },
+    "requirements": {
+      "realm": 3
+    },
+    "icon": "✨"
+  },
+  {
+    "id": "huyet_bao_dan",
+    "name": "Huyết Bạo Đan",
+    "description": "Tẩu hỏa nhập ma tạm thời, đổi sát thương nhận vào lấy sức mạnh cực đại.",
+    "tier": 3,
+    "effects": [
+      { "type": "more", "stat": "damage", "value": 0.4 }
+    ],
+    "penalty": [
+      { "type": "increase", "stat": "damageTaken", "value": 0.2 }
+    ],
+    "duration": 3,
+    "toxicity": { "chance": 30, "damage": 15, "duration": 5 },
+    "requirements": {
+      "realm": 3,
+      "hpBelow": 0.7
+    },
+    "icon": "🩸"
+  },
+  {
+    "id": "hap_huyet_dan",
+    "name": "Hấp Huyết Đan",
+    "description": "Mỗi đòn đánh đều hút máu kẻ địch.",
+    "tier": 3,
+    "effects": [
+      { "type": "increase", "stat": "lifesteal", "value": 0.2 }
+    ],
+    "duration": 3,
+    "requirements": {
+      "realm": 3
+    },
+    "icon": "🦇"
+  },
+  {
+    "id": "bat_tu_dan",
+    "name": "Bất Tử Đan",
+    "description": "Nghịch thiên cải mệnh, trùng sinh tại chỗ khi gục ngã.",
+    "tier": 4,
+    "effects": [
+      { "type": "revive", "value": 1 }
+    ],
+    "duration": 1,
+    "requirements": {
+      "realm": 4,
+      "cooldown": 10
+    },
+    "icon": "👼"
+  },
+  {
+    "id": "thoi_khong_dan",
+    "name": "Thời Không Đan",
+    "description": "Làm chủ thời gian, rút ngắn chờ đợi.",
+    "tier": 4,
+    "effects": [
+      { "type": "increase", "stat": "cooldownReduction", "value": 0.3 }
+    ],
+    "duration": 4,
+    "requirements": {
+      "realm": 4
+    },
+    "icon": "⏳"
+  },
+  {
+    "id": "thien_menh_dan",
+    "name": "Thiên Mệnh Đan",
+    "description": "Tăng cường khí vận, rơi đồ đỉnh cao.",
+    "tier": 4,
+    "effects": [
+      { "type": "increase", "stat": "luck", "value": 0.3 }
+    ],
+    "duration": 5,
+    "requirements": {
+      "realm": 4
+    },
+    "icon": "🍀"
+  },
+  {
+    "id": "nghich_huyet_dan",
+    "name": "Nghịch Huyết Đan",
+    "description": "Cấm dược. Hy sinh sinh mệnh để có sức mạnh hủy diệt.",
+    "tier": 5,
+    "effects": [
+      { "type": "more", "stat": "damage", "value": 0.7 }
+    ],
+    "penalty": [
+      { "type": "increase", "stat": "hp", "value": -0.3 }
+    ],
+    "requirements": {
+      "realm": 3,
+      "hpBelow": 0.5
+    },
+    "icon": "⚫"
+  },
+  {
+    "id": "ma_hoa_dan",
+    "name": "Ma Hóa Đan",
+    "description": "Tuyệt đối không uống nếu không muốn đánh mất lý trí.",
+    "tier": 5,
+    "effects": [
+      { "type": "increase", "stat": "allStats", "value": 0.3 }
+    ],
+    "penalty": [
+      { "type": "status", "value": "confuse" }
+    ],
+    "requirements": {
+      "realm": 3
+    },
+    "icon": "👹"
+  },
+  {
+    "id": "thien_dao_dan",
+    "name": "Thiên Đạo Hình Mẫu",
+    "description": "Bug của hệ thống. Tác dụng ngẫu nhiên không thể lường trước.",
+    "tier": 5,
+    "effects": [
+      { "type": "random_effect" }
+    ],
+    "requirements": {
+      "hidden": true
+    },
+    "icon": "🌌"
   }
 ]

@@ -11,6 +11,11 @@ export function pageInventory(el, ctx) {
   const medCD = p.medCooldownRemaining || 0
   const tab = state.inventoryTab || 'equip'
 
+  const hasDuocLy = p.skills && p.skills.some(s => {
+    const sid = typeof s === 'string' ? s : s.id;
+    return sid === 'duoc_ly' || sid === 'y_thuat';
+  });
+
   el.innerHTML = `
     <div class="page-header"><h1>🎒 Pháp Bảo</h1></div>
     <div class="panel">
@@ -77,8 +82,16 @@ export function pageInventory(el, ctx) {
           meds.map(m => `
             <div class="list-item">
               <div class="item-info">
-                <div class="item-name">${m.icon} ${m.name}</div>
-                <div class="item-meta">${m.description} · +${m.healPercent}% HP · Đan độc +${m.cooldownAdd}s</div>
+                <div class="item-name">${m.icon || '💊'} ${m.name}</div>
+                <div class="item-meta">
+                  ${m.description}
+                  ${m.healPercent ? ` · +${m.healPercent}% HP` : ''}
+                  ${m.cooldownAdd ? ` · Đan độc +${m.cooldownAdd}s` : ''}
+                  ${m.duration ? ` · Hiệu lực ${m.duration} trận` : ''}
+                  ${m.toxicity && hasDuocLy ? `<div class="text-red mt-xs">⚠️ Phản Phệ: ${m.toxicity.chance}% tẩu hỏa nhập ma</div>` : ''}
+                  ${m.toxicity && !hasDuocLy ? `<div class="text-purple mt-xs">❓ Dược lực cuồng bạo không rõ...</div>` : ''}
+                  ${m.penalty && hasDuocLy ? `<div class="text-orange mt-xs">⚠️ Phản tác dụng: ${m.penalty.map(x => `Giảm ${Math.abs(x.value)*100}% ${x.stat}`).join(', ')}</div>` : ''}
+                </div>
               </div>
               <button class="btn btn--sm btn--blue" data-med="${m.id}" 
                 ${medCD + (m.cooldownAdd || 0) > 300 ? 'disabled' : ''}>Dùng</button>

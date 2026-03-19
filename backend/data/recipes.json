@@ -1,0 +1,145 @@
+{
+  "recipes": [
+    {
+      "id": "recipe_hoi_luc_dan",
+      "target": "hoi_luc_dan",
+      "type": "medicine",
+      "name": "Công thức: Hồi Lực Đan",
+      "tier": 1,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 1
+      },
+      "materials": [
+        { "id": "linh_thao", "amount": 2 }
+      ],
+      "cost": 10,
+      "successRate": 90,
+      "craftTime": 5
+    },
+    {
+      "id": "recipe_tang_luc_dan",
+      "target": "tang_luc_dan",
+      "type": "medicine",
+      "name": "Công thức: Tăng Lực Đan",
+      "tier": 1,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 2
+      },
+      "materials": [
+        { "id": "huyet_thao", "amount": 2 }
+      ],
+      "cost": 15,
+      "successRate": 85,
+      "craftTime": 10
+    },
+    {
+      "id": "recipe_giai_doc_dan",
+      "target": "giai_doc_dan",
+      "type": "medicine",
+      "name": "Công thức: Giải Độc Đan",
+      "tier": 1,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 3
+      },
+      "materials": [
+        { "id": "doc_thao", "amount": 1 },
+        { "id": "linh_thao", "amount": 1 }
+      ],
+      "cost": 20,
+      "successRate": 80,
+      "craftTime": 10
+    },
+    {
+      "id": "recipe_cuong_the_dan",
+      "target": "cuong_the_dan",
+      "type": "medicine",
+      "name": "Công thức: Cường Thể Đan",
+      "tier": 2,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 5
+      },
+      "materials": [
+        { "id": "thanh_linh_thao", "amount": 2 },
+        { "id": "mat_da_ran", "amount": 1 }
+      ],
+      "cost": 50,
+      "successRate": 70,
+      "craftTime": 20
+    },
+    {
+      "id": "recipe_bao_kich_dan",
+      "target": "bao_kich_dan",
+      "type": "medicine",
+      "name": "Công thức: Bạo Kích Đan",
+      "tier": 2,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 6
+      },
+      "materials": [
+        { "id": "hoa_linh_chi", "amount": 2 }
+      ],
+      "cost": 80,
+      "successRate": 65,
+      "craftTime": 30
+    },
+    {
+      "id": "recipe_kim_dan",
+      "target": "kim_dan",
+      "type": "medicine",
+      "name": "Công thức: Kim Đan",
+      "tier": 3,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 10
+      },
+      "materials": [
+        { "id": "kim_linh_thao", "amount": 3 },
+        { "id": "mat_noi_dan_nho", "amount": 1 }
+      ],
+      "cost": 300,
+      "successRate": 50,
+      "craftTime": 60
+    },
+    {
+      "id": "recipe_huyet_bao_dan",
+      "target": "huyet_bao_dan",
+      "type": "medicine",
+      "name": "Công thức: Huyết Bạo Đan",
+      "tier": 3,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 12
+      },
+      "materials": [
+        { "id": "kim_linh_thao", "amount": 1 },
+        { "id": "mat_huyet_tinh", "amount": 1 }
+      ],
+      "cost": 400,
+      "successRate": 40,
+      "craftTime": 120
+    },
+    {
+      "id": "recipe_bat_tu_dan",
+      "target": "bat_tu_dan",
+      "type": "medicine",
+      "name": "Công thức: Bất Tử Đan",
+      "tier": 4,
+      "requirements": {
+        "skill": "tinh_che",
+        "level": 20
+      },
+      "materials": [
+        { "id": "thien_linh_thao", "amount": 3 },
+        { "id": "mat_ma_nhan", "amount": 1 }
+      ],
+      "cost": 2000,
+      "successRate": 20,
+      "craftTime": 300
+    }
+  ]
+}
