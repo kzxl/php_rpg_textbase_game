@@ -2234,7 +2234,6 @@ Không ai có thể vượt qua.
           </li>
 
 
-
           <li class="nav-section">HÀNH TRÌNH</li>
           <li class="nav-item ${C.currentPage==="travel"?"active":""}" data-page="travel">
             <span class="icon">🚶</span> Ngao Du
@@ -2247,37 +2246,11 @@ Không ai có thể vượt qua.
             <span class="icon">📜</span> Nhiệm Vụ
             ${(a.activeQuests||[]).filter(s=>s.status==="active").length>0?`<span class="badge" style="background:var(--purple)">${(a.activeQuests||[]).filter(s=>s.status==="active").length}</span>`:""}
           </li>
+          <li class="nav-item ${C.currentPage==="dailyquest"?"active":""}" data-page="dailyquest">
+            <span class="icon">📋</span> Nhật Nhiệm
+          </li>
           <li class="nav-item ${C.currentPage==="crimes"?"active":""}" data-page="crimes">
             <span class="icon">💀</span> Ác Nghiệp
-          </li>
-
-
-
-
-          <li class="nav-section">THẾ GIỚI</li>
-          <li class="nav-item ${C.currentPage==="housing"?"active":""}" data-page="housing">
-            <span class="icon">🏠</span> Động Phủ
-          </li>
-          <li class="nav-item ${C.currentPage==="market"?"active":""}" data-page="market">
-            <span class="icon">🏪</span> Giao Dịch Đài
-          </li>
-          <li class="nav-item ${C.currentPage==="npcshop"?"active":""}" data-page="npcshop">
-            <span class="icon">🧓</span> Thương Nhân
-          </li>
-          <li class="nav-item ${C.currentPage==="guild"?"active":""}" data-page="guild">
-            <span class="icon">🏯</span> Tông Môn
-          </li>
-          <li class="nav-item ${C.currentPage==="alchemy"?"active":""}" data-page="alchemy">
-            <span class="icon">⚒️</span> Chế Tác
-          </li>
-          <li class="nav-item ${C.currentPage==="library"?"active":""}" data-page="library">
-            <span class="icon">📚</span> Tàng Kinh Các
-          </li>
-          <li class="nav-item ${C.currentPage==="wiki"?"active":""}" data-page="wiki">
-            <span class="icon">📜</span> Wiki
-          </li>
-          <li class="nav-item ${C.currentPage==="leaderboard"?"active":""}" data-page="leaderboard">
-            <span class="icon">🏆</span> Xếp Hạng
           </li>
 
           <li class="nav-section">CHIẾN ĐẤU</li>
@@ -2285,18 +2258,38 @@ Không ai có thể vượt qua.
             <span class="icon">⚔️</span> Đấu Trường
           </li>
           <li class="nav-item ${C.currentPage==="worldboss"?"active":""}" data-page="worldboss">
-            <span class="icon">🐉</span> Boss TG
+            <span class="icon">🐉</span> Boss Thế Giới
+          </li>
+
+          <li class="nav-section">THẾ GIỚI</li>
+          <li class="nav-item ${C.currentPage==="housing"?"active":""}" data-page="housing">
+            <span class="icon">🏠</span> Động Phủ
+          </li>
+          <li class="nav-item ${C.currentPage==="guild"?"active":""}" data-page="guild">
+            <span class="icon">🏯</span> Tông Môn
+          </li>
+          <li class="nav-item ${C.currentPage==="alchemy"?"active":""}" data-page="alchemy">
+            <span class="icon">⚒️</span> Chế Tác
+          </li>
+          <li class="nav-item ${C.currentPage==="wiki"?"active":""}" data-page="wiki">
+            <span class="icon">📚</span> Tri Thức
+          </li>
+          <li class="nav-item ${C.currentPage==="leaderboard"?"active":""}" data-page="leaderboard">
+            <span class="icon">🏆</span> Xếp Hạng
           </li>
 
           <li class="nav-section">KINH TẾ</li>
+          <li class="nav-item ${C.currentPage==="market"?"active":""}" data-page="market">
+            <span class="icon">🏪</span> Giao Dịch Đài
+          </li>
+          <li class="nav-item ${C.currentPage==="npcshop"?"active":""}" data-page="npcshop">
+            <span class="icon">🧓</span> Thương Nhân
+          </li>
           <li class="nav-item ${C.currentPage==="auction"?"active":""}" data-page="auction">
-            <span class="icon">🏪</span> Đấu Giá
+            <span class="icon">🏛️</span> Đấu Giá
           </li>
           <li class="nav-item ${C.currentPage==="gacha"?"active":""}" data-page="gacha">
             <span class="icon">🎰</span> Thiên Cơ Đài
-          </li>
-          <li class="nav-item ${C.currentPage==="dailyquest"?"active":""}" data-page="dailyquest">
-            <span class="icon">📋</span> Nhật Nhiệm
           </li>
 
           ${a.role==="admin"?`
@@ -2374,4 +2367,4 @@ Không ai có thể vượt qua.
         <div class="bar-track"><div class="bar-fill nerve" style="width:${y}%"></div></div>
       </div>
       <div class="sidebar-gold">💎 ${a.gold??0} Linh Thạch</div>`}const d=document.querySelector('.nav-item[data-page="stats"]');if(d){let v="";a.statPoints>0&&(v+=`<span class="badge">${a.statPoints}</span>`),(b=a.realmInfo)!=null&&b.canBreakthrough&&(v+='<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>'),d.querySelectorAll(".badge").forEach(y=>y.remove()),d.insertAdjacentHTML("beforeend",v)}}async function V(){try{const[a,e,t,r,d,$]=await Promise.all([q.getMonsters(),q.getSkills(),q.getItems(),q.getMedicines(),q.getCrimes(),q.getEducation()]);C.monsters=a.monsters||[],C.skills=e.skills||[],C.items=t.items||[],C.medicines=r.medicines||[],C.crimes=d.crimes||[],C.educationTrees=$.trees||[],C.exploration=await q.getExploration(),C.recipes=(await q.getRecipes()).recipes,C.npcs=(await q.getNpcs()).npcs||[]}catch(a){console.error("Lỗi tải dữ liệu:",a)}}function z(a,e="info"){var r;(r=document.querySelector(".notification"))==null||r.remove();const t=document.createElement("div");t.className=`notification ${e}`,t.textContent=a,document.body.appendChild(t),setTimeout(()=>{t.style.opacity="0",t.style.transition="opacity 0.3s",setTimeout(()=>t.remove(),300)},3e3)}_t();
-//# sourceMappingURL=index-CVoUZu2X.js.map
+//# sourceMappingURL=index-BMehcnqW.js.map

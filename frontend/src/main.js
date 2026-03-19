@@ -397,7 +397,6 @@ function renderGame() {
           </li>
 
 
-
           <li class="nav-section">HÀNH TRÌNH</li>
           <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
             <span class="icon">🚶</span> Ngao Du
@@ -410,37 +409,11 @@ function renderGame() {
             <span class="icon">📜</span> Nhiệm Vụ
             ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
           </li>
+          <li class="nav-item ${state.currentPage === 'dailyquest' ? 'active' : ''}" data-page="dailyquest">
+            <span class="icon">📋</span> Nhật Nhiệm
+          </li>
           <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
             <span class="icon">💀</span> Ác Nghiệp
-          </li>
-
-
-
-
-          <li class="nav-section">THẾ GIỚI</li>
-          <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
-            <span class="icon">🏠</span> Động Phủ
-          </li>
-          <li class="nav-item ${state.currentPage === 'market' ? 'active' : ''}" data-page="market">
-            <span class="icon">🏪</span> Giao Dịch Đài
-          </li>
-          <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
-            <span class="icon">🧓</span> Thương Nhân
-          </li>
-          <li class="nav-item ${state.currentPage === 'guild' ? 'active' : ''}" data-page="guild">
-            <span class="icon">🏯</span> Tông Môn
-          </li>
-          <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
-            <span class="icon">⚒️</span> Chế Tác
-          </li>
-          <li class="nav-item ${state.currentPage === 'library' ? 'active' : ''}" data-page="library">
-            <span class="icon">📚</span> Tàng Kinh Các
-          </li>
-          <li class="nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki">
-            <span class="icon">📜</span> Wiki
-          </li>
-          <li class="nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard">
-            <span class="icon">🏆</span> Xếp Hạng
           </li>
 
           <li class="nav-section">CHIẾN ĐẤU</li>
@@ -448,18 +421,38 @@ function renderGame() {
             <span class="icon">⚔️</span> Đấu Trường
           </li>
           <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
-            <span class="icon">🐉</span> Boss TG
+            <span class="icon">🐉</span> Boss Thế Giới
+          </li>
+
+          <li class="nav-section">THẾ GIỚI</li>
+          <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
+            <span class="icon">🏠</span> Động Phủ
+          </li>
+          <li class="nav-item ${state.currentPage === 'guild' ? 'active' : ''}" data-page="guild">
+            <span class="icon">🏯</span> Tông Môn
+          </li>
+          <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
+            <span class="icon">⚒️</span> Chế Tác
+          </li>
+          <li class="nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki">
+            <span class="icon">📚</span> Tri Thức
+          </li>
+          <li class="nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard">
+            <span class="icon">🏆</span> Xếp Hạng
           </li>
 
           <li class="nav-section">KINH TẾ</li>
+          <li class="nav-item ${state.currentPage === 'market' ? 'active' : ''}" data-page="market">
+            <span class="icon">🏪</span> Giao Dịch Đài
+          </li>
+          <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
+            <span class="icon">🧓</span> Thương Nhân
+          </li>
           <li class="nav-item ${state.currentPage === 'auction' ? 'active' : ''}" data-page="auction">
-            <span class="icon">🏪</span> Đấu Giá
+            <span class="icon">🏛️</span> Đấu Giá
           </li>
           <li class="nav-item ${state.currentPage === 'gacha' ? 'active' : ''}" data-page="gacha">
             <span class="icon">🎰</span> Thiên Cơ Đài
-          </li>
-          <li class="nav-item ${state.currentPage === 'dailyquest' ? 'active' : ''}" data-page="dailyquest">
-            <span class="icon">📋</span> Nhật Nhiệm
           </li>
 
           ${p.role === 'admin' ? `
