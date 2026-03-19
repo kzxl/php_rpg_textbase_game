@@ -183,6 +183,67 @@ Không ai có thể vượt qua.
 // ==============================
 // GAME SHELL
 // ==============================
+// ===== STATUS EFFECTS WITH LIVE COUNTDOWN =====
+function renderStatusEffects(p) {
+  const now = Math.floor(Date.now() / 1000)
+  const effects = []
+  
+  if (p.hospitalUntil && p.hospitalUntil > now) {
+    effects.push({ icon: '🏥', label: 'Tịnh dưỡng', endTime: p.hospitalUntil, color: 'var(--red)' })
+  }
+  if (p.medCooldownUntil && p.medCooldownUntil > now) {
+    effects.push({ icon: '💊', label: 'Đan độc', endTime: p.medCooldownUntil, color: 'var(--orange)' })
+  }
+  if (p.jailUntil && p.jailUntil > now) {
+    effects.push({ icon: '⛓️', label: 'Ngục tù', endTime: p.jailUntil, color: 'var(--purple)' })
+  }
+  if (p.travelArrivesAt && p.travelArrivesAt > now) {
+    effects.push({ icon: '🚶', label: 'Di chuyển', endTime: p.travelArrivesAt, color: 'var(--blue)' })
+  }
+  
+  if (effects.length === 0) return ''
+  
+  return `<div class="status-effects" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;margin-bottom:2px">
+    ${effects.map(e => {
+      const rem = Math.max(0, e.endTime - now)
+      const m = Math.floor(rem / 60)
+      const s = rem % 60
+      const timeStr = m > 0 ? `${m}p${String(s).padStart(2,'0')}s` : `${s}s`
+      return `<span class="status-icon" data-end="${e.endTime}" style="
+        display:inline-flex;align-items:center;gap:2px;
+        background:rgba(0,0,0,0.4);border:1px solid ${e.color}55;
+        padding:2px 6px;border-radius:12px;font-size:11px;
+        color:${e.color};white-space:nowrap;
+      " title="${e.label}">${e.icon} <span class="cd-time">${timeStr}</span></span>`
+    }).join('')}
+  </div>`
+}
+
+// Live countdown interval
+let _statusInterval = null
+function startStatusCountdown() {
+  if (_statusInterval) clearInterval(_statusInterval)
+  _statusInterval = setInterval(() => {
+    const now = Math.floor(Date.now() / 1000)
+    document.querySelectorAll('.status-icon[data-end]').forEach(el => {
+      const end = parseInt(el.dataset.end)
+      const rem = Math.max(0, end - now)
+      if (rem <= 0) {
+        el.remove()
+        return
+      }
+      const m = Math.floor(rem / 60)
+      const s = rem % 60
+      const cdEl = el.querySelector('.cd-time')
+      if (cdEl) cdEl.textContent = m > 0 ? `${m}p${String(s).padStart(2,'0')}s` : `${s}s`
+    })
+    // Remove empty container
+    document.querySelectorAll('.status-effects').forEach(c => {
+      if (c.children.length === 0) c.remove()
+    })
+  }, 1000)
+}
+
 function renderPlayerBuffs(p) {
   let html = '';
   // Môi trường
@@ -265,6 +326,7 @@ function renderGame() {
         <div class="sidebar-player">
           <div class="player-name">${p.name}</div>
           <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
+          ${renderStatusEffects(p)}
           ${renderPlayerBuffs(p)}
           <div class="sidebar-bar" style="margin-top:8px">
             <div class="bar-label">
@@ -470,6 +532,7 @@ function renderGame() {
 
   renderPage()
   if (state.popupOpen) renderPopupContent()
+  startStatusCountdown()
 }
 
 function openPopup(page) {
@@ -538,6 +601,7 @@ function updateSidebar() {
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
       <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
+      ${renderStatusEffects(p)}
       ${renderPlayerBuffs(p)}
       <div class="sidebar-bar" style="margin-top:8px">
         <div class="bar-label">
