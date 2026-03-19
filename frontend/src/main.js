@@ -321,6 +321,10 @@ function renderGame() {
         <div class="sidebar-header">
           <div class="game-title">NGHỊCH THIÊN KÝ</div>
           <div class="game-sub">Tu Tiên RPG v2.0</div>
+          <div style="position:relative;margin-top:8px">
+            <input type="text" id="searchPlayerInput" placeholder="🔍 Tìm Người Chơi..." autocomplete="off" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.3);color:#fff;font-size:12px;outline:none">
+            <div id="searchResults" style="position:absolute;top:100%;left:0;right:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:100;display:none"></div>
+          </div>
         </div>
 
         <div class="sidebar-player">
@@ -392,11 +396,7 @@ function renderGame() {
             <span class="icon">🧘</span> Tu Luyện
           </li>
 
-          ${(p.hospitalRemaining ?? 0) > 0 ? `
-          <li class="nav-section" style="color:var(--red)">⚠ Đang bị thương</li>
-          <li class="nav-item" style="color:var(--red);pointer-events:none">
-            <span class="icon">🏥</span> Tịnh dưỡng ${p.hospitalRemaining}s
-          </li>` : ''}
+
 
           <li class="nav-section">HÀNH TRÌNH</li>
           <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
@@ -414,9 +414,7 @@ function renderGame() {
             <span class="icon">💀</span> Ác Nghiệp
           </li>
 
-          <li class="nav-item ${state.currentPage === 'profile' ? 'active' : ''}" data-page="profile">
-            <span class="icon">🔍</span> Tìm Người
-          </li>
+
 
 
           <li class="nav-section">THẾ GIỚI</li>
@@ -530,6 +528,52 @@ function renderGame() {
 
   renderPage()
   if (state.popupOpen) renderPopupContent()
+
+  // Search autocomplete
+  const searchInput = document.getElementById('searchPlayerInput')
+  const searchResults = document.getElementById('searchResults')
+  let searchTimer = null
+  if (searchInput && searchResults) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer)
+      const q = searchInput.value.trim()
+      if (q.length < 2) { searchResults.style.display = 'none'; return }
+      searchTimer = setTimeout(async () => {
+        try {
+          const data = await api.searchPlayers(q)
+          const players = data.players || data.results || []
+          if (players.length === 0) {
+            searchResults.innerHTML = '<div style="padding:8px 12px;font-size:12px;color:var(--text-dim)">Không tìm thấy</div>'
+          } else {
+            searchResults.innerHTML = players.map(pl => `
+              <div class="search-result" data-pid="${pl.id}" style="padding:8px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center">
+                <span>${pl.name} <span style="opacity:0.4">Lv.${pl.level}</span></span>
+                <span style="opacity:0.3;font-size:10px">${pl.realmInfo?.name || ''}</span>
+              </div>
+            `).join('')
+          }
+          searchResults.style.display = 'block'
+          searchResults.querySelectorAll('.search-result').forEach(r => {
+            r.addEventListener('click', () => {
+              state.currentPage = 'profile'
+              state._viewProfileId = r.dataset.pid
+              searchResults.style.display = 'none'
+              searchInput.value = ''
+              renderGame()
+            })
+            r.addEventListener('mouseenter', () => r.style.background = 'rgba(255,255,255,0.08)')
+            r.addEventListener('mouseleave', () => r.style.background = 'transparent')
+          })
+        } catch (e) { searchResults.style.display = 'none' }
+      }, 300)
+    })
+    searchInput.addEventListener('blur', () => {
+      setTimeout(() => { searchResults.style.display = 'none' }, 200)
+    })
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { searchResults.style.display = 'none'; searchInput.blur() }
+    })
+  }
   startStatusCountdown()
 }
 
