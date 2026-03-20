@@ -146,8 +146,8 @@ export function pageEducation(el, ctx) {
 
     el.innerHTML = `
       <div class="page-header">
-        <h1>📜 Đạo Lộ (Tu Luyện)</h1>
-        <div class="text-dim text-sm mt-xs">Lựa chọn con đường tu tiên của riêng bạn.</div>
+        <h1>🧘 Công Pháp Tu Luyện</h1>
+        <div class="text-dim text-sm mt-xs">Tu luyện công pháp, nâng cao thông thạo từng bước.</div>
       </div>
 
       <div class="edu-layout">

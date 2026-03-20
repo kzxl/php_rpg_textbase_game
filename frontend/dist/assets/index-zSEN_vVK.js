@@ -492,8 +492,8 @@
         </div>
       `}).join("");s.innerHTML=`
       <div class="page-header">
-        <h1>📜 Đạo Lộ (Tu Luyện)</h1>
-        <div class="text-dim text-sm mt-xs">Lựa chọn con đường tu tiên của riêng bạn.</div>
+        <h1>🧘 Công Pháp Tu Luyện</h1>
+        <div class="text-dim text-sm mt-xs">Tu luyện công pháp, nâng cao thông thạo từng bước.</div>
       </div>
 
       <div class="edu-layout">
@@ -2424,8 +2424,11 @@ Không ai có thể vượt qua.
             <span class="icon">🎒</span> Túi Đồ
             ${(s.medCooldownRemaining??0)>0?'<span class="badge" style="background:var(--orange)">⏳</span>':""}
           </li>
-          <li class="nav-item ${S.currentPage==="skills"||S.currentPage==="education"?"active":""}" data-page="education">
-            <span class="icon">🧘</span> Tu Luyện & Kỹ Năng
+          <li class="nav-item ${S.currentPage==="education"?"active":""}" data-page="education">
+            <span class="icon">🧘</span> Công Pháp
+          </li>
+          <li class="nav-item ${S.currentPage==="skills"?"active":""}" data-page="skills">
+            <span class="icon">⚡</span> Kỹ Năng
           </li>
 
 
@@ -2570,4 +2573,4 @@ Không ai có thể vượt qua.
         <div class="bar-track"><div class="bar-fill nerve" style="width:${h}%"></div></div>
       </div>
       <div class="sidebar-gold">💎 ${s.gold??0} Linh Thạch</div>`}const l=document.querySelector('.nav-item[data-page="stats"]');if(l){let m="";s.statPoints>0&&(m+=`<span class="badge">${s.statPoints}</span>`),(f=s.realmInfo)!=null&&f.canBreakthrough&&(m+='<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>'),l.querySelectorAll(".badge").forEach(h=>h.remove()),l.insertAdjacentHTML("beforeend",m)}}async function V(){try{const[s,e,t,c,l,T]=await Promise.all([H.getMonsters(),H.getSkills(),H.getItems(),H.getMedicines(),H.getCrimes(),H.getEducation()]);S.monsters=s.monsters||[],S.skills=e.skills||[],S.items=t.items||[],S.medicines=c.medicines||[],S.crimes=l.crimes||[],S.educationTrees=T.trees||[],S.exploration=await H.getExploration(),S.recipes=(await H.getRecipes()).recipes,S.npcs=(await H.getNpcs()).npcs||[]}catch(s){console.error("Lỗi tải dữ liệu:",s)}}function z(s,e="info"){var c;(c=document.querySelector(".notification"))==null||c.remove();const t=document.createElement("div");t.className=`notification ${e}`,t.textContent=s,document.body.appendChild(t),setTimeout(()=>{t.style.opacity="0",t.style.transition="opacity 0.3s",setTimeout(()=>t.remove(),300)},3e3)}zt();
-//# sourceMappingURL=index-CR_M1IbU.js.map
+//# sourceMappingURL=index-zSEN_vVK.js.map
