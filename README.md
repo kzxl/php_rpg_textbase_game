@@ -160,6 +160,28 @@ Key tables: `players`, `player_inventory`, `player_housing`, `tower_runs`, `worl
 
 ---
 
+## 📖 Wiki In-Game
+
+Game có hệ thống **Wiki hướng dẫn** tích hợp sẵn (truy cập từ action bar hoặc nav). Gồm 13 tab:
+
+| Tab | Nội dung |
+|-----|----------|
+| 📖 Lore | Biên niên sử, vùng đất, thế giới quan |
+| 🌟 Cảnh Giới | Bảng cảnh giới, độ kiếp, level range |
+| ⚔️ Chiến Đấu | Cơ chế combat, HP regen, 4 chỉ số |
+| ⚡ Kỹ Năng | 4 tab kỹ năng, mastery, công pháp đặc biệt |
+| 🗺️ Khám Phá | Tỷ lệ gặp, World Boss rally, NPC quest |
+| 🗼 Thiên Phần Tháp | Stamina cost, sự kiện tầng, mốc thưởng |
+| 🏰 Bí Cảnh | Ngọc Giản, dungeon tiers, boss drops |
+| 🏠 Động Phủ | Housing tiers, dược viên, trận pháp |
+| 🧬 Căn Cốt | Talent system, tẩy tủy/hoán cốt đan |
+| ⚗️ Luyện Đan | Craft system, phù văn (PoE-style currency) |
+| 🔪 Phạm Tội | Crime system, cướp bóc PvP |
+| 🏪 Thương Mại | NPC shop, P2P market, thuế |
+| 💡 Mẹo | Tips cho người mới, kiếm tiền, endgame |
+
+---
+
 ## 📝 Roadmap
 
 Xem chi tiết tại [next_work.md](next_work.md)
