@@ -32,6 +32,10 @@ class Player
     public int $medCooldownUntil = 0;
     /** @var int Unix timestamp when mugging cooldown expires */
     public int $mugCooldownUntil = 0;
+    public ?string $pendingMugVictim = null;
+    public ?int $pendingMugExpiry = null;
+    /** @var string Active displayed title */
+    public string $activeTitle = '';
     /** @var int Max med cooldown cap in seconds */
     private const MED_COOLDOWN_CAP = 300; // 5 minutes
     /** @var int Last HP regen timestamp (meditation) */
@@ -838,6 +842,9 @@ class Player
             'talents' => $this->talents,
             'talentDisplay' => $this->getTalentDisplay(),
             'mugCooldownUntil' => $this->mugCooldownUntil,
+            'pendingMugVictim' => $this->pendingMugVictim,
+            'pendingMugExpiry' => $this->pendingMugExpiry,
+            'activeTitle' => $this->activeTitle,
             'createdAt' => $this->createdAt,
             'craftingLevel' => $this->craftingLevel,
             'craftingXp' => $this->craftingXp,
@@ -964,6 +971,9 @@ class Player
         $player->realmTier = $data['realmTier'] ?? \App\Systems\RealmSystem::getRealmTier($player->level);
         $player->talents = $data['talents'] ?? self::generateRandomTalents();
         $player->mugCooldownUntil = $data['mugCooldownUntil'] ?? 0;
+        $player->pendingMugVictim = $data['pendingMugVictim'] ?? null;
+        $player->pendingMugExpiry = $data['pendingMugExpiry'] ?? null;
+        $player->activeTitle = $data['activeTitle'] ?? '';
         $player->createdAt = $data['createdAt'] ?? time();
         $player->craftingLevel = $data['craftingLevel'] ?? 1;
         $player->craftingXp = $data['craftingXp'] ?? 0;
