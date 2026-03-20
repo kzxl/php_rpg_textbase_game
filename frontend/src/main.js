@@ -401,10 +401,7 @@ function renderGame() {
             <span class="icon">🎒</span> Túi Đồ
             ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--orange)">⏳</span>` : ''}
           </li>
-          <li class="nav-item ${state.currentPage === 'education' ? 'active' : ''}" data-page="education">
-            <span class="icon">🧘</span> Công Pháp
-          </li>
-          <li class="nav-item ${state.currentPage === 'skills' ? 'active' : ''}" data-page="skills">
+          <li class="nav-item ${state.currentPage === 'skills' || state.currentPage === 'education' ? 'active' : ''}" data-page="skills">
             <span class="icon">⚡</span> Kỹ Năng
           </li>
 

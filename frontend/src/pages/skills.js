@@ -1,22 +1,65 @@
 /**
- * Skills Page — Kỹ Năng (3 Tabs: Chiến Đấu / Sinh Hoạt / Nội Công)
- * Unified mastery/proficiency system across all categories.
+ * Skills Page — Kỹ Năng (4 Tabs: Chiến Đấu / Sinh Hoạt / Nội Công / Công Pháp)
+ * Tab 1-3: Skill cards with mastery bars
+ * Tab 4: Education tree (studying, nodes, timer)
  */
+import { pageEducation } from './education.js'
+
 export function pageSkills(el, ctx) {
-  const { state, api, notify } = ctx
+  const { state, api, notify, renderGame } = ctx
   const pSkills = state.player.skills || []
   const learnedIds = pSkills.map(s => typeof s === 'string' ? s : s.id)
   const allSkills = state.skills || []
   const categories = {
     combat:   { icon: '⚔️', name: 'Chiến Đấu', desc: 'Chiêu thức sử dụng trong giao đấu' },
     life:     { icon: '🛠️', name: 'Sinh Hoạt', desc: 'Thu thập, chế tạo, sinh tồn' },
-    internal: { icon: '🧘', name: 'Nội Công', desc: 'Công pháp thụ động tăng cường bản thân' }
+    internal: { icon: '🧘', name: 'Nội Công', desc: 'Thụ động tăng cường bản thân' },
+    gongfa:   { icon: '📖', name: 'Công Pháp', desc: 'Tu luyện công pháp, nâng cao cảnh giới' }
   }
 
   let activeTab = localStorage.getItem('skillsTab') || 'combat'
 
   const render = () => {
-    // Learned skills enriched with master data
+    // === CÔNG PHÁP TAB → Delegate to education page ===
+    if (activeTab === 'gongfa') {
+      const tabsHtml = Object.entries(categories).map(([key, cat]) => {
+        const count = key === 'gongfa'
+          ? (state.educationTrees || []).length
+          : pSkills.filter(ps => {
+              const id = typeof ps === 'string' ? ps : ps.id
+              const master = allSkills.find(s => s.id === id)
+              return master && (master.category || 'combat') === key
+            }).length
+        return `<button class="skill-tab ${key === activeTab ? 'active' : ''}" data-tab="${key}">
+          ${cat.icon} ${cat.name} <span class="skill-tab-count">${count}</span>
+        </button>`
+      }).join('')
+
+      el.innerHTML = `
+        <div class="page-header">
+          <h1>⚡ Kỹ Năng & Công Pháp</h1>
+          <div class="text-dim text-sm">Thông thạo tăng theo sử dụng — mỗi level tăng hiệu quả.</div>
+        </div>
+        <div class="skill-tabs">${tabsHtml}</div>
+        <div id="gongfa-content"></div>
+      `
+      // Attach tab clicks
+      el.querySelectorAll('.skill-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeTab = btn.dataset.tab
+          localStorage.setItem('skillsTab', activeTab)
+          render()
+        })
+      })
+      // Render education inside the container
+      const gongfaEl = el.querySelector('#gongfa-content')
+      if (gongfaEl) {
+        pageEducation(gongfaEl, ctx)
+      }
+      return
+    }
+
+    // === SKILL TABS (combat / life / internal) ===
     const learned = pSkills.map(ps => {
       const id = typeof ps === 'string' ? ps : ps.id
       const master = allSkills.find(s => s.id === id) || { name: id, id, category: 'combat' }
@@ -28,19 +71,18 @@ export function pageSkills(el, ctx) {
       }
     })
 
-    // Filter by active tab
     const tabSkills = learned.filter(s => (s.category || 'combat') === activeTab)
     const unlearned = allSkills.filter(s => (s.category || 'combat') === activeTab && !learnedIds.includes(s.id))
 
-    // Tab buttons
     const tabsHtml = Object.entries(categories).map(([key, cat]) => {
-      const count = learned.filter(s => (s.category || 'combat') === key).length
+      const count = key === 'gongfa'
+        ? (state.educationTrees || []).length
+        : learned.filter(s => (s.category || 'combat') === key).length
       return `<button class="skill-tab ${key === activeTab ? 'active' : ''}" data-tab="${key}">
         ${cat.icon} ${cat.name} <span class="skill-tab-count">${count}</span>
       </button>`
     }).join('')
 
-    // Skill card renderer
     const renderSkill = (s, isLearned) => {
       const xpNeeded = s.level * 100
       const xpPct = Math.min(100, (s.xp / xpNeeded) * 100)
@@ -90,7 +132,7 @@ export function pageSkills(el, ctx) {
 
     el.innerHTML = `
       <div class="page-header">
-        <h1>⚡ Kỹ Năng</h1>
+        <h1>⚡ Kỹ Năng & Công Pháp</h1>
         <div class="text-dim text-sm">Thông thạo tăng theo sử dụng — mỗi level tăng hiệu quả.</div>
       </div>
 
