@@ -331,6 +331,7 @@ function renderGame() {
 
         <div class="sidebar-player">
           <div class="player-name">${p.name}</div>
+          ${p.activeTitle ? `<div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.5px;margin-top:1px">『${p.activeTitle}』</div>` : ''}
           <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
           ${renderStatusEffects(p)}
           ${renderPlayerBuffs(p)}
@@ -368,16 +369,25 @@ function renderGame() {
             <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}${(p.nerve ?? 0) < (p.maxNerve ?? 15) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+1/5min</span>` : ''}</span></div>
             <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
           </div>
-          <div class="sidebar-gold" style="padding-bottom:12px">
-            <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:8px">💎 ${p.gold ?? 0} Linh Thạch</div>
-            <div style="display:flex; gap:6px; width:100%">
-              <button class="btn btn--dark nav-item ${state.currentPage === 'events' ? 'active' : ''}" data-page="events" style="flex:1; padding:6px; font-size:14px; position:relative" title="Sự Kiện">
-                📜
-                ${(p.unreadEventsCount ?? 0) > 0 ? `<span class="badge" style="position:absolute; top:-4px; right:-4px; background:var(--red); width:8px; height:8px; padding:0; border-radius:50%"></span>` : ''}
-              </button>
-              <button class="btn btn--dark" style="flex:1; padding:6px; font-size:14px; opacity:0.3; cursor:default" disabled></button>
-              <button class="btn btn--dark" style="flex:1; padding:6px; font-size:14px; opacity:0.3; cursor:default" disabled></button>
-            </div>
+          <div class="sidebar-gold" style="padding-bottom:4px">
+            <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:6px">💎 ${p.gold ?? 0} Linh Thạch</div>
+          </div>
+          <div class="sidebar-action-bar" style="display:flex;gap:4px;padding:0 0 8px">
+            <button class="btn btn--dark nav-item ${state.currentPage === 'events' ? 'active' : ''}" data-page="events" style="flex:1;padding:6px;font-size:14px;position:relative;justify-content:center" title="Thông Báo">
+              📜${(p.unreadEventsCount ?? 0) > 0 ? `<span class="badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);width:8px;height:8px;padding:0;border-radius:50%"></span>` : ''}
+            </button>
+            <button class="btn btn--dark nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Bách Khoa">
+              📖
+            </button>
+            <button class="btn btn--dark nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xếp Hạng">
+              🏆
+            </button>
+            <button class="btn btn--dark nav-item ${state.currentPage === 'social' ? 'active' : ''}" data-page="social" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xã Hội">
+              💬
+            </button>
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border)">
+            📍 ${areaName} ${p.hospitalRemaining > 0 ? '<span style="color:var(--red)">🏥 Tịnh dưỡng</span>' : (p.travelRemaining > 0 ? '<span style="color:var(--blue)">🚶 Di chuyển...</span>' : '')}
           </div>
         </div>
 
