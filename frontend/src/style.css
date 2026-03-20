@@ -201,6 +201,7 @@ html, body {
 .bar-fill.hp { background: linear-gradient(90deg, #d94848, #e06060); }
 .bar-fill.hp[data-low="true"] { animation: pulse-bar 0.8s infinite; }
 .bar-fill.xp { background: linear-gradient(90deg, #5b8dd9, #82b4ff); }
+.bar-fill.stamina { background: linear-gradient(90deg, #e8a43a, #f0c030); }
 .bar-fill.energy { background: linear-gradient(90deg, #7fba4c, #98d468); }
 .bar-fill.nerve { background: linear-gradient(90deg, #8b2252, #c0392b); }
 

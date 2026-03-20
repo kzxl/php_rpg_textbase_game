@@ -365,7 +365,7 @@ function renderGame() {
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
-            <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}</span></div>
+            <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}${(p.nerve ?? 0) < (p.maxNerve ?? 15) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+1/5min</span>` : ''}</span></div>
             <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
           </div>
           <div class="sidebar-gold" style="padding-bottom:12px">

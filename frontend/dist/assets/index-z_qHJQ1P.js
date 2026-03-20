@@ -2388,7 +2388,7 @@ Không ai có thể vượt qua.
             <div class="bar-track"><div class="bar-fill energy" style="width:${c}%"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
-            <div class="bar-label"><span>💀 Nghịch Khí</span><span>${s.nerve??0}/${s.maxNerve??15}</span></div>
+            <div class="bar-label"><span>💀 Nghịch Khí</span><span>${s.nerve??0}/${s.maxNerve??15}${(s.nerve??0)<(s.maxNerve??15)?'<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+1/5min</span>':""}</span></div>
             <div class="bar-track"><div class="bar-fill nerve" style="width:${l}%"></div></div>
           </div>
           <div class="sidebar-gold" style="padding-bottom:12px">
@@ -2563,4 +2563,4 @@ Không ai có thể vượt qua.
         <div class="bar-track"><div class="bar-fill nerve" style="width:${h}%"></div></div>
       </div>
       <div class="sidebar-gold">💎 ${s.gold??0} Linh Thạch</div>`}const l=document.querySelector('.nav-item[data-page="stats"]');if(l){let m="";s.statPoints>0&&(m+=`<span class="badge">${s.statPoints}</span>`),(f=s.realmInfo)!=null&&f.canBreakthrough&&(m+='<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>'),l.querySelectorAll(".badge").forEach(h=>h.remove()),l.insertAdjacentHTML("beforeend",m)}}async function V(){try{const[s,e,t,c,l,T]=await Promise.all([q.getMonsters(),q.getSkills(),q.getItems(),q.getMedicines(),q.getCrimes(),q.getEducation()]);C.monsters=s.monsters||[],C.skills=e.skills||[],C.items=t.items||[],C.medicines=c.medicines||[],C.crimes=l.crimes||[],C.educationTrees=T.trees||[],C.exploration=await q.getExploration(),C.recipes=(await q.getRecipes()).recipes,C.npcs=(await q.getNpcs()).npcs||[]}catch(s){console.error("Lỗi tải dữ liệu:",s)}}function z(s,e="info"){var c;(c=document.querySelector(".notification"))==null||c.remove();const t=document.createElement("div");t.className=`notification ${e}`,t.textContent=s,document.body.appendChild(t),setTimeout(()=>{t.style.opacity="0",t.style.transition="opacity 0.3s",setTimeout(()=>t.remove(),300)},3e3)}zt();
-//# sourceMappingURL=index-BFLL7qna.js.map
+//# sourceMappingURL=index-z_qHJQ1P.js.map
