@@ -4,6 +4,7 @@
             "id": "heavy_strike",
             "name": "Trọng Kích",
             "description": "Tập trung sức mạnh vào một đòn mạnh.",
+            "category": "combat",
             "type": "active",
             "tags": ["attack", "physical", "melee", "single"],
             "damageType": "physical",
@@ -13,12 +14,14 @@
             "cooldown": 0,
             "modifiers": [],
             "tier": 1,
-            "requirements": ["Cấp độ 2"]
+            "requirements": ["Cấp độ 2"],
+            "masteryBonus": "+5% damage/level"
         },
         {
             "id": "swift_slash",
             "name": "Hấp Huyết Kiếm (Huyền Cấp)",
             "description": "Đòn chém nhanh có kèm tà thuật hút máu.",
+            "category": "combat",
             "type": "active",
             "tags": ["attack", "physical", "melee", "single"],
             "damageType": "physical",
@@ -31,12 +34,14 @@
                 { "type": "flat", "stat": "speed", "value": 5, "source": "skill" }
             ],
             "tier": 2,
-            "requirements": ["Cấp độ 5", "Tàn sát 50 Sinh linh"]
+            "requirements": ["Cấp độ 5", "Tàn sát 50 Sinh linh"],
+            "masteryBonus": "+3% lifesteal/level"
         },
         {
             "id": "precision_thrust",
             "name": "Lưu Tinh Thích (Địa Cấp)",
             "description": "Đâm liên tiếp 2 nhát với tốc độ ánh sáng.",
+            "category": "combat",
             "type": "active",
             "tags": ["attack", "physical", "melee", "single"],
             "damageType": "physical",
@@ -49,12 +54,14 @@
                 { "type": "flat", "stat": "dexterity", "value": 8, "source": "skill" }
             ],
             "tier": 3,
-            "requirements": ["Mẫn Tiệp > 30"]
+            "requirements": ["Mẫn Tiệp > 30"],
+            "masteryBonus": "+5% hit chance/level"
         },
         {
             "id": "flame_burst",
             "name": "Liệt Hỏa Diệt Thế (Thiên Cấp)",
             "description": "Lửa giận thế gian. Kẻ địch càng ít HP, sát thương càng bạo phát.",
+            "category": "combat",
             "type": "active",
             "tags": ["spell", "magical", "ranged", "single", "fire"],
             "damageType": "fire",
@@ -71,12 +78,14 @@
             "executeScaling": 1.5,
             "modifiers": [],
             "tier": 4,
-            "requirements": ["Linh Lực Tối Đa > 100", "Thuộc tính Hỏa"]
+            "requirements": ["Linh Lực Tối Đa > 100", "Thuộc tính Hỏa"],
+            "masteryBonus": "+10% burn damage/level"
         },
         {
             "id": "frost_nova",
             "name": "Tuyệt Đoán Hàn Băng (Thánh Cấp)",
-            "description": "Băng phong vạn dặm. Thay đổi quy luật đất trời: Bắt buộc Chí Mạng.",
+            "description": "Băng phong vạn dặm. Bắt buộc Chí Mạng.",
+            "category": "combat",
             "type": "active",
             "tags": ["spell", "magical", "ranged", "aoe", "ice"],
             "damageType": "ice",
@@ -92,12 +101,14 @@
             "guaranteedCrit": true,
             "modifiers": [],
             "tier": 5,
-            "requirements": ["Đạt cảnh giới Trúc Cơ", "Trí Mẫn > 80"]
+            "requirements": ["Đạt cảnh giới Trúc Cơ", "Trí Mẫn > 80"],
+            "masteryBonus": "+5% freeze chance/level"
         },
         {
             "id": "void_strike",
             "name": "Hư Không Trảm (Tiên Cấp)",
-            "description": "Chém đứt màng không gian. Hoàn toàn Xuyên Giáp đối phương.",
+            "description": "Chém đứt màng không gian. Hoàn toàn Xuyên Giáp.",
+            "category": "combat",
             "type": "active",
             "tags": ["attack", "physical", "melee", "single"],
             "damageType": "physical",
@@ -108,12 +119,37 @@
             "ignoreDefense": true,
             "modifiers": [],
             "tier": 6,
-            "requirements": ["Cảnh giới Nguyên Anh", "Cầm trên tay Thần Kiếm"]
+            "requirements": ["Cảnh giới Nguyên Anh", "Cầm trên tay Thần Kiếm"],
+            "masteryBonus": "+8% damage/level"
+        },
+        {
+            "id": "poison_dart",
+            "name": "Độc Thích Cốt",
+            "description": "Phóng ám khí tẩm kịch độc. Rút máu liên tục.",
+            "category": "combat",
+            "type": "active",
+            "tags": ["attack", "physical", "ranged", "single", "poison"],
+            "damageType": "poison",
+            "weaponTypes": ["dagger"],
+            "damageMultiplier": 0.5,
+            "cost": 10,
+            "cooldown": 0,
+            "statusEffect": {
+                "type": "poison",
+                "chance": 100,
+                "damage": 4,
+                "duration": 4
+            },
+            "modifiers": [],
+            "tier": 2,
+            "requirements": ["Mẫn Tiệp > 15"],
+            "masteryBonus": "+1 poison damage/level"
         },
         {
             "id": "rage",
             "name": "Thiên Đạo Luân Hồi (Thần Cấp)",
-            "description": "Chạm đến luật nhân quả. Phản lại 50% sát thương nhận vào thành Chuẩn Sát Thương (True Damage).",
+            "description": "Phản lại 50% sát thương nhận vào thành True Damage.",
+            "category": "internal",
             "type": "passive",
             "tags": ["buff", "physical"],
             "damageType": null,
@@ -122,12 +158,14 @@
             "modifiers": [],
             "reflectDamage": 0.5,
             "tier": 7,
-            "requirements": ["Tử Phủ vỡ nát 99 lần", "Đột phá Thần Hồn"]
+            "requirements": ["Tử Phủ vỡ nát 99 lần", "Đột phá Thần Hồn"],
+            "masteryBonus": "+5% reflect/level"
         },
         {
             "id": "iron_body",
             "name": "Thiết Thân Công",
             "description": "Luyện thân pháp cứng như sắt.",
+            "category": "internal",
             "type": "passive",
             "tags": ["buff", "physical"],
             "damageType": null,
@@ -137,155 +175,162 @@
                 { "type": "increase", "stat": "defense", "value": 15, "source": "skill" }
             ],
             "tier": 2,
-            "requirements": ["Đã chịu tổng cộng 1,000 sát thương Ngoại Công"]
+            "requirements": ["Đã chịu 1,000 sát thương Ngoại Công"],
+            "masteryBonus": "+3% defense/level"
         },
         {
-             "id": "nhan_thuat",
-             "name": "Nhãn Thuật",
-             "description": "Thần nhãn thấu tỏ vạn vật, nhìn xuyên yếu điểm kẻ địch và phá bỏ sương mù.",
-             "type": "passive",
-             "tags": ["buff", "perception"],
-             "damageType": null,
-             "weaponTypes": null,
-             "damageMultiplier": 1.0,
-             "modifiers": [],
-             "tier": 1,
-             "requirements": []
+            "id": "nhan_thuat",
+            "name": "Nhãn Thuật",
+            "description": "Thần nhãn thấu tỏ vạn vật, nhìn xuyên yếu điểm kẻ địch.",
+            "category": "internal",
+            "type": "passive",
+            "tags": ["buff", "perception"],
+            "damageType": null,
+            "weaponTypes": null,
+            "damageMultiplier": 1.0,
+            "modifiers": [],
+            "tier": 1,
+            "requirements": [],
+            "masteryBonus": "+2% crit chance/level"
         },
         {
-             "id": "poison_dart",
-             "name": "Độc Thích Cốt",
-             "description": "Phóng ám khí tẩm kịch độc. Kẻ địch trúng phải sẽ bị rút máu liên tục.",
-             "type": "active",
-             "tags": ["attack", "physical", "ranged", "single", "poison"],
-             "damageType": "poison",
-             "weaponTypes": ["dagger"],
-             "damageMultiplier": 0.5,
-             "cost": 10,
-             "cooldown": 0,
-             "statusEffect": {
-                 "type": "poison",
-                 "chance": 100,
-                 "damage": 4,
-                 "duration": 4
-             },
-             "modifiers": [],
-             "tier": 2,
-             "requirements": ["Mẫn Tiệp > 15"]
+            "id": "tieu_chu_thien",
+            "name": "Tiểu Chu Thiên",
+            "description": "Khí hành chu thiên, phục hồi Linh Lực liên tục.",
+            "category": "internal",
+            "type": "passive",
+            "tags": ["buff", "energy"],
+            "tier": 2,
+            "requirements": ["Cảnh giới Luyện Khí", "Linh Lực Tối Đa > 60"],
+            "modifiers": [
+                { "type": "flat", "stat": "energyRegen", "value": 15, "source": "skill" }
+            ],
+            "masteryBonus": "+2 energy regen/level"
         },
         {
-             "id": "duoc_ly",
-             "name": "Dược Lý Căn Bản",
-             "description": "Am hiểu thảo dược, có thể nhìn thấu tác dụng của dược liệu quý hiếm.",
-             "type": "passive",
-             "tags": ["buff", "perception"],
-             "damageType": null,
-             "weaponTypes": null,
-             "damageMultiplier": 1.0,
-             "modifiers": [],
-             "tier": 1,
-             "requirements": []
-         },
-         {
-              "id": "hai_duoc",
-              "name": "Hái Dược",
-              "description": "Kỹ năng phân biệt và thu thập thảo dược quý hiếm từ thiên nhiên.",
-              "type": "passive",
-              "tags": ["gathering", "herb"],
-              "tier": 1,
-              "requirements": []
-         },
-         {
-              "id": "khai_khoang",
-              "name": "Khai Khoáng",
-              "description": "Tìm kiếm và khai thác các quặng mỏ, tinh thạch ẩn sâu dưới lòng đất.",
-              "type": "passive",
-              "tags": ["gathering", "mining"],
-              "tier": 1,
-              "requirements": []
-         },
-         {
-              "id": "tinh_che",
-              "name": "Tinh Chế",
-              "description": "Nắm vững hỏa hầu và dược lý, tinh luyện thảo mộc thành Đan Dược.",
-              "type": "passive",
-              "tags": ["crafting", "alchemy"],
-              "tier": 1,
-              "requirements": []
-         },
-         {
-              "id": "tieu_chu_thien",
-              "name": "Tiểu Chu Thiên",
-              "description": "Khí hành chu thiên, giúp cơ thể phục hồi Linh Lực liên tục.",
-              "type": "passive",
-              "tags": ["buff", "energy"],
-              "tier": 2,
-              "requirements": ["Cảnh giới Luyện Khí", "Linh Lực Tối Đa > 60"],
-              "modifiers": [
-                  { "type": "flat", "stat": "energyRegen", "value": 15, "source": "skill" }
-              ]
-         },
-         {
-              "id": "cuu_nguu_nhi_ho",
-              "name": "Cửu Ngưu Nhị Hổ Lực",
-              "description": "Cơ thể như trâu như hổ, dồi dào sinh cơ, thể lực phục hồi kinh người.",
-              "type": "passive",
-              "tags": ["buff", "stamina"],
-              "tier": 3,
-              "requirements": ["Sức Mạnh > 30"],
-              "modifiers": [
-                  { "type": "increase", "stat": "staminaRegen", "value": 50, "source": "skill" }
-              ]
-         },
-         {
-              "id": "tinh_che",
-              "name": "Tinh Chế Thuật",
-              "description": "Nắm vững cách tinh chế nguyên liệu, tăng tỷ lệ luyện đan thành công.",
-              "type": "passive",
-              "tags": ["buff", "crafting"],
-              "tier": 2,
-              "requirements": ["Cấp độ 10"],
-              "modifiers": [
-                  { "type": "increase", "stat": "craftSuccessRate", "value": 2, "source": "skill" }
-              ]
-         },
-         {
-              "id": "phu_an_thuat",
-              "name": "Phù Ấn Thuật",
-              "description": "Thông thạo Phù Văn, giảm chi phí Linh thạch khi sử dụng Phù.",
-              "type": "passive",
-              "tags": ["buff", "crafting"],
-              "tier": 3,
-              "requirements": ["Cấp độ 20", "Tinh Chế Thuật Lv2"],
-              "modifiers": [
-                  { "type": "increase", "stat": "currencyCostReduction", "value": 5, "source": "skill" }
-              ]
-         },
-         {
-              "id": "linh_kiem_thuat",
-              "name": "Linh Kiếm Thuật",
-              "description": "Hiểu sâu linh khí chảy trong pháp khí. Khi dùng Phù Văn, affix chất lượng cao hơn.",
-              "type": "passive",
-              "tags": ["buff", "crafting"],
-              "tier": 4,
-              "requirements": ["Cấp độ 35", "Phù Ấn Thuật Lv2"],
-              "modifiers": [
-                  { "type": "increase", "stat": "affixQualityBonus", "value": 10, "source": "skill" }
-              ]
-         },
-         {
-              "id": "cuong_hoa_thuat",
-              "name": "Cường Hóa Thuật",
-              "description": "Khi dùng Thăng Cấp Phù, có cơ hội tăng 2 cấp thay vì 1.",
-              "type": "passive",
-              "tags": ["buff", "crafting"],
-              "tier": 5,
-              "requirements": ["Cấp độ 50", "Linh Kiếm Thuật Lv1"],
-              "modifiers": [
-                  { "type": "increase", "stat": "doubleUpgradeChance", "value": 15, "source": "skill" }
-              ]
-         }
+            "id": "cuu_nguu_nhi_ho",
+            "name": "Cửu Ngưu Nhị Hổ Lực",
+            "description": "Thể lực phục hồi nhanh kinh người.",
+            "category": "internal",
+            "type": "passive",
+            "tags": ["buff", "stamina"],
+            "tier": 3,
+            "requirements": ["Sức Mạnh > 30"],
+            "modifiers": [
+                { "type": "increase", "stat": "staminaRegen", "value": 50, "source": "skill" }
+            ],
+            "masteryBonus": "+5% stamina regen/level"
+        },
+        {
+            "id": "hai_duoc",
+            "name": "Hái Dược",
+            "description": "Kỹ năng thu thập thảo dược quý hiếm từ thiên nhiên.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["gathering", "herb"],
+            "tier": 1,
+            "requirements": [],
+            "masteryBonus": "+5% rare herb chance/level"
+        },
+        {
+            "id": "khai_khoang",
+            "name": "Khai Khoáng",
+            "description": "Khai thác quặng mỏ, tinh thạch ẩn sâu dưới lòng đất.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["gathering", "mining"],
+            "tier": 1,
+            "requirements": [],
+            "masteryBonus": "+5% rare ore chance/level"
+        },
+        {
+            "id": "tinh_che",
+            "name": "Tinh Chế Thuật",
+            "description": "Tinh luyện thảo mộc thành Đan Dược, tăng tỷ lệ thành công.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["crafting", "alchemy"],
+            "tier": 2,
+            "requirements": ["Cấp độ 10"],
+            "modifiers": [
+                { "type": "increase", "stat": "craftSuccessRate", "value": 2, "source": "skill" }
+            ],
+            "masteryBonus": "+2% craft success/level"
+        },
+        {
+            "id": "duoc_ly",
+            "name": "Dược Lý Căn Bản",
+            "description": "Am hiểu thảo dược, thấu tác dụng của dược liệu quý hiếm.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["buff", "perception"],
+            "damageType": null,
+            "weaponTypes": null,
+            "damageMultiplier": 1.0,
+            "modifiers": [],
+            "tier": 1,
+            "requirements": [],
+            "masteryBonus": "+3% potion effectiveness/level"
+        },
+        {
+            "id": "phu_an_thuat",
+            "name": "Phù Ấn Thuật",
+            "description": "Thông thạo Phù Văn, giảm chi phí Linh thạch khi dùng Phù.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["buff", "crafting"],
+            "tier": 3,
+            "requirements": ["Cấp độ 20", "Tinh Chế Thuật Lv2"],
+            "modifiers": [
+                { "type": "increase", "stat": "currencyCostReduction", "value": 5, "source": "skill" }
+            ],
+            "masteryBonus": "+1% cost reduction/level"
+        },
+        {
+            "id": "linh_kiem_thuat",
+            "name": "Linh Kiếm Thuật",
+            "description": "Hiểu sâu linh khí trong pháp khí. Affix chất lượng cao hơn.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["buff", "crafting"],
+            "tier": 4,
+            "requirements": ["Cấp độ 35", "Phù Ấn Thuật Lv2"],
+            "modifiers": [
+                { "type": "increase", "stat": "affixQualityBonus", "value": 10, "source": "skill" }
+            ],
+            "masteryBonus": "+2% affix quality/level"
+        },
+        {
+            "id": "cuong_hoa_thuat",
+            "name": "Cường Hóa Thuật",
+            "description": "Khi dùng Thăng Cấp Phù, có cơ hội tăng 2 cấp.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["buff", "crafting"],
+            "tier": 5,
+            "requirements": ["Cấp độ 50", "Linh Kiếm Thuật Lv1"],
+            "modifiers": [
+                { "type": "increase", "stat": "doubleUpgradeChance", "value": 15, "source": "skill" }
+            ],
+            "masteryBonus": "+3% double upgrade/level"
+        },
+        {
+            "id": "cuop_boc",
+            "name": "Cướp Bóc",
+            "description": "Kỹ năng lục soát nạn nhân, tăng giới hạn cướp được.",
+            "category": "life",
+            "type": "passive",
+            "tags": ["crime"],
+            "tier": 1,
+            "requirements": [],
+            "masteryBonus": "+2% steal limit/level"
+        }
     ],
+    "categories": {
+        "combat": { "name": "⚔️ Chiến Đấu", "desc": "Chiêu thức sử dụng trong giao đấu" },
+        "life": { "name": "🛠️ Sinh Hoạt", "desc": "Kỹ năng thu thập, chế tạo, sinh tồn" },
+        "internal": { "name": "🧘 Nội Công", "desc": "Công pháp thụ động tăng cường bản thân" }
+    },
     "tagDescriptions": {
         "attack": "Đòn tấn công trực tiếp",
         "spell": "Phép thuật tiêu hao linh lực",
@@ -296,6 +341,9 @@
         "ranged": "Tầm xa",
         "single": "Đánh đơn mục tiêu",
         "aoe": "Sát thương diện rộng",
-        "perception": "Ngộ Tính / Thấu Thị Yếu Điểm"
+        "perception": "Ngộ Tính / Thấu Thị",
+        "gathering": "Thu thập nguyên liệu",
+        "crafting": "Chế tạo / Luyện đan",
+        "crime": "Ác nghiệp / Hắc đạo"
     }
 }

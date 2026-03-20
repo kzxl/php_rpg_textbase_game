@@ -1354,3 +1354,97 @@ html, body {
 .popup-body .card {
   margin: 12px;
 }
+
+/* ===== SKILLS PAGE (3-Tab) ===== */
+.skill-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 12px 0;
+}
+
+.skill-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font);
+  border-bottom: 2px solid transparent;
+}
+
+.skill-tab:hover { color: var(--text-bright); background: var(--bg-panel-alt); }
+
+.skill-tab.active {
+  color: var(--gold);
+  background: var(--bg-panel-alt);
+  border-bottom: 2px solid var(--gold);
+}
+
+.skill-tab-count {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 10px;
+}
+.skill-tab.active .skill-tab-count { background: var(--gold); color: #000; border-color: var(--gold); }
+
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.skill-card {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.skill-card:hover { border-color: var(--border-light); }
+.skill-card.equipped { border-left: 3px solid var(--green); background: rgba(50, 200, 100, 0.04); }
+.skill-card.locked { opacity: 0.5; }
+
+.skill-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.skill-card-name { font-weight: 700; font-size: 13px; color: var(--text-bright); }
+.skill-card-tier { font-size: 10px; margin-top: 1px; letter-spacing: 1px; }
+.skill-card-desc { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; line-height: 1.5; }
+.skill-card-cost { font-size: 10px; color: var(--blue); margin-top: 4px; }
+
+.skill-card-mastery { margin-top: 6px; }
+.skill-mastery-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+.skill-mastery-bonus { font-size: 10px; color: var(--gold); margin-top: 3px; }
+
+.skill-card-req { margin-top: 4px; }
+.req-tag {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--bg-panel-alt);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin: 2px 4px 2px 0;
+}

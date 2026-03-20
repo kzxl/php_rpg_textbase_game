@@ -409,17 +409,13 @@ function renderGame() {
           </li>
 
 
-          <li class="nav-section">HÀNH TRÌNH</li>
-          <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
-            <span class="icon">🚶</span> Di Chuyển
+          <li class="nav-item ${['travel','dungeon','tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
+            <span class="icon">🚶</span> Ngao Du
             ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
           </li>
-          <li class="nav-item ${state.currentPage === 'quests' ? 'active' : ''}" data-page="quests">
+          <li class="nav-item ${state.currentPage === 'quests' || state.currentPage === 'dailyquest' ? 'active' : ''}" data-page="quests">
             <span class="icon">📜</span> Nhiệm Vụ
             ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
-          </li>
-          <li class="nav-item ${state.currentPage === 'dailyquest' ? 'active' : ''}" data-page="dailyquest">
-            <span class="icon">📋</span> Nhật Nhiệm
           </li>
           <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
             <span class="icon">💀</span> Ác Nghiệp
@@ -428,12 +424,6 @@ function renderGame() {
           <li class="nav-section">NGAO DU</li>
           <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
             <span class="icon">🔍</span> Khám Phá (${areaName})
-          </li>
-          <li class="nav-item ${state.currentPage === 'dungeon' ? 'active' : ''}" data-page="dungeon">
-            <span class="icon">⛩️</span> Bí Cảnh
-          </li>
-          <li class="nav-item ${state.currentPage === 'tiencanh' ? 'active' : ''}" data-page="tiencanh">
-            <span class="icon">🗺️</span> Tiên Cảnh
           </li>
 
           <li class="nav-section">CHIẾN ĐẤU</li>
