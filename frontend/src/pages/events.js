@@ -44,12 +44,15 @@ async function loadEvents(container, ctx) {
               
               // Icon mapping based on event type
               let icon = '📌'
-              if (ev.type === 'attack') icon = '⚔️'
-              if (ev.type === 'hospital') icon = '🏥'
-              if (ev.type === 'jail') icon = '🚓'
-              if (ev.type === 'money') icon = '💰'
-              if (ev.type === 'system') icon = '⚙️'
-              if (ev.type === 'trade') icon = '🤝'
+              const iconMap = {
+                attack: '⚔️', hospital: '🏥', jail: '🚓', money: '💰', system: '⚙️', trade: '🤝',
+                mug_win: '🗡️', mug_fail: '💀', mug_defend: '🛡️', mug_rob: '💸', mug_wound: '🩸',
+                boss_rally: '🐉', quest_complete: '🏆', quest_accept: '📜', quest_fail: '❌',
+                level_up: '⬆️', realm_breakthrough: '🌟', skill_learn: '⚡', craft_success: '🔨',
+                craft_fail: '💥', explore: '🔍', npc: '🧓', pvp: '⚔️', arena: '🏟️',
+                guild: '🏰', social: '💬', login: '🔑', daily: '📋'
+              }
+              icon = iconMap[ev.type] || '📌'
 
               return `
                 <li style="display:flex; gap:16px; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.05); align-items:flex-start;">

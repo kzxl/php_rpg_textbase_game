@@ -193,7 +193,14 @@ return function ($app) {
         $run = $stmt->fetch(\PDO::FETCH_ASSOC);
         if (!$run) return jsonResponse($response, ['error' => 'Chưa vào tháp! Hãy bắt đầu leo.'], 400);
 
+        // Stamina cost per floor (base 10, +1 per 10 floors)
         $floor = (int)$run['current_floor'];
+        $staminaCost = 10 + (int)floor($floor / 10);
+        if (($player->currentStamina ?? 0) < $staminaCost) {
+            return jsonResponse($response, ['error' => "Không đủ thể lực! Cần {$staminaCost} thể lực để vượt tầng {$floor}."], 400);
+        }
+        $player->currentStamina -= $staminaCost;
+
         $isBoss = ($floor % 10 === 0);
         $monstersPerFloor = min(1 + (int)floor($floor / 20), 3);
 

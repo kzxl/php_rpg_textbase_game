@@ -455,9 +455,6 @@ function renderGame() {
           <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
             <span class="icon">🧓</span> Thương Nhân
           </li>
-          <li class="nav-item ${state.currentPage === 'gacha' ? 'active' : ''}" data-page="gacha">
-            <span class="icon">🎰</span> Thiên Cơ Đài
-          </li>
 
           ${p.role === 'admin' ? `
           <li class="nav-section">VÔ THƯỢNG</li>
@@ -505,7 +502,7 @@ function renderGame() {
   document.getElementById('btnFabSocial')?.addEventListener('click', () => openPopup('social'))
   
   // Custom navigation for Events (since it's also inside the 3-button row)
-  const evBtn = document.querySelector('.sidebar-gold .nav-item[data-page="events"]')
+  const evBtn = document.querySelector('.sidebar-action-bar .nav-item[data-page="events"]')
   if (evBtn) {
     evBtn.addEventListener('click', (e) => {
       e.stopPropagation()
