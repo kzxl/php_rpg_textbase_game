@@ -84,7 +84,8 @@ return function ($app) {
         $craftLvl = $player->craftingLevel;
         $lvlSuccessBonus = (int) floor($craftLvl / 5); // +1% per 5 levels
         $critChance = $craftLvl >= 76 ? 8 : ($craftLvl >= 51 ? 5 : ($craftLvl >= 26 ? 3 : 0));
-        $matReturnRate = $craftLvl >= 76 ? 0.20 : ($craftLvl >= 51 ? 0.10 : 0);
+        // Soften early crafting: Lv.1-10 returns 50% mats on fail (newbie protection)
+        $matReturnRate = $craftLvl >= 76 ? 0.20 : ($craftLvl >= 51 ? 0.10 : ($craftLvl <= 10 ? 0.50 : 0));
 
         // Bonus Success Rate from Tinh Chế skill
         $baseRate = $recipe['successRate'] ?? 100;

@@ -401,11 +401,8 @@ function renderGame() {
 
           <li class="nav-section">HÀNH TRÌNH</li>
           <li class="nav-item ${state.currentPage === 'travel' ? 'active' : ''}" data-page="travel">
-            <span class="icon">🚶</span> Ngao Du
+            <span class="icon">🚶</span> Di Chuyển
             ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
-          </li>
-          <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
-            <span class="icon">🔍</span> Khám Phá (${areaName})
           </li>
           <li class="nav-item ${state.currentPage === 'quests' ? 'active' : ''}" data-page="quests">
             <span class="icon">📜</span> Nhiệm Vụ
@@ -418,15 +415,23 @@ function renderGame() {
             <span class="icon">💀</span> Ác Nghiệp
           </li>
 
+          <li class="nav-section">NGAO DU</li>
+          <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
+            <span class="icon">🔍</span> Khám Phá (${areaName})
+          </li>
+          <li class="nav-item ${state.currentPage === 'dungeon' ? 'active' : ''}" data-page="dungeon">
+            <span class="icon">⛩️</span> Bí Cảnh
+          </li>
+          <li class="nav-item ${state.currentPage === 'tiencanh' ? 'active' : ''}" data-page="tiencanh">
+            <span class="icon">🗺️</span> Tiên Cảnh
+          </li>
+
           <li class="nav-section">CHIẾN ĐẤU</li>
           <li class="nav-item ${state.currentPage === 'arena' ? 'active' : ''}" data-page="arena">
             <span class="icon">⚔️</span> Đấu Trường
           </li>
           <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
             <span class="icon">🐉</span> Boss Thế Giới
-          </li>
-          <li class="nav-item ${state.currentPage === 'tiencanh' ? 'active' : ''}" data-page="tiencanh">
-            <span class="icon">🗺️</span> Tiên Cảnh
           </li>
           <li class="nav-item ${state.currentPage === 'tower' ? 'active' : ''}" data-page="tower">
             <span class="icon">🗼</span> Thiên Phần Tháp
