@@ -226,7 +226,12 @@ return function ($app) {
                         'message' => '🔥 CẢNH BÁO! Bạn phát hiện dấu tích của ' . $boss['name'] . '! Lãnh Chúa vùng đất này!',
                         'monsterId' => $boss['id'],
                         'monsterName' => $boss['name'],
-                        'isWorldBoss' => true
+                        'bossStats' => $boss['stats'] ?? [],
+                        'isWorldBoss' => true,
+                        'actions' => [
+                            ['id' => 'solo', 'name' => '⚔️ Tự Tấn Công', 'desc' => 'Đơn thân tử chiến với Boss'],
+                            ['id' => 'rally', 'name' => '📢 Phát Động', 'desc' => 'Thông báo cho mọi người cùng đánh']
+                        ]
                     ];
                 } else {
                     $eventResult = ['type' => 'nothing', 'message' => 'Không khí nặng nề bao trùm... nhưng chẳng thấy gì.'];
@@ -328,6 +333,32 @@ return function ($app) {
                         }
                     }
 
+                    // ========================================
+                    // NPC QUEST OFFERING (with duplicate prevention)
+                    // ========================================
+                    $questOffer = null;
+                    $questReminder = null;
+                    if (!empty($npc['quests'])) {
+                        $activeQuestIds = array_map(fn($q) => $q['id'] ?? '', $player->activeQuests ?? []);
+                        $availableQuests = array_filter($npc['quests'], fn($qId) => !in_array($qId, $activeQuestIds));
+                        
+                        if (!empty($availableQuests)) {
+                            // Offer first available quest
+                            $questId = reset($availableQuests);
+                            $questOffer = [
+                                'questId' => $questId,
+                                'npcId' => $npc['id'],
+                                'npcName' => $npc['name'],
+                                'message' => ($npc['icon'] ?? '🧓') . ' ' . $npc['name'] . ': "Ta có một nhiệm vụ cho ngươi..."'
+                            ];
+                        } else {
+                            // All quests already accepted
+                            $questReminder = [
+                                'message' => ($npc['icon'] ?? '🧓') . ' ' . $npc['name'] . ': "Ngươi chưa hoàn thành nhiệm vụ ta giao sao? Đi đi, xong rồi hãy quay lại!"'
+                            ];
+                        }
+                    }
+
                     $eventResult = [
                         'type' => 'npc',
                         'message' => '🧓 Kỳ Ngộ! Bạn gặp ' . $npc['name'] . '!',
@@ -336,6 +367,8 @@ return function ($app) {
                         'npcIcon' => $npc['icon'] ?? '🧓',
                         'greeting' => $npc['greeting'] ?? 'Xin chào, hữu nhân.',
                         'hasQuests' => !empty($npc['quests']),
+                        'questOffer' => $questOffer,
+                        'questReminder' => $questReminder,
                         'studyEffect' => $studyEffect
                     ];
                 } else {

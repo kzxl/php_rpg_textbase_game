@@ -2406,7 +2406,7 @@ Không ai có thể vượt qua.
               <span>❤️ Khí Huyết</span>
               <span>
                 ${i.currentHp}/${i.maxHp}
-                ${i.currentHp<i.maxHp?`<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${(c=i.skills)!=null&&c.some(s=>s.id==="toa_thien")?"+1%/10s":"(Không tự hồi)"}</span>`:""}
+                ${i.currentHp<i.maxHp?`<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${(c=i.skills)!=null&&c.some(s=>s.id==="toa_thien")?"+1%/10s":"+0.5%/10s"}</span>`:""}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${e}%" data-low="${e<30}"></div></div>
@@ -2492,9 +2492,6 @@ Không ai có thể vượt qua.
           <li class="nav-section">CHIẾN ĐẤU</li>
           <li class="nav-item ${C.currentPage==="arena"?"active":""}" data-page="arena">
             <span class="icon">⚔️</span> Đấu Trường
-          </li>
-          <li class="nav-item ${C.currentPage==="worldboss"?"active":""}" data-page="worldboss">
-            <span class="icon">🐉</span> Boss Thế Giới
           </li>
           <li class="nav-item ${C.currentPage==="tower"?"active":""}" data-page="tower">
             <span class="icon">🗼</span> Thiên Phần Tháp
@@ -2603,4 +2600,4 @@ Không ai có thể vượt qua.
         <div class="bar-track"><div class="bar-fill nerve" style="width:${b}%"></div></div>
       </div>
       <div class="sidebar-gold">💎 ${i.gold??0} Linh Thạch</div>`}const o=document.querySelector('.nav-item[data-page="stats"]');if(o){let v="";i.statPoints>0&&(v+=`<span class="badge">${i.statPoints}</span>`),(f=i.realmInfo)!=null&&f.canBreakthrough&&(v+='<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>'),o.querySelectorAll(".badge").forEach(b=>b.remove()),o.insertAdjacentHTML("beforeend",v)}}async function V(){try{const[i,e,t,p,o,k]=await Promise.all([q.getMonsters(),q.getSkills(),q.getItems(),q.getMedicines(),q.getCrimes(),q.getEducation()]);C.monsters=i.monsters||[],C.skills=e.skills||[],C.items=t.items||[],C.medicines=p.medicines||[],C.crimes=o.crimes||[],C.educationTrees=k.trees||[],C.exploration=await q.getExploration(),C.recipes=(await q.getRecipes()).recipes,C.npcs=(await q.getNpcs()).npcs||[]}catch(i){console.error("Lỗi tải dữ liệu:",i)}}function z(i,e="info"){var p;(p=document.querySelector(".notification"))==null||p.remove();const t=document.createElement("div");t.className=`notification ${e}`,t.textContent=i,document.body.appendChild(t),setTimeout(()=>{t.style.opacity="0",t.style.transition="opacity 0.3s",setTimeout(()=>t.remove(),300)},3e3)}zt();
-//# sourceMappingURL=index-ZJ-dQJfC.js.map
+//# sourceMappingURL=index-BETtGvTn.js.map

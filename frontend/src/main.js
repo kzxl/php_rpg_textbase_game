@@ -340,7 +340,7 @@ function renderGame() {
               <span>❤️ Khí Huyết</span>
               <span>
                 ${p.currentHp}/${p.maxHp}
-                ${p.currentHp < p.maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '(Không tự hồi)'}</span>` : ''}
+                ${p.currentHp < p.maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
@@ -426,9 +426,6 @@ function renderGame() {
           <li class="nav-section">CHIẾN ĐẤU</li>
           <li class="nav-item ${state.currentPage === 'arena' ? 'active' : ''}" data-page="arena">
             <span class="icon">⚔️</span> Đấu Trường
-          </li>
-          <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
-            <span class="icon">🐉</span> Boss Thế Giới
           </li>
           <li class="nav-item ${state.currentPage === 'tower' ? 'active' : ''}" data-page="tower">
             <span class="icon">🗼</span> Thiên Phần Tháp

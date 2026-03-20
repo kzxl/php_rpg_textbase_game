@@ -174,4 +174,81 @@ return function ($app) {
             'monster' => $result['monster'] ?? ['name' => $boss['name'], 'currentHp' => $newBossHp, 'maxHp' => (int)$boss['max_hp']],
         ]);
     });
+
+    // === RALLY BOSS (from exploration discovery) ===
+    $app->post('/api/player/{id}/rally-boss', function (Request $request, Response $response, $args) use ($BOSS_TEMPLATES) {
+        $id = $args['id'];
+        $player = loadPlayer($id);
+        if (!$player) return jsonResponse($response, ['error' => 'Không tìm thấy'], 404);
+
+        $body = json_decode($request->getBody()->getContents(), true);
+        $monsterId = $body['monsterId'] ?? '';
+        $monsterName = $body['monsterName'] ?? 'Unknown Boss';
+
+        if (!$monsterId) return jsonResponse($response, ['error' => 'Thiếu ID boss'], 400);
+
+        $pdo = Database::pdo();
+
+        // Check if boss already active
+        $existing = $pdo->prepare("SELECT id FROM world_bosses WHERE boss_id = ? AND status = 'active'");
+        $existing->execute([$monsterId]);
+        if ($existing->fetch()) {
+            return jsonResponse($response, ['error' => 'Boss này đã được phát động!', 'alreadyActive' => true], 400);
+        }
+
+        // Find template or use exploration data
+        $template = null;
+        foreach ($BOSS_TEMPLATES as $t) {
+            if ($t['id'] === $monsterId) { $template = $t; break; }
+        }
+        if (!$template) {
+            // Create from exploration boss data
+            $bossHp = max(50000, $player->level * 5000);
+            $template = [
+                'id' => $monsterId,
+                'name' => $monsterName,
+                'hp' => $bossHp,
+                'level' => max(30, $player->level + 10),
+                'rewards' => ['gold' => $player->level * 100, 'xp' => $player->level * 50]
+            ];
+        }
+
+        // Spawn boss
+        $pdo->prepare("INSERT INTO world_bosses (boss_id, name, max_hp, current_hp, level, rewards, discoverer_id, discoverer_name, area) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+            ->execute([
+                $template['id'], $template['name'], $template['hp'], $template['hp'],
+                $template['level'], json_encode($template['rewards']),
+                $id, $player->name, $player->currentArea
+            ]);
+
+        // Broadcast event to all players
+        if (function_exists('addGlobalEvent')) {
+            addGlobalEvent($pdo, 'boss_rally',
+                "🐉 {$player->name} phát hiện {$template['name']} tại {$player->currentArea}! Mọi người cùng trợ giúp!"
+            );
+        }
+
+        return jsonResponse($response, [
+            'success' => true,
+            'message' => "📢 Đã phát động! {$template['name']} xuất hiện — mọi người đang được thông báo!",
+            'bossName' => $template['name'],
+            'player' => $player->toArray(),
+        ]);
+    });
+
+    // === GET ACTIVE BOSSES (for Khám Phá boss tab) ===
+    $app->get('/api/active-bosses', function (Request $request, Response $response) {
+        $pdo = Database::pdo();
+        $stmt = $pdo->query("SELECT wb.*, 
+            ROUND((wb.current_hp / wb.max_hp) * 100, 1) as hp_percent,
+            (SELECT COUNT(DISTINCT player_id) FROM world_boss_damage WHERE boss_instance_id = wb.id) as total_attackers,
+            (SELECT SUM(total_damage) FROM world_boss_damage WHERE boss_instance_id = wb.id) as total_damage_dealt
+            FROM world_bosses wb 
+            WHERE wb.status = 'active' 
+            ORDER BY wb.spawned_at DESC");
+        $bosses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        return jsonResponse($response, ['bosses' => $bosses]);
+    });
 };
+
