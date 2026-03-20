@@ -23,6 +23,7 @@ import { pageRealm } from './pages/realm.js'
 import { pageEvents } from './pages/events.js'
 import { pageDungeon } from './pages/dungeon.js'
 import { pageTienCanh } from './pages/tiencanh.js'
+import { pageTower } from './pages/tower.js'
 import { pageHousing } from './pages/housing.js'
 import { pageWiki } from './pages/wiki.js'
 import { pageNpcShop } from './pages/npcshop.js'
@@ -427,6 +428,9 @@ function renderGame() {
           <li class="nav-item ${state.currentPage === 'tiencanh' ? 'active' : ''}" data-page="tiencanh">
             <span class="icon">🗺️</span> Tiên Cảnh
           </li>
+          <li class="nav-item ${state.currentPage === 'tower' ? 'active' : ''}" data-page="tower">
+            <span class="icon">🗼</span> Thiên Phần Tháp
+          </li>
 
           <li class="nav-section">THẾ GIỚI</li>
           <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
@@ -446,14 +450,11 @@ function renderGame() {
           </li>
 
           <li class="nav-section">KINH TẾ</li>
-          <li class="nav-item ${state.currentPage === 'market' ? 'active' : ''}" data-page="market">
-            <span class="icon">🏪</span> Giao Dịch Đài
+          <li class="nav-item ${state.currentPage === 'market' || state.currentPage === 'auction' ? 'active' : ''}" data-page="market">
+            <span class="icon">🏪</span> Giao Dịch & Đấu Giá
           </li>
           <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
             <span class="icon">🧓</span> Thương Nhân
-          </li>
-          <li class="nav-item ${state.currentPage === 'auction' ? 'active' : ''}" data-page="auction">
-            <span class="icon">🏛️</span> Đấu Giá
           </li>
           <li class="nav-item ${state.currentPage === 'gacha' ? 'active' : ''}" data-page="gacha">
             <span class="icon">🎰</span> Thiên Cơ Đài
@@ -619,6 +620,7 @@ const pageMap = {
   gacha: pageGacha,
   leaderboard: pageLeaderboard,
   tiencanh: pageTienCanh,
+  tower: pageTower,
 }
 
 function renderPage() {
