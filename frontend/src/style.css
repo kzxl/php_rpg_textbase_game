@@ -1509,3 +1509,24 @@ html, body {
   font-size: 11px;
 }
 
+/* ===== LEADERBOARD ===== */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.lb-row:hover { background: var(--bg-panel-alt); }
+.lb-row.lb-top { background: rgba(255, 200, 0, 0.03); }
+.lb-rank { width: 32px; font-weight: 700; font-size: 14px; text-align: center; color: var(--text-dim); }
+.lb-rank-top { font-size: 18px; }
+.lb-info { flex: 1; min-width: 0; }
+.lb-name { font-weight: 600; font-size: 13px; color: var(--text-bright); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.lb-stat { text-align: right; }
+.lb-stat-value { font-weight: 700; font-size: 14px; }
+.lb-stat-label { font-size: 10px; color: var(--text-dim); }
+
+
