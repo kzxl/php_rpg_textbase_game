@@ -15,9 +15,9 @@ export function pageWiki(el, ctx) {
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
-        ${['lore','realm','combat','explore','dungeon','housing','talent','alchemy','crime','market','tips'].map(t => `
+        ${['lore','realm','combat','skills','explore','tower','dungeon','housing','talent','alchemy','crime','market','tips'].map(t => `
           <button class="btn btn--sm ${state._wikiTab === t ? 'btn--gold' : 'btn--dark'}" data-tab="${t}">
-            ${{lore:'📖 Lore',realm:'🌟 Cảnh Giới',combat:'⚔️ Chiến Đấu',explore:'🗺️ Khám Phá',dungeon:'🏰 Bí Cảnh',housing:'🏠 Động Phủ',talent:'🧬 Căn Cốt',alchemy:'⚗️ Luyện Đan',crime:'🔪 Phạm Tội',market:'🏪 Thương Mại',tips:'💡 Mẹo'}[t]}
+            ${{lore:'📖 Lore',realm:'🌟 Cảnh Giới',combat:'⚔️ Chiến Đấu',skills:'⚡ Kỹ Năng',explore:'🗺️ Khám Phá',tower:'🗼 Thiên Phần Tháp',dungeon:'🏰 Bí Cảnh',housing:'🏠 Động Phủ',talent:'🧬 Căn Cốt',alchemy:'⚗️ Luyện Đan',crime:'🔪 Phạm Tội',market:'🏪 Thương Mại',tips:'💡 Mẹo'}[t]}
           </button>
         `).join('')}
       </div>
@@ -99,6 +99,13 @@ export function pageWiki(el, ctx) {
           <li><strong>Flee</strong> — Có thể bỏ chạy khi quái miss (DEX vs SPD)</li>
         </ul>
 
+        <h4 style="color:var(--blue)">❤️ Hồi Khí Huyết (HP Regen)</h4>
+        <ul style="margin:8px 0">
+          <li>Mọi người chơi đều <strong>tự hồi HP cơ bản: +0.5%/10 giây</strong></li>
+          <li>Học kỹ năng <strong>Tọa Thiền</strong> → tăng lên <strong>+1%/10 giây</strong></li>
+          <li>Động Phủ → bonus hồi HP thêm theo Tier nhà</li>
+        </ul>
+
         <h4 style="color:var(--blue)">📊 4 Chỉ Số</h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0">
           <div style="padding:6px;background:rgba(255,255,255,0.03);border-radius:4px">💪 <strong>Strength</strong> — Sát thương</div>
@@ -108,22 +115,73 @@ export function pageWiki(el, ctx) {
         </div>
       `,
 
-      explore: `
-        <h3 style="color:var(--gold);margin-bottom:12px">🗺️ Hệ Thống Khám Phá</h3>
-        <p>Tiêu Thể Lực để khám phá vùng đất. Có thể gặp: quái vật, nguyên liệu, NPC, World Boss, hoặc không gì cả.</p>
+      skills: `
+        <h3 style="color:var(--gold);margin-bottom:12px">⚡ Kỹ Năng & Công Pháp</h3>
+        <p>Hệ thống kỹ năng chia 4 tab chính:</p>
 
-        <h4 style="color:var(--blue)">🎲 Tỷ Lệ Gặp (ví dụ Thanh Lam Trấn)</h4>
+        <h4 style="color:var(--blue)">📑 4 Tab</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0">
+          <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:4px">⚔️ <strong>Chiến Đấu</strong> — Kỹ năng chiến đấu (Kiếm, Quyền, Cước...)</div>
+          <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:4px">🛠️ <strong>Sinh Hoạt</strong> — Kỹ năng đời thường (Nấu ăn, Hái thuốc, Khai khoáng...)</div>
+          <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:4px">🧘 <strong>Nội Công</strong> — Kỹ năng nội tại (Tọa Thiền, Thiết Bị Đan Điền...)</div>
+          <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:4px">📖 <strong>Công Pháp</strong> — Cây tu luyện công pháp (Education Tree)</div>
+        </div>
+
+        <h4 style="color:var(--blue)">📈 Mastery</h4>
+        <p>Mỗi kỹ năng có <strong>thanh Mastery</strong>. Dùng kỹ năng → tích XP → lên cấp Mastery → mở bonus thêm.</p>
+
+        <h4 style="color:var(--blue)">📖 Công Pháp Đặc Biệt</h4>
+        <p>Một số công pháp có <strong>kỹ năng đặc biệt kèm theo</strong>. Nếu đổi công pháp, kỹ năng đặc biệt sẽ mất.</p>
+      `,
+
+      explore: `
+        <h3 style="color:var(--gold);margin-bottom:12px">🗺️ Hệ Thống Ngao Du & Khám Phá</h3>
+        <p>Tiêu Thể Lực để khám phá vùng đất. Bao gồm: di chuyển, khám phá, bí cảnh, tiên cảnh.</p>
+
+        <h4 style="color:var(--blue)">🎲 Tỷ Lệ Gặp</h4>
         <ul style="margin:8px 0">
-          <li>👹 Quái vật: 40%</li>
-          <li>🌿 Nguyên liệu: 25%</li>
-          <li>📦 Vật phẩm: 10%</li>
-          <li>🧓 NPC: 5%</li>
-          <li>💀 World Boss: 1%</li>
-          <li>😴 Không gì: 19%</li>
+          <li>👹 Quái vật: 40% — Chiến đấu để nhận XP + gold + drop</li>
+          <li>🌿 Nguyên liệu: 25% — Thu thập cho luyện đan/chế tác</li>
+          <li>📦 Vật phẩm: 10% — Vũ khí, bí tịch, đan dược</li>
+          <li>🧓 NPC: 5% — Giao nhiệm vụ, hỗ trợ tu luyện</li>
+          <li>🐉 World Boss: 1% — Boss mạnh, có thể solo hoặc phát động</li>
+          <li>👤 Người chơi: ~1% — Gặp người khác, có thể cướp</li>
+          <li>😴 Không gì: phần còn lại</li>
         </ul>
+
+        <h4 style="color:var(--blue)">🐉 World Boss (Phát Hiện qua Khám Phá)</h4>
+        <div style="background:rgba(255,100,0,0.05);border:1px solid rgba(255,100,0,0.2);border-radius:6px;padding:10px;margin:8px 0">
+          Khi gặp World Boss, có 2 lựa chọn:<br>
+          ⚔️ <strong>Tự Tấn Công</strong> — Đơn thân tử chiến<br>
+          📢 <strong>Phát Động</strong> — Thông báo cho mọi người cùng đánh. Boss xuất hiện trong danh sách đang hoạt động.
+        </div>
+
+        <h4 style="color:var(--blue)">🧓 NPC & Nhiệm Vụ</h4>
+        <p>Khi gặp NPC trong khám phá, NPC có thể <strong>giao nhiệm vụ</strong>. Nếu đã nhận nhiệm vụ rồi, NPC sẽ nhắc nhở hoàn thành. <strong>Không thể nhận trùng nhiệm vụ.</strong></p>
 
         <h4 style="color:var(--blue)">🏗️ Di Chuyển</h4>
         <p>Dùng bản đồ để di chuyển giữa các vùng. Mỗi vùng có pool quái và nguyên liệu riêng, độ khó tăng dần.</p>
+      `,
+
+      tower: `
+        <h3 style="color:var(--gold);margin-bottom:12px">🗼 Thiên Phần Tháp</h3>
+        <p>Tháp vô hạn — leo tầng, đánh quái, nhận thưởng. Reset mỗi mùa (hàng tháng).</p>
+
+        <h4 style="color:var(--blue)">⚡ Thể Lực</h4>
+        <p>Mỗi tầng tiêu tốn thể lực: <strong>10 + (tầng / 10)</strong>. Ví dụ: T1-9 = 10, T10-19 = 11, T50 = 15...</p>
+
+        <h4 style="color:var(--blue)">🎯 Sự Kiện Tầng</h4>
+        <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:12px">
+          <tr style="background:rgba(255,255,255,0.05)"><th style="padding:5px;text-align:left">Tầng</th><th>Loại</th><th>Hiệu ứng</th></tr>
+          <tr><td style="padding:5px">Mỗi 10</td><td>👑 Boss</td><td>Boss mạnh, drop thêm</td></tr>
+          <tr style="background:rgba(255,255,255,0.02)"><td style="padding:5px">Mỗi 15</td><td>💰 Bảo Tàng</td><td>Loot ×2.5</td></tr>
+          <tr><td style="padding:5px">Mỗi 7</td><td>☠️ Bẫy Trận</td><td>-10% HP trước chiến đấu</td></tr>
+          <tr style="background:rgba(255,255,255,0.02)"><td style="padding:5px">Mỗi 13</td><td>💚 Linh Tuyền</td><td>+20% HP hồi phục</td></tr>
+          <tr><td style="padding:5px">Mỗi 11</td><td>⚡ Tinh Anh</td><td>Quái +30% stats</td></tr>
+        </table>
+
+        <h4 style="color:var(--blue)">🏆 Mốc Thưởng</h4>
+        <p>Đạt các mốc tầng (T10, T25, T50...) sẽ nhận danh hiệu + linh thạch. Bảng xếp hạng mùa ghi nhận tầng cao nhất.</p>
       `,
 
       dungeon: `
@@ -232,23 +290,26 @@ export function pageWiki(el, ctx) {
           <li>Train stats đều → đừng full STR, DEF cũng quan trọng</li>
           <li>Khám phá Thanh Lam Trấn để farm nguyên liệu + XP ban đầu</li>
           <li>Mua Động Phủ sớm → passive HP regen giúp nhiều!</li>
-          <li>Học skill phù hợp build → Tọa Thiên = hồi HP miễn phí</li>
-          <li>Hoàn thành Quest để nhận phần thưởng lớn</li>
+          <li>Học kỹ năng <strong>Tọa Thiền</strong> → gấp đôi tốc độ hồi HP</li>
+          <li>Gặp NPC khám phá → nhận nhiệm vụ để có phần thưởng lớn</li>
+          <li>Quản lý thể lực: khám phá + tháp đều tiêu thể lực</li>
         </ol>
 
         <h4 style="color:var(--blue)">💰 Kiếm Tiền</h4>
         <ul style="margin:8px 0">
-          <li>Farm quái + bán nguyên liệu cho NPC</li>
+          <li>Farm quái + bán nguyên liệu cho Thương Nhân NPC</li>
           <li>Làm Crime → rủi ro cao nhưng lợi nhuận tốt</li>
           <li>Chạy Bí Cảnh → Boss drop đồ giá trị</li>
           <li>Trồng thảo dược ở Dược Viên → thu nhập thụ động</li>
+          <li>Chế tác vật phẩm → bán trên sàn Giao Dịch</li>
         </ul>
 
         <h4 style="color:var(--blue)">⚔️ Endgame</h4>
         <ul style="margin:8px 0">
+          <li>Leo Thiên Phần Tháp → tranh hạng mùa + mốc thưởng</li>
+          <li>Phát hiện & phát động World Boss → thưởng lớn cho cả nhóm</li>
           <li>Chinh phục Bí Cảnh T4 → phần thưởng tốt nhất</li>
           <li>Farm Tẩy Tủy Đan để nâng Căn Cốt → tăng hiệu quả rèn luyện</li>
-          <li>Dùng Phù Văn tinh luyện trang bị → affix tốt = sức mạnh vượt trội</li>
           <li>Vượt Độ Kiếp → cảnh giới cao hơn = bonus stats khổng lồ</li>
         </ul>
       `,

@@ -109,12 +109,19 @@ export function pageTower(el, ctx) {
     else if (floor % 11 === 0) types.push('⚡ Tinh Anh (+30% stats)')
     else if (floor % 9 === 0 && floor > 20) types.push('☯ Ngũ Hành')
     const monstersCount = Math.min(1 + Math.floor(floor / 20), 3)
+    const staminaCost = 10 + Math.floor(floor / 10)
+    const playerStamina = ctx.state.player?.currentStamina ?? 0
+    const canFight = playerStamina >= staminaCost
     el.innerHTML = `<div class="panel"><div class="panel-body" style="padding:14px">
-      <div style="font-weight:700">Tầng ${floor} Preview</div>
-      <div style="font-size:12px;opacity:0.7;margin-top:4px">
+      <div style="font-weight:700;font-size:15px">🗼 Tầng ${floor}</div>
+      <div style="font-size:12px;opacity:0.7;margin-top:6px">
         ${types.length ? types.join(' · ') : '⚔️ Thường'}
         · ${monstersCount} quái
         · Sức mạnh ×${(Math.pow(1.08, floor-1)).toFixed(1)}
+      </div>
+      <div style="font-size:12px;margin-top:6px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:4px;display:inline-block">
+        ⚡ Thể lực: <strong style="color:${canFight ? 'var(--green)' : 'var(--red)'}">${staminaCost}</strong>
+        <span style="opacity:0.5;margin-left:6px">(Hiện có: ${playerStamina})</span>
       </div>
     </div></div>`
   }
