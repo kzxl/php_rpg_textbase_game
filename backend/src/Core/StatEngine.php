@@ -78,8 +78,10 @@ class StatEngine
         }
 
         // Calculate derived stats
-        $final['maxHp'] = self::calcMaxHp($final['strength']);
-        $final['maxEnergy'] = self::calcMaxEnergy($final['dexterity']);
+        $baseHp = self::calcMaxHp($final['strength']);
+        $final['maxHp'] = (int) round(ModifierEngine::apply($baseHp, $modifiers, 'maxHp', $context));
+        $baseEnergy = self::calcMaxEnergy($final['dexterity']);
+        $final['maxEnergy'] = (int) round(ModifierEngine::apply($baseEnergy, $modifiers, 'maxEnergy', $context));
         
         $baseEnergyRegen = self::calcEnergyRegen($final['speed']);
         $final['energyRegen'] = round(ModifierEngine::apply($baseEnergyRegen, $modifiers, 'energyRegen', $context), 2);

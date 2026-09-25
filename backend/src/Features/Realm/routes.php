@@ -20,7 +20,7 @@ return function ($app) {
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
         $realmInfo = $player->getRealmInfo();
-        $allRealms = RealmSystem::getAllRealms();
+        $allRealms = RealmSystem::getAllRealms($player->realmTier);
 
         return jsonResponse($response, [
             'current' => $realmInfo,
@@ -54,7 +54,8 @@ return function ($app) {
 
         // Random failure (no trial required) — hospitalize
         if ($result['failed'] ?? false) {
-            $cost = RealmSystem::REALMS[$player->realmTier + 1]['breakthroughCost'] ?? null;
+            $nextDef = RealmSystem::getRealmDefinition($player->realmTier + 1);
+            $cost = $nextDef['breakthroughCost'] ?? null;
             // Still consume half the resources on failure
             if ($cost) {
                 $player->gold -= (int)(($cost['gold'] ?? 0) / 2);
@@ -80,7 +81,7 @@ return function ($app) {
             $monsterId = $result['trialMonster'];
             $monsterData = GameDataRepository::getMonsterById($monsterId);
             $nextTier = $player->realmTier + 1;
-            $nextRealm = RealmSystem::REALMS[$nextTier] ?? null;
+            $nextRealm = RealmSystem::getRealmDefinition($nextTier);
             $cost = $nextRealm['breakthroughCost'] ?? null;
             $failChance = $result['failChance'] ?? 0;
             $failHospitalSecs = $result['failHospitalSeconds'] ?? 0;

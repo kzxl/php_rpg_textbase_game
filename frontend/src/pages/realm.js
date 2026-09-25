@@ -37,7 +37,7 @@ export function pageRealm(el, ctx) {
           <span style="font-size:36px">${curr.icon}</span>
           <div>
             <div style="font-size:20px;font-weight:700;color:${curr.color}">${curr.fullName}</div>
-            <div style="opacity:0.5;font-size:13px">Tầng ${curr.tier}/8 · ${curr.subStageName}</div>
+            <div style="opacity:0.5;font-size:13px">Cảnh Giới Bậc ${curr.tier} · ${curr.subStageName}</div>
           </div>
         </div>
 

@@ -256,6 +256,14 @@ class Player
             $mods = array_merge($mods, $envMods[$this->currentArea]);
         }
 
+        // Realm bonuses (Cảnh giới tu vi gia trì)
+        $realmBonuses = \App\Systems\RealmSystem::getCumulativeBonuses($this->realmTier);
+        foreach ($realmBonuses as $stat => $val) {
+            if ($val > 0) {
+                $mods[] = new Modifier('flat', $stat, (float)$val, null, 'realm');
+            }
+        }
+
         return $mods;
     }
 
@@ -755,44 +763,56 @@ class Player
     }
 
     /**
-     * Gain XP, handle level up. Level cap is removed!
+     * Gain XP, handle level up without any level cap (Vô Hạn Cấp Độ).
      */
-    public function gainXp(int $amount): void
-    {
-        $this->xp += $amount;
-        
-        while ($this->xp >= $this->xpToNext) {
-            $this->xp -= $this->xpToNext;
-            $this->level++;
-            
-            // Phần thưởng cơ bản khi lên cấp (áp dụng cho mọi cấp)
-            // Chỉ số (STR/SPD/DEX/DEF) tăng qua Rèn Luyện (linh lực) + Căn Cốt, không cộng điểm tự do
-            $this->maxNerve += 1;         // Tăng max nghịch khí
-            // Nâng độ khó: Công thức cày cuốc RPG (Level^2.2 * 100)
-            $this->xpToNext = (int) (100 * pow($this->level, 2.2));
-            
-            $this->recalcDerived();
-            $this->currentHp = $this->maxHp;
-            $this->currentEnergy = $this->maxEnergy;
-            $this->nerve = $this->maxNerve; // Phục hồi full nghịch khí
-        }
-    }
+     public function gainXp(int $amount): void
+     {
+         $this->xp += $amount;
+         $leveledUp = false;
+         
+         while ($this->xp >= $this->xpToNext) {
+             $this->xp -= $this->xpToNext;
+             $this->level++;
+             $leveledUp = true;
+             
+             // Công thức cày cuốc RPG không giới hạn cấp độ (Safe 64-bit int calculation)
+             $nextXp = (float)(100 * pow($this->level, 2.2));
+             if ($nextXp > PHP_INT_MAX / 4) {
+                 $this->xpToNext = (int)(PHP_INT_MAX / 4);
+             } else {
+                 $this->xpToNext = (int) $nextXp;
+             }
+         }
 
-    public function isAlive(): bool
-    {
-        return $this->currentHp > 0;
-    }
+         if ($leveledUp) {
+             $this->recalcDerived();
+             $this->currentHp = $this->maxHp;
+             $this->currentEnergy = $this->maxEnergy;
+             $this->currentStamina = $this->maxStamina;
+         }
+     }
 
-    private function recalcDerived(): void
-    {
-        $stats = $this->getFinalStats();
-        $this->maxHp = $stats['maxHp'];
-        $this->maxEnergy = $stats['maxEnergy'] ?? 50;
-        
-        // Luôn luôn đảm bảo xpToNext chuẩn với công thức cày cuốc mới nhất 
-        // (Sửa lỗi cho các account cũ đang bị số xpToNext lệch)
-        $this->xpToNext = (int) (100 * pow($this->level, 2.2));
-    }
+     public function isAlive(): bool
+     {
+         return $this->currentHp > 0;
+     }
+
+     private function recalcDerived(): void
+     {
+         $stats = $this->getFinalStats();
+         // Mỗi cấp độ tăng thêm 5 Max HP cơ bản
+         $levelHpBonus = max(0, ($this->level - 1) * 5);
+         $this->maxHp = (int)($stats['maxHp'] + $levelHpBonus);
+         $this->maxEnergy = (int)($stats['maxEnergy'] ?? 50);
+         
+         // Luôn luôn đảm bảo xpToNext chuẩn với công thức cày cuốc mới nhất 
+         $nextXp = (float)(100 * pow($this->level, 2.2));
+         if ($nextXp > PHP_INT_MAX / 4) {
+             $this->xpToNext = (int)(PHP_INT_MAX / 4);
+         } else {
+             $this->xpToNext = (int) $nextXp;
+         }
+     }
 
     public function toArray(): array
     {
