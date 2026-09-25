@@ -11,7 +11,7 @@ use App\Systems\MonsterSystem;
 
 return function ($app) {
     $app->post('/api/combat/full', function (Request $request, Response $response) {
-        $body = $request->getParsedBody();
+        $body = (array)($request->getParsedBody() ?: json_decode((string)$request->getBody(), true) ?: []);
         $playerId = $body['playerId'] ?? '';
         $trackedMonsterId = $body['trackedMonsterId'] ?? null;
         $monsterId = $body['monsterId'] ?? null;

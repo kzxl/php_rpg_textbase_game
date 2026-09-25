@@ -286,6 +286,12 @@ async function doExplore(ctx) {
   const rEl = document.getElementById('exploreResult')
   if (!rEl) return
 
+  const btnExp = document.getElementById('btnExplore')
+  if (btnExp) {
+    btnExp.disabled = true
+    btnExp.style.opacity = '0.6'
+  }
+
   rEl.innerHTML = `<div class="panel"><div class="panel-body text-center text-gold">⏳ Đang tìm kiếm...</div></div>`
 
   try {
@@ -294,9 +300,19 @@ async function doExplore(ctx) {
     updateSidebar()
 
     const ev = data.event
+    const cost = data.cost || 10
+    const curStamina = data.player.currentStamina ?? 0
+    const maxStamina = data.player.maxStamina ?? 100
+    const hasEnoughStamina = curStamina >= cost
+
     let html = `
       <div class="panel" style="background: rgba(255,255,255,0.05); border-color: var(--blue);">
         <div class="panel-body text-center">
+          <div style="margin-bottom: 10px;">
+            <span class="badge" style="background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); font-size: 11px; padding: 3px 8px;">
+              🏃 -${cost} Thể Lực (Hiện có: ${curStamina}/${maxStamina})
+            </span>
+          </div>
     `
 
     if (ev.type === 'monster') {
@@ -306,6 +322,7 @@ async function doExplore(ctx) {
         <div class="flex gap-2 justify-center mt-md w-full">
           <button class="btn btn--red flex-1" id="btnExploreCombat" data-mid="${ev.monsterId}">🗡️ Giao Chiến</button>
           <button class="btn btn--blue flex-1" id="btnExploreTrack" data-mid="${ev.monsterId}">👣 Theo Dõi</button>
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>🔍 Dò Tiếp</button>
         </div>
       `
     } else if (ev.type === 'monster_ambush' && ev.combatResult) {
@@ -318,6 +335,10 @@ async function doExplore(ctx) {
         <div class="text-lg bold" style="color:var(--red);margin-bottom:8px">${ev.message}</div>
         <div style="font-size:16px;font-weight:700;color:${ocColor};margin-bottom:12px">${oc}</div>
         <div class="combat-log" style="max-height:200px;overflow-y:auto;text-align:left">${logHtml}</div>
+        <div class="flex gap-2 justify-center mt-md">
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>🔍 Dò Thám Tiếp (-${cost} TL)</button>
+          <button class="btn btn--blue" id="btnExploreContinue">Tiếp tục</button>
+        </div>
       `
     } else if (ev.type === 'worldBoss') {
       html += `
@@ -327,6 +348,7 @@ async function doExplore(ctx) {
         <div class="flex gap-2 justify-center mt-md w-full">
           <button class="btn btn--red flex-1" id="btnExploreCombat" data-mid="${ev.monsterId}">⚔️ Thách Đấu</button>
           <button class="btn btn--blue flex-1" id="btnExploreTrack" data-mid="${ev.monsterId}">👣 Ghi Dấu</button>
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>🔍 Dò Tiếp</button>
         </div>
       `
     } else if (ev.type === 'npc' && ev.npcId) {
@@ -334,7 +356,11 @@ async function doExplore(ctx) {
         <div style="font-size: 48px; margin-bottom: 8px;">${ev.npcIcon || '🧓'}</div>
         <div class="text-lg text-gold bold mb-sm">${ev.message}</div>
         <div class="text-sm text-dim mb-md">${ev.npcTitle || 'Kỳ nhân dị sĩ qua đường'}</div>
-        <button class="btn btn--gold" id="btnNpcInteract">💬 Bái Kiến</button>
+        <div class="flex gap-2 justify-center mt-md">
+          <button class="btn btn--gold flex-1" id="btnNpcInteract">💬 Bái Kiến</button>
+          <button class="btn btn--blue flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>🔍 Dò Tiếp</button>
+          <button class="btn btn--dark" id="btnExploreContinue">Đóng</button>
+        </div>
       `
     } else if (ev.type === 'player_encounter' && ev.targetPlayer) {
       const tp = ev.targetPlayer;
@@ -345,6 +371,7 @@ async function doExplore(ctx) {
         <div class="flex gap-2 justify-center mt-md w-full">
           <button class="btn btn--green flex-1" id="btnInteractGift" data-pid="${tp.id}">🎁 Tặng Linh Thạch (+100)</button>
           <button class="btn btn--red flex-1" id="btnInteractMug" data-pid="${tp.id}">⚔️ Cướp Bóc</button>
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>🔍 Dò Tiếp</button>
         </div>
       `;
     } else {
@@ -353,7 +380,12 @@ async function doExplore(ctx) {
         <div class="text-lg text-bright bold mb-sm">${ev.message}</div>
         ${ev.gold ? `<div class="text-gold bold">+${ev.gold} 💎 Linh Thạch</div>` : ''}
         ${ev.item ? `<div class="text-green bold">+1 ${ev.item.name}</div>` : ''}
-        <button class="btn btn--blue mt-md" id="btnExploreContinue">Tiếp tục</button>
+        <div class="flex gap-2 justify-center mt-md">
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>
+            ${hasEnoughStamina ? `🔍 Dò Thám Tiếp (-${cost} TL)` : `❌ Hết Thể Lực (${curStamina}/${cost})`}
+          </button>
+          <button class="btn btn--blue" id="btnExploreContinue">Tiếp tục</button>
+        </div>
       `
     }
 
@@ -387,11 +419,20 @@ async function doExplore(ctx) {
       })
     }
     
+    document.getElementById('btnExploreAgain')?.addEventListener('click', () => {
+      doExplore(ctx)
+    })
+
     document.getElementById('btnExploreContinue')?.addEventListener('click', () => {
       rEl.innerHTML = ''
     })
   } catch (e) {
     rEl.innerHTML = `<div class="panel"><div class="panel-body text-red text-center">Lỗi: ${e.message}</div></div>`
+  } finally {
+    if (btnExp) {
+      btnExp.disabled = false
+      btnExp.style.opacity = '1'
+    }
   }
 }
 

@@ -86,7 +86,7 @@ class StatEngine
         $baseEnergyRegen = self::calcEnergyRegen($final['speed']);
         $final['energyRegen'] = round(ModifierEngine::apply($baseEnergyRegen, $modifiers, 'energyRegen', $context), 2);
 
-        $baseStaminaRegen = 10; // Cố định 10 Thể lực
+        $baseStaminaRegen = 2; // Cân bằng 2 Thể lực / 10s (hồi đầy trong ~8.3 phút)
         $final['staminaRegen'] = round(ModifierEngine::apply($baseStaminaRegen, $modifiers, 'staminaRegen', $context), 2);
 
         $final['critChance'] = self::calcCritChance($final['dexterity']);
@@ -185,7 +185,7 @@ class StatEngine
         $baseEnergyRegen = self::calcEnergyRegen($breakdown['speed']['final'] ?? 8);
         $breakdown['energyRegen'] = ModifierEngine::applyWithBreakdown($baseEnergyRegen, $modifiers, 'energyRegen', $context);
         
-        $breakdown['staminaRegen'] = ModifierEngine::applyWithBreakdown(10, $modifiers, 'staminaRegen', $context);
+        $breakdown['staminaRegen'] = ModifierEngine::applyWithBreakdown(2, $modifiers, 'staminaRegen', $context);
         
         return $breakdown;
     }

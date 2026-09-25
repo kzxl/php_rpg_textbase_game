@@ -385,7 +385,7 @@ function renderGame() {
               <span>🏃 Thể Lực</span>
               <span>
                 ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
-                ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 10}/10s</span>` : ''}
+                ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
@@ -745,7 +745,7 @@ function updateSidebar() {
           <span>🏃 Thể Lực</span>
           <span>
             ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
-            ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 10}/10s</span>` : ''}
+            ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>

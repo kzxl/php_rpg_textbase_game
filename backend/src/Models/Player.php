@@ -724,7 +724,7 @@ class Player
 
         // Stamina Regen
         if ($this->currentStamina < $this->maxStamina) {
-            $staminaRegenStat = $stats['staminaRegen'] ?? 10;
+            $staminaRegenStat = $stats['staminaRegen'] ?? 2;
             $this->currentStamina = min($this->maxStamina, $this->currentStamina + $staminaRegenStat * $ticks);
             $changed = true;
         }
