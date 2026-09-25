@@ -2,6 +2,8 @@
  * Stats Page — Rèn Luyện & Cảnh Giới
  * Training only (no manual stat point allocation — auto-distributed on level-up)
  */
+import { openTribulationModal } from '../game/TribulationModal.js'
+
 export function pageStats(el, ctx) {
   const { state, api, notify, renderGame } = ctx
   const p = state.player, s = p.stats, a = p.allocatedStats || {}
@@ -101,20 +103,8 @@ export function pageStats(el, ctx) {
       </div>
     </div>`
 
-  el.querySelector('.btn-breakthrough')?.addEventListener('click', async () => {
-    try {
-      const btn = el.querySelector('.btn-breakthrough')
-      btn.disabled = true
-      btn.innerHTML = 'Đang Độ Kiếp...'
-      const data = await api.attemptBreakthrough(state.playerId)
-      state.player = data.player
-      notify(data.message, 'success')
-      renderGame()
-    } catch (e) {
-      notify(e.message || 'Đột phá thất bại', 'error')
-      const btn = el.querySelector('.btn-breakthrough')
-      if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Đột Phá Cảnh Giới!' }
-    }
+  el.querySelector('.btn-breakthrough')?.addEventListener('click', () => {
+    openTribulationModal(ctx)
   })
 
   el.querySelectorAll('.train-btn').forEach(btn => {

@@ -29,7 +29,7 @@ class PlayerRepository
             skill_progress, discovered_nodes,
             current_area, traveling_to, travel_arrives_at, role, realm_tier, talents,
             glitch_insight, behavior_counters, unlocked_imprints, active_stance,
-            crafting_level, crafting_xp
+            crafting_level, crafting_xp, active_auras, tribulation_records
         ) VALUES (
             :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
             :current_hp, :max_hp, :current_energy, :max_energy, :current_stamina, :max_stamina, :stat_points,
@@ -39,7 +39,7 @@ class PlayerRepository
             :skill_progress, :discovered_nodes,
             :current_area, :traveling_to, :travel_arrives_at, :role, :realm_tier, :talents,
             :glitch_insight, :behavior_counters, :unlocked_imprints, :active_stance,
-            :crafting_level, :crafting_xp
+            :crafting_level, :crafting_xp, :active_auras, :tribulation_records
         ) ON DUPLICATE KEY UPDATE
             name = VALUES(name), gender = VALUES(gender),
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
@@ -66,7 +66,9 @@ class PlayerRepository
             unlocked_imprints = VALUES(unlocked_imprints),
             active_stance = VALUES(active_stance),
             crafting_level = VALUES(crafting_level),
-            crafting_xp = VALUES(crafting_xp)";
+            crafting_xp = VALUES(crafting_xp),
+            active_auras = VALUES(active_auras),
+            tribulation_records = VALUES(tribulation_records)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -114,6 +116,8 @@ class PlayerRepository
             'active_stance' => $data['activeStance'] ?? 'breaker',
             'crafting_level' => (int)($data['craftingLevel'] ?? 1),
             'crafting_xp' => (int)($data['craftingXp'] ?? 0),
+            'active_auras' => json_encode($data['activeAuras'] ?? []),
+            'tribulation_records' => json_encode($data['tribulationRecords'] ?? []),
         ]);
 
         // Phase 5: Normalized Tracking Tables
@@ -187,6 +191,8 @@ class PlayerRepository
             'activeStance' => $row['active_stance'] ?? 'breaker',
             'craftingLevel' => (int)($row['crafting_level'] ?? 1),
             'craftingXp' => (int)($row['crafting_xp'] ?? 0),
+            'activeAuras' => json_decode($row['active_auras'] ?? '[]', true) ?: [],
+            'tribulationRecords' => json_decode($row['tribulation_records'] ?? '[]', true) ?: [],
             // skills loaded from player_skills table below
             'skills' => [],
             // equipment/inventory loaded from player_items table

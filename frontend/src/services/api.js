@@ -74,6 +74,13 @@ class GameAPI {
     })
   }
 
+  toggleAura(id, auraId) {
+    return this.request(`/player/${id}/skills/toggle-aura`, {
+      method: 'POST',
+      body: JSON.stringify({ auraId }),
+    })
+  }
+
   healPlayer(id) {
     return this.request(`/player/${id}/heal`, { method: 'POST' })
   }
@@ -286,6 +293,7 @@ class GameAPI {
 
   // Realm (Cảnh Giới)
   getRealmInfo(id) { return this.request(`/player/${id}/realm`) }
+  getTribulationPreview(id) { return this.request(`/player/${id}/tribulation-preview`) }
   attemptBreakthrough(id) {
     return this.request(`/player/${id}/breakthrough`, { method: 'POST' })
   }

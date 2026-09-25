@@ -81,6 +81,66 @@ class Player
     public array $tienCanhMaps = []; // Tiên Đồ inventory [{mapId, tier, modifiers}]
     public array $atlasProgress = []; // {mapId: timesCompleted}
     public int $atlasBonus = 0; // IIQ bonus from atlas completion
+    public array $activeAuras = []; // Array of active aura IDs reserving mana
+    public array $tribulationRecords = []; // History of survived heavenly tribulations
+
+    /**
+     * Danh mục Tâm Pháp Hào Quang & Tỷ Lệ Khóa Linh Lực (Mana Reservation)
+     */
+    public const AURA_CONFIGS = [
+        'ho_the_kim_chung' => [
+            'id' => 'ho_the_kim_chung',
+            'name' => 'Hộ Thể Kim Chung',
+            'icon' => '🛡️',
+            'category' => 'internal',
+            'reservationPct' => 20,
+            'desc' => 'Khóa 20% Linh Lực tối đa. Tăng +25 Giáp & +100 Máu, giảm 20% sát thương lôi kiếp.',
+            'statBonuses' => ['defense' => 25, 'maxHp' => 100]
+        ],
+        'than_hanh_bo' => [
+            'id' => 'than_hanh_bo',
+            'name' => 'Thần Hành Hào Quang',
+            'icon' => '💨',
+            'category' => 'internal',
+            'reservationPct' => 15,
+            'desc' => 'Khóa 15% Linh Lực tối đa. Tăng +20 Tốc độ & +15 Thân pháp né tránh.',
+            'statBonuses' => ['speed' => 20, 'dexterity' => 15]
+        ],
+        'hoa_diem_chan_khi' => [
+            'id' => 'hoa_diem_chan_khi',
+            'name' => 'Hỏa Diễm Chân Khí',
+            'icon' => '🔥',
+            'category' => 'internal',
+            'reservationPct' => 25,
+            'desc' => 'Khóa 25% Linh Lực tối đa. Tăng +25 Lực đạo & +10% Tỷ lệ Bạo Kích.',
+            'statBonuses' => ['strength' => 25, 'critChance' => 10]
+        ],
+        'toa_thien' => [
+            'id' => 'toa_thien',
+            'name' => 'Toạ Thiền Tụ Khí',
+            'icon' => '🧘',
+            'category' => 'internal',
+            'reservationPct' => 10,
+            'desc' => 'Khóa 10% Linh Lực tối đa. Gia tăng tốc độ hồi phục Khí Huyết & Thể Lực.',
+            'statBonuses' => ['hpRegen' => 5, 'staminaRegen' => 2]
+        ]
+    ];
+
+    public function getReservedEnergy(): int
+    {
+        $totalPct = 0;
+        foreach ($this->activeAuras as $auraId) {
+            if (isset(self::AURA_CONFIGS[$auraId])) {
+                $totalPct += self::AURA_CONFIGS[$auraId]['reservationPct'];
+            }
+        }
+        return (int)floor($this->maxEnergy * (min(85, $totalPct) / 100));
+    }
+
+    public function getUsableEnergy(): int
+    {
+        return max(5, $this->maxEnergy - $this->getReservedEnergy());
+    }
 
     /** @var array Base stat allocations */
     private array $baseStats;
@@ -266,6 +326,16 @@ class Player
         foreach ($realmBonuses as $stat => $val) {
             if ($val > 0) {
                 $mods[] = new Modifier('flat', $stat, (float)$val, null, 'realm');
+            }
+        }
+
+        // Active Mana Reservation Auras (Tâm Pháp Hào Quang Chiếm Dụng Linh Lực)
+        foreach ($this->activeAuras as $auraId) {
+            $auraDef = self::AURA_CONFIGS[$auraId] ?? null;
+            if ($auraDef && !empty($auraDef['statBonuses'])) {
+                foreach ($auraDef['statBonuses'] as $stat => $val) {
+                    $mods[] = new Modifier('flat', $stat, (float)$val, null, 'aura_' . $auraId);
+                }
             }
         }
 
@@ -715,10 +785,14 @@ class Player
             $changed = true;
         }
 
-        // Energy Regen
-        if ($this->currentEnergy < $this->maxEnergy) {
+        // Energy Regen (tính theo Linh Lực khả dụng sau khi trừ bảo lưu)
+        $usableEnergy = $this->getUsableEnergy();
+        if ($this->currentEnergy < $usableEnergy) {
             $energyRegenStat = $stats['energyRegen'] ?? 5; 
-            $this->currentEnergy = min($this->maxEnergy, $this->currentEnergy + $energyRegenStat * $ticks);
+            $this->currentEnergy = min($usableEnergy, $this->currentEnergy + $energyRegenStat * $ticks);
+            $changed = true;
+        } elseif ($this->currentEnergy > $usableEnergy) {
+            $this->currentEnergy = $usableEnergy;
             $changed = true;
         }
 
@@ -763,7 +837,7 @@ class Player
         $stats = $this->getFinalStats();
         $regen = $stats['energyRegen'] ?? 5;
         $before = $this->currentEnergy;
-        $this->currentEnergy = min($this->maxEnergy, $this->currentEnergy + $regen);
+        $this->currentEnergy = min($this->getUsableEnergy(), $this->currentEnergy + $regen);
         return $this->currentEnergy - $before;
     }
 
@@ -809,6 +883,7 @@ class Player
          $levelHpBonus = max(0, ($this->level - 1) * 5);
          $this->maxHp = (int)($stats['maxHp'] + $levelHpBonus);
          $this->maxEnergy = (int)($stats['maxEnergy'] ?? 50);
+         $this->currentEnergy = min($this->currentEnergy, $this->getUsableEnergy());
          
          // Luôn luôn đảm bảo xpToNext chuẩn với công thức cày cuốc mới nhất 
          $nextXp = (float)(100 * pow($this->level, 2.2));
@@ -902,6 +977,12 @@ class Player
             'unlockedImprints' => $this->unlockedImprints,
             'activeStance' => $this->activeStance,
             'glitchStatus' => \App\Systems\GlitchSystem::getPlayerGlitchStatus($this),
+            'activeAuras' => $this->activeAuras,
+            'reservedEnergy' => $this->getReservedEnergy(),
+            'usableEnergy' => $this->getUsableEnergy(),
+            'reservationPct' => min(100, array_sum(array_map(fn($a) => self::AURA_CONFIGS[$a]['reservationPct'] ?? 0, $this->activeAuras))),
+            'tribulationRecords' => $this->tribulationRecords,
+            'auraConfigs' => self::AURA_CONFIGS,
         ];
     }
 
@@ -1041,6 +1122,12 @@ class Player
             ? (json_decode($data['unlockedImprints'] ?? $data['unlocked_imprints'], true) ?: [])
             : ($data['unlockedImprints'] ?? $data['unlocked_imprints'] ?? []);
         $player->activeStance = $data['activeStance'] ?? $data['active_stance'] ?? 'breaker';
+        $player->activeAuras = is_string($data['activeAuras'] ?? $data['active_auras'] ?? null)
+            ? (json_decode($data['activeAuras'] ?? $data['active_auras'], true) ?: [])
+            : ($data['activeAuras'] ?? $data['active_auras'] ?? []);
+        $player->tribulationRecords = is_string($data['tribulationRecords'] ?? $data['tribulation_records'] ?? null)
+            ? (json_decode($data['tribulationRecords'] ?? $data['tribulation_records'], true) ?: [])
+            : ($data['tribulationRecords'] ?? $data['tribulation_records'] ?? []);
 
         return $player;
     }

@@ -2,6 +2,8 @@
  * Cảnh Giới – Chi Tiết Tu Tiên Realm System
  * Hiển thị cảnh giới hiện tại, danh sách tất cả realms, nút Đột phá
  */
+import { openTribulationModal } from '../game/TribulationModal.js'
+
 export function pageRealm(el, ctx) {
   const { state, api, notify, updateSidebar } = ctx
   const pid = state.playerId
@@ -127,32 +129,8 @@ export function pageRealm(el, ctx) {
   }
 
   function bindEvents() {
-    document.getElementById('btnBreakthrough')?.addEventListener('click', async () => {
-      const btn = document.getElementById('btnBreakthrough')
-      if (!confirm('Bạn có chắc muốn đột phá? Thất bại sẽ bị trọng thương!')) return
-      btn.disabled = true
-      btn.textContent = '⏳ Đang đột phá...'
-      try {
-        const data = await api.attemptBreakthrough(pid)
-        if (data.success) {
-          notify(data.message, 'success')
-          state.player = data.player
-          updateSidebar()
-          // Reload realm page
-          await load()
-        } else {
-          notify(data.message, 'error')
-          if (data.player) {
-            state.player = data.player
-            updateSidebar()
-          }
-          await load()
-        }
-      } catch (e) {
-        notify(e.message || 'Lỗi đột phá', 'error')
-        btn.disabled = false
-        btn.textContent = '⚡ ĐỘT PHÁ'
-      }
+    document.getElementById('btnBreakthrough')?.addEventListener('click', () => {
+      openTribulationModal(ctx)
     })
   }
 

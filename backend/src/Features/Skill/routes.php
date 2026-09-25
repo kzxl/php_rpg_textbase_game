@@ -162,6 +162,52 @@ return function ($app) {
         ]);
     });
 
+    // Bật / Tắt Tâm Pháp Hào Quang chiếm dụng Linh Lực (Mana Reservation)
+    $app->post('/api/player/{id}/skills/toggle-aura', function (Request $request, Response $response, array $args) {
+        $id = $args['id'];
+        $player = loadPlayer($id);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        $body = json_decode($request->getBody()->getContents(), true) ?: $request->getParsedBody();
+        $auraId = $body['auraId'] ?? '';
+
+        if (!isset(\App\Models\Player::AURA_CONFIGS[$auraId])) {
+            return jsonResponse($response, ['error' => 'Tâm pháp hào quang không tồn tại'], 400);
+        }
+
+        $auraConfig = \App\Models\Player::AURA_CONFIGS[$auraId];
+        $activeAuras = $player->activeAuras ?? [];
+
+        if (in_array($auraId, $activeAuras, true)) {
+            // Tắt hào quang -> giải phóng Linh Lực
+            $player->activeAuras = array_values(array_filter($activeAuras, fn($a) => $a !== $auraId));
+            $msg = "Đã thu hồi hào quang [{$auraConfig['name']}], giải phóng {$auraConfig['reservationPct']}% Linh Lực!";
+        } else {
+            // Kiểm tra tổng reservation
+            $currentPct = 0;
+            foreach ($activeAuras as $a) {
+                $currentPct += \App\Models\Player::AURA_CONFIGS[$a]['reservationPct'] ?? 0;
+            }
+            if ($currentPct + $auraConfig['reservationPct'] > 85) {
+                return jsonResponse($response, ['error' => 'Không thể kích hoạt: Tổng Linh Lực bảo lưu không thể vượt quá 85%!'], 400);
+            }
+            $player->activeAuras[] = $auraId;
+            $msg = "Đã kích hoạt hào quang [{$auraConfig['name']}], khóa {$auraConfig['reservationPct']}% Linh Lực bảo lưu!";
+        }
+
+        $player->currentEnergy = min($player->currentEnergy, $player->getUsableEnergy());
+        savePlayer($id, $player);
+
+        return jsonResponse($response, [
+            'success' => true,
+            'message' => $msg,
+            'activeAuras' => $player->activeAuras,
+            'reservedEnergy' => $player->getReservedEnergy(),
+            'usableEnergy' => $player->getUsableEnergy(),
+            'player' => $player->toArray()
+        ]);
+    });
+
     $app->get('/api/data/skills', function (Request $request, Response $response) {
         return jsonResponse($response, ['skills' => (new SkillSystem())->getAll()]);
     });

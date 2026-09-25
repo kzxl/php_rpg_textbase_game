@@ -29,13 +29,40 @@ return function ($app) {
         ]);
     });
 
-    // === ATTEMPT BREAKTHROUGH ===
+    // === GET TRIBULATION PREVIEW ===
+    $app->get('/api/player/{id}/tribulation-preview', function (Request $request, Response $response, array $args) {
+        $player = loadPlayer($args['id']);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        $nextTier = $player->realmTier + 1;
+        $config = \App\Systems\TribulationSystem::getTribulationConfig($nextTier);
+        $stats = $player->getFinalStats();
+        $defRedPct = min(60, (int)round(\App\Core\StatEngine::calcDamageReduction($stats['defense'] ?? 10) * 0.75));
+        $dodgeChance = min(40, (int)round(\App\Core\StatEngine::calcDodgeChance($stats['dexterity'] ?? 10, $stats['speed'] ?? 10) * 0.5));
+
+        return jsonResponse($response, [
+            'targetTier' => $nextTier,
+            'tribulation' => $config,
+            'playerStats' => [
+                'currentHp' => $player->currentHp,
+                'maxHp' => $player->maxHp,
+                'usableEnergy' => $player->getUsableEnergy(),
+                'defense' => $stats['defense'] ?? 0,
+                'defenseMitigationPct' => $defRedPct,
+                'dodgeChancePct' => $dodgeChance,
+                'hasGoldenBell' => in_array('ho_the_kim_chung', $player->activeAuras ?? [], true),
+                'hasGaleStride' => in_array('than_hanh_bo', $player->activeAuras ?? [], true),
+            ]
+        ]);
+    });
+
+    // === ATTEMPT BREAKTHROUGH VIA HEAVENLY TRIBULATION SURVIVAL ===
     $app->post('/api/player/{id}/breakthrough', function (Request $request, Response $response, array $args) {
         $id = $args['id'];
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        // Hospital/jail check
+        // Hospital check
         if ($player->hospitalUntil > time()) {
             return jsonResponse($response, ['error' => 'Đang tĩnh dưỡng, không thể đột phá!'], 400);
         }
@@ -48,145 +75,68 @@ return function ($app) {
         );
 
         // Simple failure — not enough level/resources
-        if (!$result['success'] && !($result['needsTrial'] ?? false) && !($result['failed'] ?? false)) {
+        if (!$result['success'] && !($result['needsTrial'] ?? false)) {
             return jsonResponse($response, ['error' => $result['message']], 400);
         }
 
-        // Random failure (no trial required) — hospitalize
-        if ($result['failed'] ?? false) {
-            $nextDef = RealmSystem::getRealmDefinition($player->realmTier + 1);
-            $cost = $nextDef['breakthroughCost'] ?? null;
-            // Still consume half the resources on failure
+        $nextTier = $player->realmTier + 1;
+        $nextRealm = RealmSystem::getRealmDefinition($nextTier);
+        $cost = $nextRealm['breakthroughCost'] ?? null;
+
+        // Execute Heavenly Tribulation Survival Ordeal
+        $tribulation = \App\Systems\TribulationSystem::simulateTribulation($player, $nextTier);
+
+        if (!$tribulation['survived']) {
+            // Failed tribulation survival
             if ($cost) {
-                $player->gold -= (int)(($cost['gold'] ?? 0) / 2);
+                $player->gold = max(0, $player->gold - (int)(($cost['gold'] ?? 0) / 2));
                 $player->currentEnergy = max(0, $player->currentEnergy - (int)(($cost['energy'] ?? 0) / 2));
             }
-            // Hospitalize
-            $hospitalSecs = $result['failHospitalSeconds'] ?? 60;
             $player->currentHp = 1;
-            $player->hospitalUntil = time() + $hospitalSecs;
+            $player->hospitalUntil = time() + 90; // 90s tĩnh dưỡng
+            \App\Systems\GlitchSystem::trackBehavior($player, 'tribulation_failed', 1);
             savePlayer($id, $player);
 
-            $mins = (int)ceil($hospitalSecs / 60);
             return jsonResponse($response, [
                 'success' => false,
-                'failed' => true,
-                'message' => "⚡ Đột phá thất bại! Cơ thể không chịu nổi, bị trọng thương! Tĩnh dưỡng {$mins} phút.",
+                'trialFailed' => true,
+                'message' => "⚡ Lôi Kiếp bộc phát vượt quá sức chịu đựng! Ngã xuống tại đợt {$tribulation['wavesSurvived']}/{$tribulation['totalWaves']}, kinh mạch tổn thương, tĩnh dưỡng 1.5 phút.",
+                'tribulation' => $tribulation,
                 'player' => $player->toArray(),
             ]);
         }
 
-        // Needs trial combat
-        if ($result['needsTrial'] ?? false) {
-            $monsterId = $result['trialMonster'];
-            $monsterData = GameDataRepository::getMonsterById($monsterId);
-            $nextTier = $player->realmTier + 1;
-            $nextRealm = RealmSystem::getRealmDefinition($nextTier);
-            $cost = $nextRealm['breakthroughCost'] ?? null;
-            $failChance = $result['failChance'] ?? 0;
-            $failHospitalSecs = $result['failHospitalSeconds'] ?? 0;
-
-            if (!$monsterData) {
-                // No monster in DB — skip trial, just do fail chance roll
-                if ($failChance > 0 && mt_rand(1, 100) <= $failChance) {
-                    if ($cost) {
-                        $player->gold -= (int)(($cost['gold'] ?? 0) / 2);
-                        $player->currentEnergy = max(0, $player->currentEnergy - (int)(($cost['energy'] ?? 0) / 2));
-                    }
-                    $player->currentHp = 1;
-                    $player->hospitalUntil = time() + $failHospitalSecs;
-                    savePlayer($id, $player);
-                    $mins = (int)ceil($failHospitalSecs / 60);
-                    return jsonResponse($response, [
-                        'success' => false,
-                        'failed' => true,
-                        'message' => "⚡ Đột phá thất bại! Trọng thương! Tĩnh dưỡng {$mins} phút.",
-                        'player' => $player->toArray(),
-                    ]);
-                }
-                // Success without trial
-                $result['success'] = true;
-                $result['newTier'] = $nextTier;
-                $result['cost'] = $cost;
-                $result['message'] = "🌟 ĐỘT PHÁ THÀNH CÔNG! Chào mừng đến cảnh giới {$nextRealm['name']}!";
-            } else {
-                // Create Monster and fight
-                $trialLevel = $player->level + 2;
-                $monsterData['name'] = "⚡ Thiên Kiếp: " . $monsterData['name'];
-                $monster = Monster::fromData($monsterData, $trialLevel);
-
-                $combatEngine = new CombatEngine();
-                $combatResult = $combatEngine->fullCombat($player, $monster);
-
-                if ($combatResult['outcome'] !== 'win') {
-                    // Lost trial — hospitalize longer
-                    $player->hospitalUntil = time() + $failHospitalSecs;
-                    savePlayer($id, $player);
-                    $mins = (int)ceil($failHospitalSecs / 60);
-                    return jsonResponse($response, [
-                        'success' => false,
-                        'trialFailed' => true,
-                        'message' => "⚡ Thiên Kiếp thất bại! {$monsterData['name']} quá mạnh. Trọng thương, tĩnh dưỡng {$mins} phút.",
-                        'combat' => $combatResult,
-                        'player' => $player->toArray(),
-                    ]);
-                }
-
-                // Won trial — but still roll fail chance for breakthrough itself
-                if ($failChance > 0 && mt_rand(1, 100) <= $failChance) {
-                    if ($cost) {
-                        $player->gold -= (int)(($cost['gold'] ?? 0) / 2);
-                        $player->currentEnergy = max(0, $player->currentEnergy - (int)(($cost['energy'] ?? 0) / 2));
-                    }
-                    $halfHospital = (int)($failHospitalSecs / 2);
-                    $player->hospitalUntil = time() + $halfHospital;
-                    savePlayer($id, $player);
-                    $mins = (int)ceil($halfHospital / 60);
-                    return jsonResponse($response, [
-                        'success' => false,
-                        'failed' => true,
-                        'message' => "⚡ Thắng Thiên Kiếp nhưng đột phá thất bại! Bị phản phệ, tĩnh dưỡng {$mins} phút.",
-                        'combat' => $combatResult,
-                        'player' => $player->toArray(),
-                    ]);
-                }
-
-                // Full success with trial
-                $result['success'] = true;
-                $result['newTier'] = $nextTier;
-                $result['cost'] = $cost;
-                $result['message'] = "⚡🌟 Vượt qua Thiên Kiếp! ĐỘT PHÁ THÀNH CÔNG lên " . ($nextRealm['name'] ?? '???') . "!";
-                $result['combat'] = $combatResult;
-            }
+        // Survived all lightning waves! ASCENSION SUCCESS!
+        if ($cost) {
+            $player->gold -= ($cost['gold'] ?? 0);
+            $player->currentEnergy = max(0, $player->currentEnergy - ($cost['energy'] ?? 0));
         }
 
-        if ($result['success']) {
-            // Deduct cost
-            $cost = $result['cost'] ?? null;
-            if ($cost) {
-                $player->gold -= ($cost['gold'] ?? 0);
-                $player->currentEnergy -= ($cost['energy'] ?? 0);
-            }
+        // Level up realm
+        $player->realmTier = $nextTier;
+        $player->tribulationRecords[] = [
+            'tier' => $nextTier,
+            'name' => $tribulation['tribulationName'],
+            'time' => time(),
+            'waves' => $tribulation['totalWaves'],
+        ];
 
-            // Level up realm
-            $player->realmTier = $result['newTier'];
+        // Track breakthrough streak & tribulation survival
+        \App\Systems\GlitchSystem::trackBehavior($player, 'breakthrough_streak', 1);
+        \App\Systems\GlitchSystem::trackBehavior($player, 'tribulation_survived', 1);
 
-            // Track breakthrough streak behavior
-            \App\Systems\GlitchSystem::trackBehavior($player, 'breakthrough_streak', 1);
+        // Full heal on breakthrough!
+        $player->fullHeal();
 
-            // Full heal on breakthrough!
-            $player->fullHeal();
+        savePlayer($id, $player);
 
-            savePlayer($id, $player);
-
-            return jsonResponse($response, [
-                'success' => true,
-                'message' => $result['message'],
-                'newRealm' => $player->getRealmInfo(),
-                'combat' => $result['combat'] ?? null,
-                'player' => $player->toArray(),
-            ]);
-        }
+        return jsonResponse($response, [
+            'success' => true,
+            'message' => "⚡🌟 ĐỘT PHÁ THÀNH CÔNG! Sống sót qua {$tribulation['totalWaves']} đợt Lôi Đình, thăng hoa cảnh giới {$nextRealm['name']}!",
+            'newRealm' => $player->getRealmInfo(),
+            'tribulation' => $tribulation,
+            'player' => $player->toArray(),
+        ]);
 
         return jsonResponse($response, ['error' => $result['message']], 400);
     });

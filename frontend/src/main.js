@@ -328,7 +328,9 @@ function renderGame() {
   if (!p) return
   const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
   const stPct = p.maxStamina > 0 ? Math.max(0, (p.currentStamina / p.maxStamina) * 100) : 0
-  const enPct = p.maxEnergy > 0 ? Math.max(0, (p.currentEnergy / p.maxEnergy) * 100) : 0
+  const usableEnergy = p.usableEnergy ?? Math.max(0, p.maxEnergy - (p.reservedEnergy ?? 0))
+  const resPct = p.reservationPct ?? 0
+  const enPct = usableEnergy > 0 ? Math.min(100, Math.max(0, (p.currentEnergy / usableEnergy) * 100)) : 0
   const xpPct = (p.xpToNext && p.xpToNext > 0) ? Math.min(100, Math.max(0, ((p.xp || 0) / p.xpToNext) * 100)) : 0
 
   const currentAreaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
@@ -382,7 +384,7 @@ function renderGame() {
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label">
-              <span>🏃 Thể Lực</span>
+              <span>🏃 Thể Lực (Thế Giới)</span>
               <span>
                 ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
                 ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
@@ -392,10 +394,10 @@ function renderGame() {
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label">
-              <span>🔮 Linh Lực</span>
+              <span>🔵 Linh Lực (Thực Chiến)</span>
               <span>
-                ${p.currentEnergy}/${p.maxEnergy}
-                ${p.currentEnergy < p.maxEnergy ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.energyRegen ?? 5}/10s</span>` : ''}
+                ${p.currentEnergy}/${usableEnergy}
+                ${resPct > 0 ? `<span style="font-size:10px; color:#f59e0b; margin-left:4px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
@@ -719,7 +721,9 @@ function renderPage() {
 function updateSidebar() {
   const p = state.player; if (!p) return
   const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
-  const enPct = p.maxEnergy > 0 ? Math.max(0, (p.currentEnergy / p.maxEnergy) * 100) : 0
+  const usableEnergy = p.usableEnergy ?? Math.max(0, p.maxEnergy - (p.reservedEnergy ?? 0))
+  const resPct = p.reservationPct ?? 0
+  const enPct = usableEnergy > 0 ? Math.min(100, Math.max(0, (p.currentEnergy / usableEnergy) * 100)) : 0
 
   const sp = document.querySelector('.sidebar-player')
   if (sp) {
@@ -742,7 +746,7 @@ function updateSidebar() {
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
         <div class="bar-label">
-          <span>🏃 Thể Lực</span>
+          <span>🏃 Thể Lực (Thế Giới)</span>
           <span>
             ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
             ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
@@ -752,10 +756,10 @@ function updateSidebar() {
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
         <div class="bar-label">
-          <span>🔮 Linh Lực</span>
+          <span>🔵 Linh Lực (Thực Chiến)</span>
           <span>
-            ${p.currentEnergy}/${p.maxEnergy}
-            ${p.currentEnergy < p.maxEnergy ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.energyRegen ?? 5}/10s</span>` : ''}
+            ${p.currentEnergy}/${usableEnergy}
+            ${resPct > 0 ? `<span style="font-size:10px; color:#f59e0b; margin-left:4px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
