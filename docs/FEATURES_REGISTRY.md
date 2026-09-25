@@ -28,7 +28,7 @@ Database (MySQL 8.0 / MariaDB)
 | Code | Feature Name | Backend Module | Frontend Page | Core Endpoints | State & Invariants |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `EXP-01` | **Khám Phá (Exploration)** | `Features/Exploration` | `pages/combat.js` | `POST /api/player/{id}/explore` | Dynamic stamina cost (10 - 200 TL) scaling across 18 canonical realms. Spawns monsters, NPCs, items, or random encounters. |
-| `EXP-02` | **Chiến Đấu 2D (Combat Arena)** | `Features/Combat` | `pages/combat.js` | `POST /api/player/{id}/combat` | Turn-based 25 turns max. Weakpoint targeting, hit/dodge/crit rolls. |
+| `EXP-02` | **Chiến Đấu 2D (Combat Arena)** | `Features/Combat` | `pages/combat.js` | `POST /api/combat/full` | Turn-based 25 turns max. Probabilistic active skill trigger (15-85%), Qi consumption, weakpoint targeting, hit/dodge/crit rolls. Fallback to normal attack. |
 | `EXP-03` | **Ngao Du Bát Hoang (World Map / Travel)** | `Features/Travel` | `pages/travel.js` | `GET /api/data/areas`, `POST /api/player/{id}/travel` | 18 canonical realms in 5 tiers (Lv.1 to Lv.4000+). Travel timers, level gates, and unique environmental realm modifiers. |
 | `EXP-04` | **Phó Bản Bí Cảnh (Dungeon)** | `Features/Dungeon` | `pages/dungeon.js` | `GET/POST /api/player/{id}/dungeons` | Multi-node runs with boss and item drops. |
 | `EXP-05` | **Bát Hoang Tiên Cảnh (TienCanh)** | `Features/TienCanh` | `pages/tiencanh.js` | `GET/POST /api/player/{id}/tiencanh` | Dynamic exploration atlas grid. |
@@ -41,9 +41,9 @@ Database (MySQL 8.0 / MariaDB)
 ### Domain 2: TU CHÂN (Cultivation & Progression)
 | Code | Feature Name | Backend Module | Frontend Page | Core Endpoints | State & Invariants |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `CUL-01` | **Tu Luyện & Cảnh Giới (Realm)** | `Features/Realm` | `pages/stats.js`, `pages/realm.js` | `GET/POST /api/player/{id}/realm`, `/breakthrough` | 19 canonical realms + unlimited procedural realms. Breakthrough trial combat. |
+| `CUL-01` | **Tu Luyện & Cảnh Giới (Realm)** | `Features/Realm`, `Features/Tribulation` | `pages/stats.js`, `pages/realm.js` | `GET/POST /api/player/{id}/realm`, `/tribulation/*` | 19 canonical realms + unlimited procedural realms. Major realm breakthroughs summon multi-wave Heavenly Tribulation (Đột Phá Lôi Kiếp). |
 | `CUL-02` | **Rèn Luyện Thể Chất (Gym)** | `Features/Gym` | `pages/stats.js` | `POST /api/player/{id}/train` | Multiplies stat gain by talent aptitude. Spends stamina. |
-| `CUL-03` | **Chiêu Thức & Tâm Pháp (Skills - Pillar 1)** | `Features/Skill` | `pages/skills.js` (tab `combat`) | `POST /api/player/{id}/skills/equip` | Active combat skills & passive mind methods. Realm-scaled equip loadout slots. Usage-based mastery XP. |
+| `CUL-03` | **Chiêu Thức (Skills - Pillar 1)** | `Features/Skill` | `pages/skills.js` (tab `combat`) | `POST /api/player/{id}/skills/equip` | Equipped active combat loadout (3-6 slots). Dynamic trigger chance roll (15-85%). Usage-based mastery XP. |
 | ~~`CUL-04`~~ | **[RETIRED] Công Pháp Cũ (Education Trees)** | *Deprecated* | *Decommissioned* | *N/A* | *Replaced by action-driven Monster Mastery (`CUL-08`) and Crafting Mastery (`CUL-09`).* |
 | `CUL-05` | **Tàng Kinh Các (Library)** | `Core/GameDataRepository` | `pages/skills.js`, `pages/library.js` | `GET /api/data/skills` | Catalog of skills. Filtered by player Nhãn Thuật perception level. |
 | `CUL-06` | **Thiên Đạo Dị Biến (Glitch - Pillar 4)** | `Features/Glitch`, `Systems/GlitchSystem` | `pages/skills.js` (tab `glitch`) | `GET/POST /api/player/{id}/glitches` | Feature Fog of War. 3 Stances + 10 Hidden Imprints with riddles. |
@@ -91,6 +91,7 @@ Database (MySQL 8.0 / MariaDB)
 | `SYS-04` | **Đạo Hữu (Social & Friends)** | `Features/Social` | `pages/social.js` | `GET/POST /api/social` | Friends list, online status, direct profile shortcuts. |
 | `SYS-05` | **Bảng Xếp Hạng (Leaderboard)** | `Features/Leaderboard` | `pages/leaderboard.js` | `GET /api/leaderboard` | Top level, wealth, arena ratings. |
 | `SYS-06` | **Sự Kiện & Lịch Sử (Events)** | `Features/Events`, `Features/TimeEvent` | `pages/events.js` | `GET /api/events` | Combat logs, hospital notifications, trade receipts. |
+| `SYS-07` | **Thiết Lập & Đăng Xuất (Settings & Session)** | `Features/Auth` | `main.js` (`showSettingsModal`) | `POST /api/auth/login` | LocalStorage session invalidation (`isLoggedOut`), audio/shake/toast preferences, dev bypass synchronization. |
 
 ---
 
@@ -105,5 +106,12 @@ Database (MySQL 8.0 / MariaDB)
 3. **Stat Calculation Pipeline**:
    - All modifiers must pass through `ModifierEngine::apply()`.
    - Realm cumulative bonuses (`RealmSystem::getCumulativeBonuses()`) must always be injected into `Player::gatherModifiers()`.
-4. **Fog of War Invariant**:
+   - Derived `maxHp` from `StatEngine::calculateAll()` must be synchronized with `Player->maxHp` in `toArray()` to prevent HUD mismatch.
+4. **Energy Separation Invariant**:
+   - **Thể Lực (Stamina World)**: Exclusively deducted for world exploration (10-200 TL per step), gym training, and travel. Never spent during turn combat.
+   - **Linh Lực (Qi / Mana Combat)**: Exclusively consumed during combat turns for triggered active skills (10-100 Qi) and persistent aura reservation (10-85%). Never spent on exploration.
+5. **Skill Activation Invariant**:
+   - Only equipped active skills (`isEquipped === true`) with sufficient available energy (`currentEnergy >= cost`) may enter the trigger chance roll.
+   - Turns without skill triggers must cleanly fall back to `⚔️ Thường công` (Normal Attack) at 0 energy cost.
+6. **Fog of War Invariant**:
    - Never expose raw action thresholds or internal counter names of deep-fog imprints to unauthenticated or low-level players.
