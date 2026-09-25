@@ -275,6 +275,11 @@ function renderPlayerBuffs(p) {
     'u_minh_quy_vuc': { icon: '💀', tooltip: 'U Ám Hút Hồn: Giảm 15% Phòng Ngự' },
     'thien_dao_tan_tich': { icon: '✨', tooltip: 'Thiên Đạo Ban Phước: Tăng 15% Toàn Chỉ Số' },
     'vo_tan_hu_khong': { icon: '🌀', tooltip: 'Hỗn Loạn Cực Hạn: Tăng 50% ST Gây Ra & Nhận Vào' },
+    'cuu_u_than_uyen': { icon: '👿', tooltip: 'Cửu U Ma Khí: Tăng 35% Sát Thương, 20% Tốc Độ' },
+    'thai_co_hong_hoang': { icon: '🦕', tooltip: 'Hồng Hoang Cổ Khí: Tăng 25% Máu, 20% Giáp' },
+    'chu_thien_tinh_hai': { icon: '🌌', tooltip: 'Tinh Tú Luân Chuyển: Tăng 30% Tốc Độ, 25% Nhanh Nhẹn' },
+    'hon_don_tien_vuc': { icon: '🔮', tooltip: 'Hỗn Độn Tiên Khí: Tăng 35% Toàn Bộ Thuộc Tính' },
+    'hon_nguyen_dao_canh': { icon: '👑', tooltip: 'Hỗn Nguyên Đạo Vực: Tăng 60% Sát Thương, 50% Toàn Thuộc Tính' },
   };
   const env = envMap[p.currentArea];
   if (env) {

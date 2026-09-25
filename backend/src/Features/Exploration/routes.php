@@ -10,6 +10,12 @@ use Slim\Psr7\Response;
 use App\Core\GameDataRepository;
 
 return function ($app) {
+    // Get all exploration areas config
+    $app->get('/api/data/exploration', function (Request $request, Response $response) {
+        $areas = GameDataRepository::getAreas();
+        return jsonResponse($response, $areas);
+    });
+
     // Phase 5: Get Area Monsters. Auto-spawns up to 5 monsters based on time elapsed.
     $app->get('/api/player/{id}/area-monsters', function (Request $request, Response $response, array $args) {
         $id = $args['id'];
@@ -107,9 +113,13 @@ return function ($app) {
             return jsonResponse($response, ['error' => 'Khu vực này hiện tĩnh mịch, không thể khám phá.'], 400);
         }
 
-        $cost = $areaData['staminaCost'] ?? 10;
+        $cost = (int)($areaData['staminaCost'] ?? $areaData['stamina_cost'] ?? 10);
         if (!$player->spendStamina($cost)) {
-            return jsonResponse($response, ['error' => 'Không đủ thể lực.'], 400);
+            return jsonResponse($response, [
+                'error' => "Không đủ thể lực! Dò thám [{$areaData['name']}] cần {$cost} Thể Lực (Hiện có: {$player->currentStamina}/{$player->maxStamina}).",
+                'requiredStamina' => $cost,
+                'currentStamina' => $player->currentStamina,
+            ], 400);
         }
 
         // RNG Roll based on weights

@@ -8,7 +8,7 @@ export function pageCombat(el, ctx) {
 
   const currentAreaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
   const areaName = currentAreaData ? currentAreaData.name : 'Vùng Đất Vô Danh'
-  const exploreCost = currentAreaData ? currentAreaData.staminaCost : 10
+  const exploreCost = currentAreaData ? (currentAreaData.staminaCost || currentAreaData.stamina_cost || 10) : 10
 
   el.innerHTML = `
     <div class="page-header">

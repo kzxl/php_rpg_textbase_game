@@ -27,9 +27,9 @@ Database (MySQL 8.0 / MariaDB)
 ### Domain 1: HÀNH TRÌNH (Journey & Exploration) — Priority 1
 | Code | Feature Name | Backend Module | Frontend Page | Core Endpoints | State & Invariants |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `EXP-01` | **Khám Phá (Exploration)** | `Features/Exploration` | `pages/combat.js` | `POST /api/player/{id}/explore` | Costs stamina. Spawns monsters, NPCs, items, or random encounters. |
+| `EXP-01` | **Khám Phá (Exploration)** | `Features/Exploration` | `pages/combat.js` | `POST /api/player/{id}/explore` | Dynamic stamina cost (10 - 200 TL) scaling across 18 canonical realms. Spawns monsters, NPCs, items, or random encounters. |
 | `EXP-02` | **Chiến Đấu 2D (Combat Arena)** | `Features/Combat` | `pages/combat.js` | `POST /api/player/{id}/combat` | Turn-based 25 turns max. Weakpoint targeting, hit/dodge/crit rolls. |
-| `EXP-03` | **Ngao Du Bát Hoang (Travel)** | `Features/Travel` | `pages/travel.js` | `POST /api/player/{id}/travel` | Traveling timer lock. Level gates per area. Sets environment buff. |
+| `EXP-03` | **Ngao Du Bát Hoang (World Map / Travel)** | `Features/Travel` | `pages/travel.js` | `GET /api/data/areas`, `POST /api/player/{id}/travel` | 18 canonical realms in 5 tiers (Lv.1 to Lv.4000+). Travel timers, level gates, and unique environmental realm modifiers. |
 | `EXP-04` | **Phó Bản Bí Cảnh (Dungeon)** | `Features/Dungeon` | `pages/dungeon.js` | `GET/POST /api/player/{id}/dungeons` | Multi-node runs with boss and item drops. |
 | `EXP-05` | **Bát Hoang Tiên Cảnh (TienCanh)** | `Features/TienCanh` | `pages/tiencanh.js` | `GET/POST /api/player/{id}/tiencanh` | Dynamic exploration atlas grid. |
 | `EXP-06` | **Thiên Cơ Nhiệm Vụ (Quests)** | `Features/Quests`, `Features/NPC` | `pages/quests.js` | `GET/POST /api/player/{id}/quests` | Kill and collect quest tracking from area NPCs. |

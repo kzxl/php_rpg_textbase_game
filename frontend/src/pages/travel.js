@@ -85,6 +85,11 @@ async function loadTravelMap(container, ctx) {
       'u_minh_quy_vuc': '💀 U minh: -15% Phòng Ngự',
       'thien_dao_tan_tich': '✨ Thiên đạo: +15% Toàn Chỉ Số',
       'vo_tan_hu_khong': '🌀 Hỗn loạn: +50% ST Gây & Nhận',
+      'cuu_u_than_uyen': '👿 Cửu U ma khí: +35% ST, +20% Tốc Độ',
+      'thai_co_hong_hoang': '🦕 Hồng hoang cổ khí: +25% HP, +20% Giáp',
+      'chu_thien_tinh_hai': '🌌 Tinh tú xoay chuyển: +30% Tốc Độ, +25% Nhanh Nhẹn',
+      'hon_don_tien_vuc': '🔮 Hỗn độn tiên khí: +35% Toàn Chỉ Số',
+      'hon_nguyen_dao_canh': '👑 Hỗn nguyên đạo vực: +60% ST, +50% Toàn Thuộc Tính',
     }
     const envEffect = envMap[player?.currentArea] || ''
 
@@ -142,8 +147,11 @@ async function loadTravelMap(container, ctx) {
               const isHere = a.id === player.currentArea && !traveling
               const tooLow = player.level < (a.min_level || 1)
               const travelTime = parseInt(a.travel_time) || 0
-              const aStaminaCost = exploArea?.staminaCost || 10
+              const aStaminaCost = parseInt(a.stamina_cost) || exploArea?.staminaCost || 10
               const aEnvEffect = envMap[a.id] || ''
+              const aTier = a.tier || 'Bát Hoang'
+              const stamBg = aStaminaCost >= 100 ? 'rgba(239,68,68,0.2)' : aStaminaCost >= 40 ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.06)'
+              const stamColor = aStaminaCost >= 100 ? 'var(--red)' : aStaminaCost >= 40 ? 'var(--gold)' : 'var(--text-dim)'
 
               let cardBorder = 'rgba(255,255,255,0.08)'
               let cardBg = 'rgba(255,255,255,0.03)'
@@ -169,6 +177,10 @@ async function loadTravelMap(container, ctx) {
                       ${tooLow ? '<span style="color:var(--red); font-size:12px">🔒 Khóa</span>' : ''}
                     </div>
 
+                    <div style="display:inline-block; font-size:10px; color:var(--gold); opacity:0.85; margin-bottom:6px; font-weight:600">
+                      🏛️ ${aTier}
+                    </div>
+
                     <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; line-height:1.3">
                       ${a.description || 'Vùng đất hoang sơ chưa rõ lai lịch.'}
                     </div>
@@ -180,8 +192,8 @@ async function loadTravelMap(container, ctx) {
                       <span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.06); color:var(--text-dim)">
                         ${travelTime > 0 ? `⏱ ${travelTime}s` : '⚡ Tức thời'}
                       </span>
-                      <span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.06); color:var(--text-dim)">
-                        🏃 -${aStaminaCost} TL
+                      <span class="badge" style="font-size:10px; padding:2px 6px; background:${stamBg}; color:${stamColor}; border:1px solid ${stamBg}">
+                        🏃 -${aStaminaCost} TL (Dò thám)
                       </span>
                     </div>
 

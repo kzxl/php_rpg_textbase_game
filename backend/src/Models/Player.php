@@ -249,7 +249,12 @@ class Player
             'thien_hoa_linh_dia' => [new Modifier('increase', 'fireDamage', 0.25, null, 'env_hellfire')],
             'u_minh_quy_vuc' => [new Modifier('decrease', 'defense', 0.15, null, 'env_soul')],
             'thien_dao_tan_tich' => [new Modifier('increase', 'allStats', 0.15, null, 'env_law')],
-            'vo_tan_hu_khong' => [new Modifier('increase', 'damage', 0.5, null, 'env_void'), new Modifier('increase', 'damageTaken', 0.3, null, 'env_void')]
+            'vo_tan_hu_khong' => [new Modifier('increase', 'damage', 0.5, null, 'env_void'), new Modifier('increase', 'damageTaken', 0.3, null, 'env_void')],
+            'cuu_u_than_uyen' => [new Modifier('increase', 'damage', 0.35, null, 'env_abyss'), new Modifier('increase', 'speed', 0.2, null, 'env_abyss')],
+            'thai_co_hong_hoang' => [new Modifier('increase', 'maxHp', 0.25, null, 'env_primordial'), new Modifier('increase', 'defense', 0.2, null, 'env_primordial')],
+            'chu_thien_tinh_hai' => [new Modifier('increase', 'speed', 0.3, null, 'env_stars'), new Modifier('increase', 'dexterity', 0.25, null, 'env_stars')],
+            'hon_don_tien_vuc' => [new Modifier('increase', 'allStats', 0.35, null, 'env_chaos')],
+            'hon_nguyen_dao_canh' => [new Modifier('increase', 'damage', 0.6, null, 'env_dao'), new Modifier('increase', 'allStats', 0.5, null, 'env_dao')]
         ];
 
         if (isset($envMods[$this->currentArea])) {
@@ -980,6 +985,8 @@ class Player
         $player->recalcDerived();
         $player->currentHp = $data['currentHp'] ?? $player->maxHp;
         $player->currentEnergy = $data['currentEnergy'] ?? $player->maxEnergy;
+        $player->maxStamina = (int)($data['maxStamina'] ?? $data['max_stamina'] ?? 100);
+        $player->currentStamina = isset($data['currentStamina']) ? (int)$data['currentStamina'] : (isset($data['current_stamina']) ? (int)$data['current_stamina'] : $player->maxStamina);
         $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
         $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
         $player->lastHpRegen = $data['lastHpRegen'] ?? time();
