@@ -445,6 +445,11 @@ class GameAPI {
   // Time Events
   getActiveEvents() { return this.request('/events/active') }
   quickEvent(type) { return this.request(`/events/quick/${type}`, { method: 'POST' }) }
+
+  // Glitch System (Thiên Đạo Bị Lỗi)
+  getGlitches(id) { return this.request(`/player/${id}/glitches`) }
+  setStance(id, stance) { return this.request(`/player/${id}/stance`, { method: 'POST', body: JSON.stringify({ stance }) }) }
+  overrideTribulation(id) { return this.request(`/player/${id}/glitch/override-tribulation`, { method: 'POST' }) }
 }
 
 export const api = new GameAPI()

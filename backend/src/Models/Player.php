@@ -41,6 +41,12 @@ class Player
     /** @var int Last HP regen timestamp (meditation) */
     public int $lastHpRegen = 0;
     
+    // --- Glitch System (Thiên Đạo Bị Lỗi) ---
+    public int $glitchInsight = 0;
+    public array $behaviorCounters = [];
+    public array $unlockedImprints = [];
+    public string $activeStance = 'breaker';
+    
     // --- Phase 1: Crimes + Jail + Education ---
     public int $gold = 0;
     public int $nerve = 15;
@@ -219,6 +225,16 @@ class Player
 
         // Extra modifiers (titles, hidden, etc.)
         $mods = array_merge($mods, $this->extraModifiers);
+
+        // Glitch Imprints (Dấu Ấn Lỗi Thiên Đạo)
+        if (!empty($this->unlockedImprints)) {
+            $mods = array_merge($mods, \App\Systems\GlitchSystem::getImprintModifiers($this->unlockedImprints));
+        }
+
+        // Glitch Combat Stance (Thế Chiến Đấu)
+        if (!empty($this->activeStance)) {
+            $mods = array_merge($mods, \App\Systems\GlitchSystem::getStanceModifiers($this->activeStance));
+        }
 
         // Environment modifiers
         $envMods = [
@@ -857,6 +873,11 @@ class Player
             'tienCanhMaps' => $this->tienCanhMaps,
             'atlasProgress' => $this->atlasProgress,
             'atlasBonus' => $this->atlasBonus,
+            'glitchInsight' => $this->glitchInsight,
+            'behaviorCounters' => $this->behaviorCounters,
+            'unlockedImprints' => $this->unlockedImprints,
+            'activeStance' => $this->activeStance,
+            'glitchStatus' => \App\Systems\GlitchSystem::getPlayerGlitchStatus($this),
         ];
     }
 
@@ -986,6 +1007,14 @@ class Player
         $player->tienCanhMaps = $data['tienCanhMaps'] ?? [];
         $player->atlasProgress = $data['atlasProgress'] ?? [];
         $player->atlasBonus = $data['atlasBonus'] ?? 0;
+        $player->glitchInsight = (int)($data['glitchInsight'] ?? $data['glitch_insight'] ?? 0);
+        $player->behaviorCounters = is_string($data['behaviorCounters'] ?? $data['behavior_counters'] ?? null) 
+            ? (json_decode($data['behaviorCounters'] ?? $data['behavior_counters'], true) ?: []) 
+            : ($data['behaviorCounters'] ?? $data['behavior_counters'] ?? []);
+        $player->unlockedImprints = is_string($data['unlockedImprints'] ?? $data['unlocked_imprints'] ?? null)
+            ? (json_decode($data['unlockedImprints'] ?? $data['unlocked_imprints'], true) ?: [])
+            : ($data['unlockedImprints'] ?? $data['unlocked_imprints'] ?? []);
+        $player->activeStance = $data['activeStance'] ?? $data['active_stance'] ?? 'breaker';
 
         return $player;
     }

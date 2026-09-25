@@ -1,6 +1,8 @@
 /**
  * Khám Phá Area & Combat Page
  */
+import { ThreeEngine } from '../game/ThreeEngine.js';
+
 export function pageCombat(el, ctx) {
   const { state, api, notify, renderGame, updateSidebar } = ctx
   const p = state.player
@@ -15,15 +17,30 @@ export function pageCombat(el, ctx) {
       <div class="text-dim text-sm">Nơi cất giấu nhiều cơ duyên và hiểm nguy.</div>
     </div>
 
+    <!-- AUTO BATTLE 3D ARENA -->
+    <div class="panel mt-md toggle-auto-combat" style="display:none; border-color:var(--gold);">
+      <div class="panel-title flex justify-between items-center">
+         <span>⚔️ Đấu Trường Tự Động (3D)</span>
+         <button class="btn btn--red btn--sm" id="btnStopAuto">Dừng Auto</button>
+      </div>
+      <div class="panel-body no-pad" id="autoCombat3DContainer" style="height:350px; background:#000;"></div>
+      <div class="panel-body text-center" id="autoCombatStatus" style="font-size:12px; color:var(--text-dim); padding:8px;"></div>
+    </div>
+
     <!-- KHÁM PHÁ -->
-    <div class="panel" style="border-color: rgba(208, 165, 48, 0.4); box-shadow: 0 4px 15px rgba(208, 165, 48, 0.1);">
+    <div class="panel" id="panelKhamPha" style="border-color: rgba(208, 165, 48, 0.4); box-shadow: 0 4px 15px rgba(208, 165, 48, 0.1);">
       <div class="panel-body text-center" style="padding: 24px 16px;">
         <h2 class="text-lg text-gold mb-sm">Dò Thám Xung Quanh</h2>
         <p class="text-dim mb-md">Tiêu hao thể lực để tìm kiếm tài nguyên, kỳ ngộ hoặc yêu thú.</p>
-        <button class="btn btn--gold btn--lg" id="btnExplore" style="width: 100%; max-width: 300px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 8px;">
-          <span>🔍 Tìm Kiếm</span>
-          <span class="badge" style="background: rgba(0,0,0,0.3); color: #fff;">-${exploreCost} Thể Lực</span>
-        </button>
+        <div class="flex justify-center gap-2 flex-wrap">
+          <button class="btn btn--gold btn--lg" id="btnExplore" style="min-width: 150px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <span>🔍 Tìm Kiếm</span>
+            <span class="badge" style="background: rgba(0,0,0,0.3); color: #fff;">-${exploreCost} Thể Lực</span>
+          </button>
+          <button class="btn btn--red btn--lg" id="btnAutoBattle" style="min-width: 150px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            <span>⚔️ Tự Động Đánh (3D)</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -191,6 +208,113 @@ export function pageCombat(el, ctx) {
   el.querySelectorAll('.list-item.clickable').forEach(item => {
     item.addEventListener('click', () => startCombat(item.dataset.mid, ctx))
   })
+
+  // --- AUTO BATTLE LOGIC ---
+  let isAutoBattling = false;
+  
+  const btnAuto = document.getElementById('btnAutoBattle');
+  const btnStop = document.getElementById('btnStopAuto');
+  const panelKhamPha = document.getElementById('panelKhamPha');
+  const panelAuto = document.querySelector('.toggle-auto-combat');
+  const statusEl = document.getElementById('autoCombatStatus');
+
+  if (btnAuto) {
+    btnAuto.addEventListener('click', () => {
+      isAutoBattling = true;
+      panelKhamPha.style.display = 'none';
+      panelAuto.style.display = 'block';
+      
+      const container = document.getElementById('autoCombat3DContainer');
+      if (ctx._activeThreeArena) ctx._activeThreeArena.destroy();
+      ctx._activeThreeArena = new ThreeEngine(container);
+      ctx._activeThreeArena.setupCombatArena();
+      ctx._activeThreeArena.startLoop();
+      
+      startAutoBattleLoop();
+    });
+  }
+
+  if (btnStop) {
+    btnStop.addEventListener('click', () => {
+      isAutoBattling = false;
+      panelKhamPha.style.display = 'block';
+      panelAuto.style.display = 'none';
+      if (ctx._activeThreeArena) ctx._activeThreeArena.destroy();
+    });
+  }
+
+  async function startAutoBattleLoop() {
+     while(isAutoBattling) {
+        statusEl.innerHTML = "<span class='text-gold'>⏳ Đang rà soát và thám hiểm...</span>";
+        const playerState = state.player;
+        
+        if ((playerState.currentStamina || 0) < exploreCost) {
+            statusEl.innerHTML = "<span class='text-red'>❌ Hết thể lực! Tự động dừng.</span>";
+            isAutoBattling = false;
+            break;
+        }
+        if (playerState.currentHp / playerState.maxHp < 0.2) {
+            statusEl.innerHTML = "<span class='text-red'>❌ Máu quá thấp! Tự động dừng.</span>";
+            isAutoBattling = false;
+            break;
+        }
+
+        try {
+           const dUrl = await api.explore(state.playerId);
+           state.player = dUrl.player; 
+           updateSidebar();
+
+           if (dUrl.event && (dUrl.event.type === 'monster' || dUrl.event.type === 'worldBoss')) {
+               statusEl.innerHTML = `<span class='text-red'>⚔️ Đã tìm thấy ${dUrl.event.message}... Chuẩn bị giao chiến!</span>`;
+               await new Promise(r => setTimeout(r, 1000));
+               
+               if (!isAutoBattling) break;
+
+               ctx._activeThreeArena.resetCombatArena();
+               const cr = await api.request('/combat/full', { 
+                  method: 'POST', 
+                  body: JSON.stringify({ playerId: state.playerId, monsterId: dUrl.event.monsterId }) 
+               });
+               state.player = cr.player; 
+               updateSidebar();
+               
+               const isWin = cr.outcome === 'win';
+               await ctx._activeThreeArena.playCombatAnimation(isWin, cr.outcome);
+               
+               if (isWin) {
+                   statusEl.innerHTML = `<span class='text-green'>🏆 Chiến thắng! Nhận được ${cr.rewards?.xp||0} XP. Lặp lại sau 1s...</span>`;
+               } else {
+                   statusEl.innerHTML = `<span class='text-red'>💀 ${cr.outcome === 'flee' ? 'Đã bỏ chạy' : 'Thất bại'}! Vòng lặp dừng.</span>`;
+                   isAutoBattling = false;
+                   break;
+               }
+           } else if (dUrl.event && dUrl.event.type === 'monster_ambush' && dUrl.event.combatResult) {
+               // Bị quái đánh lén
+               const cr = dUrl.event.combatResult;
+               const isWin = cr.outcome === 'win';
+               statusEl.innerHTML = `<span class='text-orange'>⚠️ Bị phục kích! ${dUrl.event.message}</span>`;
+               
+               ctx._activeThreeArena.resetCombatArena();
+               await new Promise(r => setTimeout(r, 600));
+               await ctx._activeThreeArena.playCombatAnimation(isWin, cr.outcome);
+               
+               if (!isWin) {
+                   statusEl.innerHTML = `<span class='text-red'>💀 Thuộc hạ bãi! Vòng lặp dừng.</span>`;
+                   isAutoBattling = false;
+                   break;
+               }
+           } else {
+               statusEl.innerHTML = `<span class='text-blue'>♻️ ${dUrl.event.message}. Đang tiếp tục...</span>`;
+           }
+        } catch(e) {
+           statusEl.innerHTML = `<span class='text-red'>Lỗi hệ thống hoặc Database. Dừng auto.</span>`;
+           isAutoBattling = false;
+           console.error(e);
+           break;
+        }
+        await new Promise(r => setTimeout(r, 1500));
+     }
+  }
 }
 
 async function doExplore(ctx) {
@@ -498,6 +622,10 @@ async function doCombat(ctx, monsterId, instanceId = null) {
 
     const logHtml = r.log.map(l => {
       if (l.startsWith('---')) return `<div class="turn">${l}</div>`
+      if (l.includes('PHÁT HIỆN LỖI THIÊN ĐẠO') || l.includes('🌌 [PHÁT HIỆN')) return `<div class="glitch-unlock" style="background:rgba(168,85,247,0.2);border:1px solid #c084fc;padding:6px 10px;border-radius:6px;margin:4px 0;color:#f0abfc;font-weight:bold;text-shadow:0 0 10px rgba(192,132,252,0.5)">${l}</div>`
+      if (l.includes('VẾT NỨT THIÊN ĐẠO') || l.includes('Khai thác Lỗi')) return `<div class="glitch-burst" style="color:#d8b4fe;font-weight:bold;text-shadow:0 0 8px rgba(192,132,252,0.4)">${l}</div>`
+      if (l.includes('Thế Du Đạo') || l.includes('nương theo kẽ hở')) return `<div class="flow-dodge" style="color:#67e8f9;font-weight:600">${l}</div>`
+      if (l.includes('Kim Thân Bất Diệt')) return `<div class="undying-proc" style="color:#fde047;font-weight:600">${l}</div>`
       if (l.includes('linh lực') && l.includes('+')) return `<div class="energy">${l}</div>`
       if (l.includes('linh lực')) return `<div class="energy-cost">${l}</div>`
       if (l.includes('kiệt linh')) return `<div class="miss">${l}</div>`
@@ -535,6 +663,12 @@ async function doCombat(ctx, monsterId, instanceId = null) {
     const oc = outcomeMap[r.outcome] || outcomeMap['loss']
     const goldText = r.rewards?.gold ? ` · +${r.rewards.gold} 💰` : ''
     const rewardText = r.rewards ? ` · +${r.rewards.xp} XP${goldText}` : ''
+    const glitchBanner = r.weakpoint ? `
+      <div style="background:rgba(168,85,247,0.12);border-top:1px solid rgba(168,85,247,0.25);padding:6px 12px;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;">
+        <span style="color:#d8b4fe;">🌌 Vết Nứt Thiên Đạo: <strong>${r.weakpoint}</strong></span>
+        <span style="color:#fbbf24;">🔮 Thấu Triệt: <strong>${r.glitchInsight || 0}</strong></span>
+      </div>
+    ` : ''
 
     rEl.innerHTML = `
       <div class="panel">
@@ -556,6 +690,7 @@ async function doCombat(ctx, monsterId, instanceId = null) {
             </div>
           </div>
         </div>
+        ${glitchBanner}
         <div class="combat-log">${logHtml}</div>
       </div>`
 

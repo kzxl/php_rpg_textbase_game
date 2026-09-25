@@ -27,7 +27,8 @@ class PlayerRepository
             gold, nerve, max_nerve, crime_exp, crime_skills, jail_until,
             studying_node, study_ends_at, unlocked_nodes, tree_progress,
             skill_progress, discovered_nodes,
-            current_area, traveling_to, travel_arrives_at, role, realm_tier, talents
+            current_area, traveling_to, travel_arrives_at, role, realm_tier, talents,
+            glitch_insight, behavior_counters, unlocked_imprints, active_stance
         ) VALUES (
             :id, :username, :password_hash, :name, :gender, :level, :xp, :xp_to_next,
             :current_hp, :max_hp, :current_energy, :max_energy, :current_stamina, :max_stamina, :stat_points,
@@ -35,7 +36,8 @@ class PlayerRepository
             :gold, :nerve, :max_nerve, :crime_exp, :crime_skills, :jail_until,
             :studying_node, :study_ends_at, :unlocked_nodes, :tree_progress,
             :skill_progress, :discovered_nodes,
-            :current_area, :traveling_to, :travel_arrives_at, :role, :realm_tier, :talents
+            :current_area, :traveling_to, :travel_arrives_at, :role, :realm_tier, :talents,
+            :glitch_insight, :behavior_counters, :unlocked_imprints, :active_stance
         ) ON DUPLICATE KEY UPDATE
             name = VALUES(name), gender = VALUES(gender),
             level = VALUES(level), xp = VALUES(xp), xp_to_next = VALUES(xp_to_next),
@@ -56,7 +58,11 @@ class PlayerRepository
             travel_arrives_at = VALUES(travel_arrives_at),
             role = VALUES(role),
             realm_tier = VALUES(realm_tier),
-            talents = VALUES(talents)";
+            talents = VALUES(talents),
+            glitch_insight = VALUES(glitch_insight),
+            behavior_counters = VALUES(behavior_counters),
+            unlocked_imprints = VALUES(unlocked_imprints),
+            active_stance = VALUES(active_stance)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -98,6 +104,10 @@ class PlayerRepository
             'role' => $data['role'] ?? 'player',
             'realm_tier' => $data['realmTier'] ?? 1,
             'talents' => json_encode($data['talents'] ?? null),
+            'glitch_insight' => (int)($data['glitchInsight'] ?? 0),
+            'behavior_counters' => json_encode($data['behaviorCounters'] ?? []),
+            'unlocked_imprints' => json_encode($data['unlockedImprints'] ?? []),
+            'active_stance' => $data['activeStance'] ?? 'breaker',
         ]);
 
         // Phase 5: Normalized Tracking Tables
@@ -165,6 +175,10 @@ class PlayerRepository
             'role' => $row['role'] ?? 'player',
             'realmTier' => (int)($row['realm_tier'] ?? 1),
             'talents' => json_decode($row['talents'] ?? 'null', true),
+            'glitchInsight' => (int)($row['glitch_insight'] ?? 0),
+            'behaviorCounters' => json_decode($row['behavior_counters'] ?? '{}', true) ?: [],
+            'unlockedImprints' => json_decode($row['unlocked_imprints'] ?? '[]', true) ?: [],
+            'activeStance' => $row['active_stance'] ?? 'breaker',
             // skills loaded from player_skills table below
             'skills' => [],
             // equipment/inventory loaded from player_items table

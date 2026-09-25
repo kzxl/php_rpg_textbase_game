@@ -35,6 +35,7 @@ import { pageDailyQuest } from './pages/dailyquest.js'
 import { pageWorldBoss } from './pages/worldboss.js'
 import { pageGacha } from './pages/gacha.js'
 import { pageLeaderboard } from './pages/leaderboard.js'
+import { renderGlitchPage } from './pages/glitch.js'
 
 // ===== STATE =====
 const state = {
@@ -73,6 +74,22 @@ async function render() {
       localStorage.removeItem('playerId')
     }
   }
+
+  // --- DEV BYPASS: Auto login as 'admin' ---
+  if (!state.playerId) {
+    try {
+      const data = await api.login('admin', 'admin');
+      state.playerId = data.id;
+      state.player = data.player;
+      localStorage.setItem('playerId', data.id);
+      await loadGameData();
+      renderGame();
+      return;
+    } catch(e) {
+      console.warn("Dev auto-login failed. Fallback to intro UI.", e);
+    }
+  }
+  // -----------------------------------------
 
   if (!state.playerId) {
     renderIntro()
@@ -404,6 +421,10 @@ function renderGame() {
           <li class="nav-item ${state.currentPage === 'skills' || state.currentPage === 'education' ? 'active' : ''}" data-page="skills">
             <span class="icon">⚡</span> Kỹ Năng
           </li>
+          <li class="nav-item ${state.currentPage === 'glitch' ? 'active' : ''}" data-page="glitch" style="background: rgba(192, 132, 252, 0.08); border-left: 2px solid #c084fc;">
+            <span class="icon">🌌</span> Dị Biến Thiên Đạo
+            <span class="badge" style="background: #a855f7;">${p.glitchInsight || 0}</span>
+          </li>
 
 
           <li class="nav-item ${['travel','dungeon','tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
@@ -617,6 +638,7 @@ const pageMap = {
   leaderboard: pageLeaderboard,
   tiencanh: pageTienCanh,
   tower: pageTower,
+  glitch: renderGlitchPage,
 }
 
 function renderPage() {

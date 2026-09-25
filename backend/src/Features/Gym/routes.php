@@ -58,6 +58,12 @@ return function ($app) {
         elseif ($streakDays >= 7) $streakBonus = 0.25;
         elseif ($streakDays >= 3) $streakBonus = 0.10;
 
+        // Dấu ấn Bạch Thủ Khởi Gia (pauper_resolve bonus)
+        $hasPauper = in_array('pauper_resolve', $player->unlockedImprints ?? [], true);
+        if ($hasPauper) {
+            $streakBonus += 0.15;
+        }
+
         // Execute training with diminishing returns
         $errors = [];
         $totalGain = 0;
@@ -65,7 +71,7 @@ return function ($app) {
             // Diminishing returns: efficiency decreases as sessions increase
             $sessionsUsed = ($player->gymSessions ?? 0) + $i;
             $efficiency = max(0.1, 1.0 - ($sessionsUsed / $sessionCap) * 0.5);
-            $efficiency *= (1 + $streakBonus); // streak multiplier
+            $efficiency *= (1 + $streakBonus); // streak & glitch multiplier
 
             $error = $player->trainStat($stat, $energyCost);
             if ($error) {
@@ -80,6 +86,12 @@ return function ($app) {
         }
 
         $player->gymSessions = ($player->gymSessions ?? 0) + $actualCount;
+
+        // Hành vi: Rèn luyện khi 0 Linh Thạch (Bạch Thủ Khởi Gia)
+        $glitchUnlocks = [];
+        if ($player->gold === 0) {
+            $glitchUnlocks = \App\Systems\GlitchSystem::trackBehavior($player, 'zero_gold_train', $actualCount);
+        }
 
         // Update training streak (if trained today for first time)
         $yesterday = date('Y-m-d', strtotime('-1 day'));
@@ -101,8 +113,9 @@ return function ($app) {
         $usedEnergy = $actualCount * $energyCost;
         $effectiveGain = round($totalGain, 1);
         $streakLabel = $streakDays >= 30 ? '🏆 Thiết Nhân (+50%)' : ($streakDays >= 7 ? '🔥 Kiên Trì (+25%)' : ($streakDays >= 3 ? '⚡ Streak (+10%)' : ''));
+        if ($hasPauper) $streakLabel .= ($streakLabel ? ' ' : '') . '🪙 Bạch Thủ Khởi Gia (+15%)';
 
-        return jsonResponse($response, [
+        $resData = [
             'message' => "Rèn luyện +{$effectiveGain} {$statLabel} (-{$usedEnergy} linh lực)" . ($streakLabel ? " {$streakLabel}" : ''),
             'player' => $player->toArray(),
             'trained' => $actualCount,
@@ -111,6 +124,11 @@ return function ($app) {
             'sessionCap' => $sessionCap,
             'streakDays' => $player->gymStreak ?? 0,
             'streakBonus' => $streakBonus,
-        ]);
+        ];
+        if (!empty($glitchUnlocks)) {
+            $resData['glitchUnlocks'] = $glitchUnlocks;
+        }
+
+        return jsonResponse($response, $resData);
     });
 };

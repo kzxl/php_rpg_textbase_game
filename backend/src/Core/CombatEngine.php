@@ -21,8 +21,32 @@ class CombatEngine
     public array $playerStatus = [];
     public array $monsterStatus = [];
 
+    /** @var string|null Vết Nứt Thiên Đạo xuất hiện trên cơ thể quái vật ở hiệp này */
+    public ?string $activeWeakpoint = null;
+
+    /** @var array Danh sách sự kiện Glitch xảy ra trong combat */
+    public array $glitchEvents = [];
+
+    /** @var float Giảm sát thương của quái vật do bị Glitch Shock */
+    public float $monsterGlitchDebuff = 0.0;
+
     /** Max turns before stalemate */
     private const MAX_TURNS = 25;
+
+    /**
+     * Roll 1 Vết Nứt Thiên Đạo trên thân quái vật
+     */
+    public function rollWeakpoint(string $stance = 'breaker'): string
+    {
+        $weakpointCandidates = ['Đầu', 'Ngực', 'Tim', 'Cổ', 'Bụng', 'Tay', 'Chân'];
+        // Thế Phá Quy (breaker) tăng ưu tiên các điểm chí mạng (Đầu, Tim, Ngực)
+        if ($stance === 'breaker') {
+            $critCandidates = ['Đầu', 'Tim', 'Ngực', 'Đầu', 'Tim'];
+            $weakpointCandidates = array_merge($weakpointCandidates, $critCandidates);
+        }
+        $this->activeWeakpoint = $weakpointCandidates[array_rand($weakpointCandidates)];
+        return $this->activeWeakpoint;
+    }
 
     /**
      * Ngũ Hành (Five Elements) advantage cycle:
@@ -121,9 +145,33 @@ class CombatEngine
             }
         }
 
+        // Kiểm tra hành vi Liều Mạng (Near-death attack)
+        if (($attacker->currentHp / max(1, $attacker->maxHp)) < 0.15) {
+            \App\Systems\GlitchSystem::trackBehavior($attacker, 'near_death_attacks', 1);
+        }
+
+        // Tự động roll Vết Nứt Thiên Đạo nếu chưa có
+        if ($this->activeWeakpoint === null) {
+            $this->rollWeakpoint($attacker->activeStance ?? 'breaker');
+        }
+
         // Base Stat Damage
         $baseStat = $damageType === 'magical' ? ($aStats['dexterity'] * 0.8 + $aStats['strength'] * 0.2) : $aStats['strength'];
         $baseStat *= $skillMul;
+
+        // Thế Nghịch Hành (Glitch Stance): Máu càng thấp sát thương càng cao
+        if (($attacker->activeStance ?? '') === 'glitch') {
+            $missingHpRatio = max(0, 1 - ($attacker->currentHp / max(1, $attacker->maxHp)));
+            $baseStat *= (1.0 + ($missingHpRatio * 0.8));
+        }
+
+        // Dấu ấn Tử Địa Hậu Sinh (death_gambit)
+        $hasDeathGambit = in_array('death_gambit', $attacker->unlockedImprints ?? [], true);
+        if ($hasDeathGambit && ($attacker->currentHp / max(1, $attacker->maxHp)) < 0.25) {
+            $guaranteedCrit = true;
+            $lifesteal = max($lifesteal, 0.15);
+        }
+
         $totalDamage = 0;
         $finalHitLabel = 'hit';
 
@@ -134,6 +182,7 @@ class CombatEngine
             $hitChance = StatEngine::calcHitChance($aStats['speed'], $dStats['dexterity']);
             if ($this->roll(100) > $hitChance) {
                 $this->log("💨 Nhịp " . ($i+1) . ": {$attacker->name} chém hụt!");
+                \App\Systems\GlitchSystem::trackBehavior($attacker, 'miss_attack_count', 1);
                 continue;
             }
 
@@ -145,9 +194,22 @@ class CombatEngine
                 continue;
             }
 
-            // 3. Body part
+            // 3. Body part & Glitch Weakpoint check
             $bodyPart = $this->rollBodyPart();
             $partMul = $bodyPart['mul'];
+            $isWeakpointHit = ($bodyPart['name'] === $this->activeWeakpoint);
+
+            if ($isWeakpointHit) {
+                $weakpointMul = 2.5;
+                if (in_array('weakpoint_striker', $attacker->unlockedImprints ?? [], true)) {
+                    $weakpointMul += 0.5;
+                }
+                if (($attacker->activeStance ?? '') === 'breaker') {
+                    $weakpointMul *= 1.2;
+                }
+                $partMul = max($partMul, $weakpointMul);
+            }
+
             $currentDamage = $baseStat * $partMul;
 
             // Execute Scaling (Thiên Cấp)
@@ -163,8 +225,11 @@ class CombatEngine
                 $finalHitLabel = 'crit';
             }
 
-            // 5. Defense reduction
+            // 5. Defense reduction & Dấu ấn Vạn Vật Chi Lý (monster_insight)
             $def = $ignoreDefense ? 0 : $dStats['defense'];
+            if (in_array('monster_insight', $attacker->unlockedImprints ?? [], true)) {
+                $def = (int)round($def * 0.85);
+            }
             $reduction = StatEngine::calcDamageReduction($def);
             $finalDamage = max(0, (int) round($currentDamage * (1 - $reduction / 100)));
 
@@ -197,15 +262,31 @@ class CombatEngine
             if ($finalDamage === 0) {
                 $this->log("🛡 Nhịp " . ($i+1) . ": Đánh vào {$bodyPart['name']} nhưng bị chặn!");
             } else {
-                $icon = $isCrit ? '💥' : ($ignoreDefense ? '🌌' : '⚔️');
+                $icon = $isWeakpointHit ? '🌌' : ($isCrit ? '💥' : ($ignoreDefense ? '⚡' : '⚔️'));
                 $critText = $isCrit ? ' CHÍNH MẠNG!' : '';
                 $ignoreText = $ignoreDefense ? ' [Xuyên Giáp]' : '';
-                $this->log("{$icon} Nhịp " . ($i+1) . ": Trúng {$bodyPart['name']} — {$finalDamage} sát thương{$critText}{$ignoreText}");
+                $weakpointText = $isWeakpointHit ? ' [VẾT NỨT THIÊN ĐẠO]' : '';
+                
+                $this->log("{$icon} Nhịp " . ($i+1) . ": Trúng {$bodyPart['name']} — {$finalDamage} sát thương{$critText}{$ignoreText}{$weakpointText}");
+                
+                // Khai thác Lỗi Thiên Đạo khi trúng Weakpoint
+                if ($isWeakpointHit) {
+                    $attacker->glitchInsight = ($attacker->glitchInsight ?? 0) + 5;
+                    $this->monsterGlitchDebuff = 0.25; // Giảm 25% dmg lượt sau của quái
+                    \App\Systems\GlitchSystem::trackBehavior($attacker, 'weakpoint_hits', 1);
+                    $this->glitchEvents[] = [
+                        'type' => 'weakpoint_burst',
+                        'part' => $bodyPart['name'],
+                        'damage' => $finalDamage,
+                        'insightGained' => 5
+                    ];
+                    $this->log("🌀 Khai thác Lỗi Thiên Đạo! Quy luật không gian vỡ vụn (+5 Thấu Triệt, Quái bị Nghịch Mạch giảm 25% sát thương)!");
+                }
                 
                 $defender->takeDamage($finalDamage);
                 $totalDamage += $finalDamage;
 
-                // Lifesteal (Huyền Cấp)
+                // Lifesteal (Huyền Cấp & Tử Địa Hậu Sinh)
                 if ($lifesteal > 0) {
                     $heal = (int)($finalDamage * $lifesteal);
                     $attacker->currentHp = min($attacker->maxHp, $attacker->currentHp + $heal);
@@ -253,13 +334,27 @@ class CombatEngine
         // Dodge
         $dodgeChance = StatEngine::calcDodgeChance($dStats['dexterity'], $aStats['speed']);
         if ($this->roll(100) <= $dodgeChance) {
-            $this->log("🌀 {$defender->name} né được!");
+            // Thế Du Đạo (flow stance): Né hồi linh lực & phản chấn
+            if (($defender->activeStance ?? '') === 'flow') {
+                $defender->currentEnergy = min($defender->maxEnergy, $defender->currentEnergy + 6);
+                $flowReflect = max(1, (int)round($aStats['strength'] * 0.25));
+                $attacker->takeDamage($flowReflect);
+                $this->log("🌀 [Thế Du Đạo] {$defender->name} nương theo kẽ hở quy luật né đòn, hồi 6 Linh Lực & phản chấn {$flowReflect} sát thương!");
+            } else {
+                $this->log("🌀 {$defender->name} né được!");
+            }
             return $this->playerResult('dodge', 0, $defender);
         }
 
         // Body part + damage
         $bodyPart = $this->rollBodyPart();
         $baseDamage = $aStats['strength'] * $bodyPart['mul'];
+
+        // Glitch Shock Debuff từ lượt đánh trúng Vết Nứt trước
+        if ($this->monsterGlitchDebuff > 0) {
+            $baseDamage *= (1.0 - $this->monsterGlitchDebuff);
+            $this->monsterGlitchDebuff = 0.0; // Reset debuff
+        }
 
         // Crit (monsters: 5% + dex*0.1)
         $isCrit = false;
@@ -271,6 +366,13 @@ class CombatEngine
 
         $reduction = StatEngine::calcDamageReduction($dStats['defense']);
         $finalDamage = max(0, (int) round($baseDamage * (1 - $reduction / 100)));
+
+        // Dấu ấn Kim Thân Bất Diệt (undying_flesh): HP < 20% giảm 30% sát thương
+        $hasUndying = in_array('undying_flesh', $defender->unlockedImprints ?? [], true);
+        if ($hasUndying && ($defender->currentHp / max(1, $defender->maxHp)) < 0.20) {
+            $finalDamage = (int)round($finalDamage * 0.70);
+            $this->log("🛡️ [Kim Thân Bất Diệt] Quy luật chai sạn kích hoạt, triệt tiêu 30% sát thương!");
+        }
 
         if ($finalDamage === 0) {
             $this->log("🛡 {$defender->name} chặn hoàn toàn đòn vào {$bodyPart['name']}!");
@@ -396,6 +498,9 @@ class CombatEngine
                 }
             }
 
+            // Roll Vết Nứt Thiên Đạo xuất hiện ở hiệp này
+            $this->rollWeakpoint($player->activeStance ?? 'breaker');
+
             // Player attacks
             $this->attack($player, $monster, $skillToUse);
             $allLogs = array_merge($allLogs, $this->log);
@@ -488,10 +593,18 @@ class CombatEngine
                     $allLogs[] = "🎉 Đột phá! Cấp {$player->level}!";
                 }
                 $rewards = ['xp' => $xp, 'gold' => $goldReward, 'prevLevel' => $prevLevel, 'monsterLevel' => $monster->level ?? 1];
+                $unlocked = \App\Systems\GlitchSystem::trackBehavior($player, 'monster_kills', 1);
+                foreach ($unlocked as $u) {
+                    $allLogs[] = "🌌 [PHÁT HIỆN LỖI THIÊN ĐẠO] Mở khóa Dấu Ấn: {$u['name']} ({$u['title']})!";
+                }
                 break;
 
             case 'flee':
                 $allLogs[] = "🚪 Thoát thân thành công. Không nhận thưởng.";
+                $unlocked = \App\Systems\GlitchSystem::trackBehavior($player, 'flee_count', 1);
+                foreach ($unlocked as $u) {
+                    $allLogs[] = "🌌 [PHÁT HIỆN LỖI THIÊN ĐẠO] Mở khóa Dấu Ấn: {$u['name']} ({$u['title']})!";
+                }
                 break;
 
             case 'stalemate':
@@ -514,6 +627,10 @@ class CombatEngine
                 $player->hospitalize($hospDuration);
                 $allLogs[] = "💀 {$player->name} đã ngã xuống...";
                 $allLogs[] = "🏥 Tịnh dưỡng {$hospDuration}s";
+                $unlocked = \App\Systems\GlitchSystem::trackBehavior($player, 'hospital_count', 1);
+                foreach ($unlocked as $u) {
+                    $allLogs[] = "🌌 [PHÁT HIỆN LỖI THIÊN ĐẠO] Mở khóa Dấu Ấn: {$u['name']} ({$u['title']})!";
+                }
                 break;
         }
 
@@ -537,6 +654,10 @@ class CombatEngine
             'monster' => $monster->toArray(),
             'rewards' => $rewards,
             'log' => $allLogs,
+            'weakpoint' => $this->activeWeakpoint,
+            'glitchEvents' => $this->glitchEvents,
+            'glitchInsight' => $player->glitchInsight,
+            'activeStance' => $player->activeStance,
         ];
     }
 
