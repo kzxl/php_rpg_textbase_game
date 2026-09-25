@@ -257,6 +257,12 @@ class Player
         // Gender bonuses
         $mods = array_merge($mods, StatEngine::getGenderModifiers($this->gender));
 
+        // Level HP bonus: Mỗi cấp độ tăng thêm 5 Max HP cơ bản
+        $levelHpBonus = max(0, ($this->level - 1) * 5);
+        if ($levelHpBonus > 0) {
+            $mods[] = new Modifier('flat', 'maxHp', (float)$levelHpBonus, null, 'level_hp');
+        }
+
         // Allocated stat points as flat modifiers
         foreach ($this->allocatedStats as $stat => $points) {
             if ($points > 0) {
@@ -876,14 +882,13 @@ class Player
          return $this->currentHp > 0;
      }
 
-     private function recalcDerived(): void
+     public function recalcDerived(): void
      {
          $stats = $this->getFinalStats();
-         // Mỗi cấp độ tăng thêm 5 Max HP cơ bản
-         $levelHpBonus = max(0, ($this->level - 1) * 5);
-         $this->maxHp = (int)($stats['maxHp'] + $levelHpBonus);
+         $this->maxHp = (int)$stats['maxHp'];
          $this->maxEnergy = (int)($stats['maxEnergy'] ?? 50);
          $this->currentEnergy = min($this->currentEnergy, $this->getUsableEnergy());
+         $this->currentHp = min($this->currentHp, $this->maxHp);
          
          // Luôn luôn đảm bảo xpToNext chuẩn với công thức cày cuốc mới nhất 
          $nextXp = (float)(100 * pow($this->level, 2.2));
@@ -896,6 +901,7 @@ class Player
 
     public function toArray(): array
     {
+        $this->recalcDerived();
         $finalStats = $this->getFinalStats();
         return [
             'id' => $this->id,
@@ -907,9 +913,9 @@ class Player
             'xp' => $this->xp,
             'xpToNext' => $this->xpToNext,
             'currentHp' => $this->currentHp,
-            'maxHp' => $this->maxHp,
+            'maxHp' => (int)$finalStats['maxHp'],
             'currentEnergy' => $this->currentEnergy,
-            'maxEnergy' => $this->maxEnergy,
+            'maxEnergy' => (int)($finalStats['maxEnergy'] ?? 50),
             'currentStamina' => $this->currentStamina,
             'maxStamina' => $this->maxStamina,
             'statPoints' => $this->statPoints,
@@ -1062,16 +1068,6 @@ class Player
         // Restore medicines
         $player->medicines = $data['medicines'] ?? [];
 
-        // Recalculate maxHp/maxEnergy after restoring all equipment/stats
-        $player->recalcDerived();
-        $player->currentHp = $data['currentHp'] ?? $player->maxHp;
-        $player->currentEnergy = $data['currentEnergy'] ?? $player->maxEnergy;
-        $player->maxStamina = (int)($data['maxStamina'] ?? $data['max_stamina'] ?? 100);
-        $player->currentStamina = isset($data['currentStamina']) ? (int)$data['currentStamina'] : (isset($data['current_stamina']) ? (int)$data['current_stamina'] : $player->maxStamina);
-        $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
-        $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
-        $player->lastHpRegen = $data['lastHpRegen'] ?? time();
-
         // Phase 1
         $player->gold = $data['gold'] ?? 0;
         $player->nerve = $data['nerve'] ?? 15;
@@ -1128,6 +1124,32 @@ class Player
         $player->tribulationRecords = is_string($data['tribulationRecords'] ?? $data['tribulation_records'] ?? null)
             ? (json_decode($data['tribulationRecords'] ?? $data['tribulation_records'], true) ?: [])
             : ($data['tribulationRecords'] ?? $data['tribulation_records'] ?? []);
+        $player->hospitalUntil = $data['hospitalUntil'] ?? 0;
+        $player->medCooldownUntil = $data['medCooldownUntil'] ?? 0;
+        $player->lastHpRegen = $data['lastHpRegen'] ?? time();
+        $player->maxStamina = (int)($data['maxStamina'] ?? $data['max_stamina'] ?? 100);
+        $player->currentStamina = isset($data['currentStamina']) ? (int)$data['currentStamina'] : (isset($data['current_stamina']) ? (int)$data['current_stamina'] : $player->maxStamina);
+
+        // Recalculate maxHp/maxEnergy after all realmTier, talents, auras, equipment, etc. are restored
+        $player->recalcDerived();
+
+        // Restore HP: If saved HP was full health (or not set), keep full health with new maxHp
+        $savedHp = isset($data['currentHp']) ? (int)$data['currentHp'] : $player->maxHp;
+        $savedMaxHp = isset($data['maxHp']) ? (int)$data['maxHp'] : $player->maxHp;
+        if ($savedHp >= $savedMaxHp || !isset($data['currentHp'])) {
+            $player->currentHp = $player->maxHp;
+        } else {
+            $player->currentHp = min($player->maxHp, $savedHp);
+        }
+
+        // Restore Energy: If saved energy was full usable energy (or not set), keep full usable energy
+        $savedEnergy = isset($data['currentEnergy']) ? (int)$data['currentEnergy'] : $player->getUsableEnergy();
+        $savedMaxEnergy = isset($data['maxEnergy']) ? (int)$data['maxEnergy'] : $player->maxEnergy;
+        if ($savedEnergy >= $savedMaxEnergy || !isset($data['currentEnergy'])) {
+            $player->currentEnergy = $player->getUsableEnergy();
+        } else {
+            $player->currentEnergy = min($player->getUsableEnergy(), $savedEnergy);
+        }
 
         return $player;
     }

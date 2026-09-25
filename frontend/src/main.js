@@ -325,10 +325,12 @@ function renderPlayerBuffs(p) {
 
 function renderGame() {
   const p = state.player
-  if (!p) return
-  const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
+  const maxHp = p.stats?.maxHp ?? p.maxHp ?? 100
+  const currentHp = Math.min(maxHp, p.currentHp)
+  const hpPct = maxHp > 0 ? Math.min(100, Math.max(0, (currentHp / maxHp) * 100)) : 0
   const stPct = p.maxStamina > 0 ? Math.max(0, (p.currentStamina / p.maxStamina) * 100) : 0
-  const usableEnergy = p.usableEnergy ?? Math.max(0, p.maxEnergy - (p.reservedEnergy ?? 0))
+  const maxEnergy = p.stats?.maxEnergy ?? p.maxEnergy ?? 50
+  const usableEnergy = p.usableEnergy ?? Math.max(0, maxEnergy - (p.reservedEnergy ?? 0))
   const resPct = p.reservationPct ?? 0
   const enPct = usableEnergy > 0 ? Math.min(100, Math.max(0, (p.currentEnergy / usableEnergy) * 100)) : 0
   const xpPct = (p.xpToNext && p.xpToNext > 0) ? Math.min(100, Math.max(0, ((p.xp || 0) / p.xpToNext) * 100)) : 0
@@ -376,8 +378,8 @@ function renderGame() {
             <div class="bar-label">
               <span>❤️ Khí Huyết</span>
               <span>
-                ${p.currentHp}/${p.maxHp}
-                ${p.currentHp < p.maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
+                ${currentHp}/${maxHp}
+                ${currentHp < maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
@@ -720,8 +722,11 @@ function renderPage() {
 // ===== SIDEBAR UPDATE (partial, no full re-render) =====
 function updateSidebar() {
   const p = state.player; if (!p) return
-  const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
-  const usableEnergy = p.usableEnergy ?? Math.max(0, p.maxEnergy - (p.reservedEnergy ?? 0))
+  const maxHp = p.stats?.maxHp ?? p.maxHp ?? 100
+  const currentHp = Math.min(maxHp, p.currentHp)
+  const hpPct = maxHp > 0 ? Math.min(100, Math.max(0, (currentHp / maxHp) * 100)) : 0
+  const maxEnergy = p.stats?.maxEnergy ?? p.maxEnergy ?? 50
+  const usableEnergy = p.usableEnergy ?? Math.max(0, maxEnergy - (p.reservedEnergy ?? 0))
   const resPct = p.reservationPct ?? 0
   const enPct = usableEnergy > 0 ? Math.min(100, Math.max(0, (p.currentEnergy / usableEnergy) * 100)) : 0
 
@@ -738,8 +743,8 @@ function updateSidebar() {
         <div class="bar-label">
           <span>❤️ Khí Huyết</span>
           <span>
-            ${p.currentHp}/${p.maxHp}
-            ${p.currentHp < p.maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '(Không tự hồi)'}</span>` : ''}
+            ${currentHp}/${maxHp}
+            ${currentHp < maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '(Không tự hồi)'}</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
