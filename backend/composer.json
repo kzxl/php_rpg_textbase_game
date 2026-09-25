@@ -10,7 +10,10 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "src/",
+            "LiteApi\\": "../../../../php/libs/LiteApi/src/",
+            "LiteValidate\\": "../../../../php/libs/LiteValidate/src/",
+            "LiteORM\\": "../../../../php/libs/LiteORM/src/"
         }
     },
     "scripts": {

@@ -27,6 +27,9 @@ class ComposerStaticInit3f1f5b1f5b9e04604fc31e87c7c66d74
         ),
         'L' => 
         array (
+            'LiteValidate\\' => 13,
+            'LiteORM\\' => 8,
+            'LiteApi\\' => 8,
             'Laravel\\SerializableClosure\\' => 28,
         ),
         'I' => 
@@ -75,6 +78,18 @@ class ComposerStaticInit3f1f5b1f5b9e04604fc31e87c7c66d74
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
+        ),
+        'LiteValidate\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/../../../../php/libs/LiteValidate/src',
+        ),
+        'LiteORM\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/../../../../php/libs/LiteORM/src',
+        ),
+        'LiteApi\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/../../../../php/libs/LiteApi/src',
         ),
         'Laravel\\SerializableClosure\\' => 
         array (

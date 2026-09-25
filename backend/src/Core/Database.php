@@ -10,6 +10,11 @@ class Database
 {
     private static ?\PDO $instance = null;
 
+    public static function setInstance(\PDO $pdo): void
+    {
+        self::$instance = $pdo;
+    }
+
     public static function connect(): \PDO
     {
         if (self::$instance !== null) {
