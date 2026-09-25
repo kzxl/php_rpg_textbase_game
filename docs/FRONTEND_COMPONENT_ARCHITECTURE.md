@@ -77,10 +77,10 @@ To eliminate copy-pasted UI fragments, standardized atom components were introdu
 
 ---
 
-## 4. Feature Modularization: Inventory Case Study
+## 4. Feature Modularization: Implemented Feature Packages
 
-The monolithic `frontend/src/pages/inventory.js` was decomposed into a modular package under `frontend/src/pages/inventory/`:
-
+### 4.1 Càn Khôn Túi: Inventory Package (`frontend/src/pages/inventory/`)
+The monolithic `frontend/src/pages/inventory.js` was decomposed into a modular package:
 ```
 frontend/src/pages/
 ├── inventory.js                <-- Backward-compatible bridge entry point
@@ -94,23 +94,37 @@ frontend/src/pages/
     └── index.js                <-- Clean barrel export
 ```
 
-### 4.1 Backward Compatibility Guarantee
-Existing code importing from `frontend/src/pages/inventory.js` continues to work with zero modification:
+### 4.2 Lò Tạo Hóa: Alchemy & Forging Package (`frontend/src/pages/alchemy/`)
+The monolithic `frontend/src/pages/alchemy.js` (659 lines) was partitioned into a dedicated package:
+```
+frontend/src/pages/
+├── alchemy.js                  <-- Backward-compatible bridge entry point
+└── alchemy/
+    ├── constants.js            <-- Rarity colors, slot icons, talisman recipes & enhance cost formulas
+    ├── PillFurnace.js          <-- Herb inventory chips, recipe accordions, craft rate bonuses
+    ├── EquipmentForge.js       <-- 16-recipe forging across 5 tiers with category filter
+    ├── EnhancementAltar.js     <-- +1 to +12 equipment enhancement, success meter & risk protection
+    ├── TalismanInscriber.js    <-- Currency & affix modification (Tẩy Tủy, Hỗn Chú, Thiên Mệnh, Thăng Cấp)
+    ├── AlchemyPage.js          <-- Coordinator managing 4 pillars, mastery XP & skill buffs
+    └── index.js                <-- Clean barrel export
+```
+
+### 4.3 Backward Compatibility Guarantee
+Existing code importing from `frontend/src/pages/inventory.js` or `frontend/src/pages/alchemy.js` continues to work with zero modification:
 ```javascript
-// frontend/src/pages/inventory.js
-import { InventoryPage, MATERIAL_FALLBACK_MAP, classifyMaterial } from './inventory/index.js'
+// frontend/src/pages/alchemy.js
+import { AlchemyPage } from './alchemy/index.js'
+export * from './alchemy/index.js'
 
-export { MATERIAL_FALLBACK_MAP, classifyMaterial }
+let _activeAlchemyInstance = null
 
-let _activeInventoryInstance = null
-
-export function pageInventory(el, ctx) {
-  if (_activeInventoryInstance) {
-    _activeInventoryInstance.unmount()
-    _activeInventoryInstance = null
+export async function pageAlchemy(el, ctx) {
+  if (_activeAlchemyInstance) {
+    _activeAlchemyInstance.unmount()
+    _activeAlchemyInstance = null
   }
-  _activeInventoryInstance = new InventoryPage({ ctx })
-  _activeInventoryInstance.mount(el)
+  _activeAlchemyInstance = new AlchemyPage({ ctx })
+  _activeAlchemyInstance.mount(el)
 }
 ```
 
@@ -118,7 +132,7 @@ export function pageInventory(el, ctx) {
 
 ## 5. Quality Assurance & Verification Metrics
 
-- **Vite Compilation**: `npm run build` completed in **742ms** with **0 errors and 0 warnings**.
+- **Vite Compilation**: `npm run build` completed in **854ms** with **54 modules transformed, 0 errors and 0 warnings**.
 - **E2E Independent Test Suite**: **130/130 tests passing (100%)** across 4 tiers (Feature coverage, boundaries, pairwise combinations, real-world workflows).
 - **Adversarial Stress Suite**: **116/116 checks passing (100%)** (55 Stat Comparison deltas + 61 Unequip & Capacity invariant checks).
 - **Total Test Coverage**: **246 test assertions verified**.
@@ -127,19 +141,15 @@ export function pageInventory(el, ctx) {
 
 ## 6. Migration Roadmap for Remaining Monoliths
 
-With the `LiteUI` framework established and verified in `inventory`, the remaining god files will follow the identical partition pattern:
+With the `LiteUI` framework established and verified in both `inventory` and `alchemy`, the remaining god files will follow the identical partition pattern:
 
-1. **`alchemy.js` -> `frontend/src/pages/alchemy/`**:
-   - `PillFurnace.js`: Pill crafting, heat adjustment, recipe requirements.
-   - `EquipmentForge.js`: 16-recipe forging across 5 tiers.
-   - `EnhancementAltar.js`: +1 to +12 equipment enhancement mechanics.
-   - `AlchemyPage.js`: Coordinator with tab switcher.
-2. **`combat.js` -> `frontend/src/pages/combat/`**:
+1. **`combat.js` -> `frontend/src/pages/combat/`**:
    - `CombatArenaView.js`: 2D battlefield layout and HP/MP meters.
    - `CombatLogView.js`: Scrollable, color-coded combat round logs.
    - `CombatActionPanel.js`: Attack, skill shortcuts, medicine usage.
    - `CombatCoordinator.js`: Turn resolution and state machine.
-3. **`skills.js` -> `frontend/src/pages/skills/`**:
+2. **`skills.js` -> `frontend/src/pages/skills/`**:
    - `SkillTreeView.js`: Martial arts progression.
    - `BreakthroughView.js`: Realm advancement and tribulation readiness.
    - `SpiritualRootsView.js`: Elemental root affinities and talent modifiers.
+
