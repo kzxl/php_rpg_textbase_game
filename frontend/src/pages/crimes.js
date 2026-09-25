@@ -82,7 +82,7 @@ export function pageCrimes(el, ctx) {
         ${catCrimes.map(c => {
           const cs = p.crimeSkills?.[c.id] ?? 0
           const locked = cs < (c.minSkill ?? 0)
-          const canDo = !locked && (p.nerve ?? 0) >= c.nerveCost
+          const canDo = !locked && (p.currentStamina ?? 100) >= (c.nerveCost ?? 2)
           const specials = c.special || []
           const successEst = Math.min(95, c.baseSuccessRate + cs * 0.5)
           return `
@@ -95,7 +95,7 @@ export function pageCrimes(el, ctx) {
                 </div>
                 <div class="item-desc">${c.description}</div>
                 <div class="item-meta" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
-                  <span>⚡ ${c.nerveCost} Khí</span>
+                  <span>🏃 ${c.nerveCost ?? 2} Thể Lực</span>
                   <span>💰 ${c.rewards.goldMin}-${c.rewards.goldMax}</span>
                   <span style="color:${successEst >= 60 ? 'var(--green)' : successEst >= 40 ? 'var(--orange)' : 'var(--red)'}">🎯 ${Math.round(successEst)}%</span>
                   ${locked ? `<span style="color:var(--red)">Cần Skill ${c.minSkill}</span>` : `<span>📊 ${cs}/100</span>`}
@@ -131,7 +131,7 @@ export function pageCrimes(el, ctx) {
         <div class="bar-track">
           <div class="bar-fill" style="width:${cePct}%; background:var(--gold);"></div>
         </div>
-        <div class="text-dim mt-sm" style="font-size:12px;">Cần <strong>${ceNeeded - ceCurrentLevel} EXP</strong> nữa để tăng giới hạn Nghịch Khí. (Giới hạn hiện tại: ${p.maxNerve || 15})</div>
+        <div class="text-dim mt-sm" style="font-size:12px;">Cần <strong>${ceNeeded - ceCurrentLevel} EXP</strong> nữa để tăng cấp Danh Vọng Hắc Đạo.</div>
       </div>
     </div>
   `
@@ -139,7 +139,7 @@ export function pageCrimes(el, ctx) {
   el.innerHTML = `
     <div class="page-header">
       <h1>💀 Nghịch Thiên – Phá Luật</h1>
-      <div class="actions"><span class="text-dim">💀 ${p.nerve ?? 0}/${p.maxNerve ?? 15} Nghịch Khí · 💰 ${p.gold ?? 0} Linh Thạch</span></div>
+      <div class="actions"><span class="text-dim">🏃 ${p.currentStamina ?? 100}/${p.maxStamina ?? 100} Thể Lực · 💰 ${p.gold ?? 0} Linh Thạch</span></div>
     </div>
     ${ceHtml}
     ${panelsHtml}`

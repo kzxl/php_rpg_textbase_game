@@ -1089,15 +1089,15 @@ class Player
     public function commitCrime(array $crime): array
     {
         if ($this->isJailed()) return ['outcome' => 'jailed', 'message' => 'Đang bị giam! Không thể phạm tội.'];
-        if ($this->isHospitalized()) return ['outcome' => 'hospital', 'message' => 'Đang tịnh dưỡng! Không thể phạm tội.'];
-        if ($this->nerve < $crime['nerveCost']) return ['outcome' => 'no_nerve', 'message' => 'Không đủ Nghịch Khí!'];
+        $cost = $crime['nerveCost'] ?? 2;
+        if ($this->currentStamina < $cost) return ['outcome' => 'no_stamina', 'message' => 'Không đủ Thể Lực!'];
 
         $cs = $this->crimeSkills[$crime['id']] ?? 0;
         if ($cs < ($crime['minSkill'] ?? 0)) {
             return ['outcome' => 'locked', 'message' => "Cần Crime Skill {$crime['minSkill']} để thực hiện!"];
         }
 
-        $this->nerve -= $crime['nerveCost'];
+        $this->currentStamina -= $cost;
 
         // Category bonus: skills in same category boost success
         $categoryBonus = 0;
@@ -1234,9 +1234,9 @@ class Player
     public function escapeJail(): array
     {
         if (!$this->isJailed()) return ['success' => false, 'message' => 'Không bị giam!'];
-        if ($this->nerve < 3) return ['success' => false, 'message' => 'Cần 3 Nghịch Khí để vượt ngục!'];
+        if ($this->currentStamina < 10) return ['success' => false, 'message' => 'Cần 10 Thể Lực để vượt ngục!'];
 
-        $this->nerve -= 3;
+        $this->currentStamina -= 10;
         $dex = $this->getFinalStats()['dexterity'] ?? 10;
         $escapeChance = min(60, 20 + $dex * 0.5);
 

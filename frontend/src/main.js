@@ -328,7 +328,7 @@ function renderGame() {
   const hpPct = Math.max(0, (p.currentHp / p.maxHp) * 100)
   const stPct = p.maxStamina > 0 ? Math.max(0, (p.currentStamina / p.maxStamina) * 100) : 0
   const enPct = p.maxEnergy > 0 ? Math.max(0, (p.currentEnergy / p.maxEnergy) * 100) : 0
-  const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
+  const xpPct = (p.xpToNext && p.xpToNext > 0) ? Math.min(100, Math.max(0, ((p.xp || 0) / p.xpToNext) * 100)) : 0
 
   const currentAreaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
   const areaName = currentAreaData ? currentAreaData.name : 'Khám Phá'
@@ -400,8 +400,11 @@ function renderGame() {
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
           </div>
           <div class="sidebar-bar" style="margin-top:4px">
-            <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}${(p.nerve ?? 0) < (p.maxNerve ?? 15) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+1/5min</span>` : ''}</span></div>
-            <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
+            <div class="bar-label">
+              <span>✨ Tu Vi (Cấp ${p.level})</span>
+              <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:10px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
+            </div>
+            <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
           </div>
           <div class="sidebar-gold" style="padding-bottom:4px">
             <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:6px">💎 ${p.gold ?? 0} Linh Thạch</div>
@@ -724,7 +727,7 @@ function updateSidebar() {
   const sp = document.querySelector('.sidebar-player')
   if (sp) {
     const stPct = p.maxStamina > 0 ? Math.max(0, (p.currentStamina / p.maxStamina) * 100) : 0
-    const nervePct = (p.maxNerve ?? 15) > 0 ? Math.max(0, ((p.nerve ?? 0) / (p.maxNerve ?? 15)) * 100) : 0
+    const xpPct = (p.xpToNext && p.xpToNext > 0) ? Math.min(100, Math.max(0, ((p.xp || 0) / p.xpToNext) * 100)) : 0
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
       <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
@@ -761,8 +764,11 @@ function updateSidebar() {
         <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
       </div>
       <div class="sidebar-bar" style="margin-top:4px">
-        <div class="bar-label"><span>💀 Nghịch Khí</span><span>${p.nerve ?? 0}/${p.maxNerve ?? 15}</span></div>
-        <div class="bar-track"><div class="bar-fill nerve" style="width:${nervePct}%"></div></div>
+        <div class="bar-label">
+          <span>✨ Tu Vi (Cấp ${p.level})</span>
+          <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:10px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
+        </div>
+        <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
       </div>
       <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>`
   }
