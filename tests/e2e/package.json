@@ -1,0 +1,9 @@
+{
+  "name": "rpg-engine-e2e-tests",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Opaque-Box E2E Testing Suite for Nghịch Thiên Ký RPG Engine",
+  "scripts": {
+    "test": "node run_tests.js"
+  }
+}

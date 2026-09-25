@@ -612,9 +612,9 @@ class Player
     }
 
     /**
-     * Train a stat in the gym. Costs energy, directly increases stat.
+     * Train a stat in the gym. Costs stamina, directly increases stat.
      */
-    public function trainStat(string $stat, int $energyCost = 5): ?string
+    public function trainStat(string $stat, int $staminaCost = 5): ?string
     {
         if (!in_array($stat, StatEngine::BATTLE_STATS)) {
             return "Chỉ số không hợp lệ.";
@@ -622,11 +622,11 @@ class Player
         if ($this->isHospitalized()) {
             return "Đang tịnh dưỡng, không thể rèn luyện!";
         }
-        if ($this->currentEnergy < $energyCost) {
-            return "Không đủ linh lực! Cần {$energyCost}.";
+        if ($this->currentStamina < $staminaCost) {
+            return "Không đủ Thể Lực! Cần {$staminaCost}.";
         }
 
-        $this->currentEnergy -= $energyCost;
+        $this->currentStamina -= $staminaCost;
 
         // Gain = base 1, multiplied by talent aptitude
         $talentMul = $this->talents[$stat] ?? 1.0;

@@ -16,7 +16,7 @@ return function ($app) {
         $body = $request->getParsedBody();
         $stat = $body['stat'] ?? '';
         $count = min(max((int)($body['count'] ?? 1), 1), 100); // 1-100 lần
-        $energyCost = 5;
+        $staminaCost = 5;
 
         // Session cap based on realm tier
         $sessionCap = 20 + ($player->realmTier * 5);
@@ -37,9 +37,9 @@ return function ($app) {
         }
 
         // Check max trainable
-        $maxTrainable = (int)floor($player->currentEnergy / $energyCost);
+        $maxTrainable = (int)floor(($player->currentStamina ?? 100) / $staminaCost);
         if ($maxTrainable <= 0) {
-            return jsonResponse($response, ['error' => 'Không đủ linh lực để rèn luyện!'], 400);
+            return jsonResponse($response, ['error' => 'Không đủ thể lực để rèn luyện!'], 400);
         }
         $remainingSessions = max(0, $sessionCap - ($player->gymSessions ?? 0));
         if ($remainingSessions <= 0) {
@@ -73,7 +73,7 @@ return function ($app) {
             $efficiency = max(0.1, 1.0 - ($sessionsUsed / $sessionCap) * 0.5);
             $efficiency *= (1 + $streakBonus); // streak & glitch multiplier
 
-            $error = $player->trainStat($stat, $energyCost);
+            $error = $player->trainStat($stat, $staminaCost);
             if ($error) {
                 $errors[] = $error;
                 break;
@@ -110,13 +110,13 @@ return function ($app) {
 
         $statNames = ['strength' => 'Sức mạnh', 'speed' => 'Tốc độ', 'dexterity' => 'Khéo léo', 'defense' => 'Phòng thủ'];
         $statLabel = $statNames[$stat] ?? $stat;
-        $usedEnergy = $actualCount * $energyCost;
+        $usedStamina = $actualCount * $staminaCost;
         $effectiveGain = round($totalGain, 1);
         $streakLabel = $streakDays >= 30 ? '🏆 Thiết Nhân (+50%)' : ($streakDays >= 7 ? '🔥 Kiên Trì (+25%)' : ($streakDays >= 3 ? '⚡ Streak (+10%)' : ''));
         if ($hasPauper) $streakLabel .= ($streakLabel ? ' ' : '') . '🪙 Bạch Thủ Khởi Gia (+15%)';
 
         $resData = [
-            'message' => "Rèn luyện +{$effectiveGain} {$statLabel} (-{$usedEnergy} linh lực)" . ($streakLabel ? " {$streakLabel}" : ''),
+            'message' => "Rèn luyện +{$effectiveGain} {$statLabel} (-{$usedStamina} thể lực)" . ($streakLabel ? " {$streakLabel}" : ''),
             'player' => $player->toArray(),
             'trained' => $actualCount,
             'effectiveGain' => $effectiveGain,

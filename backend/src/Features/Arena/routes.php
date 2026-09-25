@@ -23,16 +23,15 @@ return function ($app) {
     ];
 
     $getRank = function(int $rating) use ($RANKS) {
-        $rank = $RANKS[0];
-        foreach ($RANKS as $r) {
-            if ($rating >= $r['min']) $rank = $r;
+        $rankIdx = 0;
+        foreach ($RANKS as $idx => $r) {
+            if ($rating >= $r['min']) $rankIdx = $idx;
         }
+        $rank = $RANKS[$rankIdx];
         $rank['rating'] = $rating;
-        // Next rank threshold
-        $nextIdx = array_search($rank, $RANKS);
-        $rank['nextThreshold'] = isset($RANKS[$nextIdx + 1]) ? $RANKS[$nextIdx + 1]['min'] : null;
+        $rank['nextThreshold'] = isset($RANKS[$rankIdx + 1]) ? $RANKS[$rankIdx + 1]['min'] : null;
         $rank['progress'] = $rank['nextThreshold'] 
-            ? round(($rating - $rank['min']) / ($rank['nextThreshold'] - $rank['min']) * 100) 
+            ? (int)max(0, min(100, round(($rating - $rank['min']) / ($rank['nextThreshold'] - $rank['min']) * 100))) 
             : 100;
         return $rank;
     };
@@ -79,7 +78,7 @@ return function ($app) {
         // Potential opponents (5 near your ELO for selection)
         $myRating = (int)($arena['rating'] ?? 1000);
         $oppStmt = $pdo->prepare("
-            SELECT a.player_id, a.rating, p.name, p.level
+            SELECT a.player_id, a.rating, a.streak, p.name, p.level
             FROM pvp_arena a JOIN players p ON p.id = a.player_id
             WHERE a.player_id != ? AND ABS(a.rating - ?) <= 200
             ORDER BY RAND() LIMIT 5
@@ -88,6 +87,7 @@ return function ($app) {
         $opponents = $oppStmt->fetchAll(\PDO::FETCH_ASSOC);
         foreach ($opponents as &$o) {
             $o['rank'] = $getRank((int)$o['rating']);
+            $o['streak'] = (int)($o['streak'] ?? 0);
         }
 
         return jsonResponse($response, [
@@ -188,8 +188,9 @@ return function ($app) {
         }
 
         // Log fight
-        $pdo->prepare("INSERT INTO pvp_history (attacker_id, defender_id, winner_id, rating_change, gold_reward) VALUES (?, ?, ?, ?, ?)")
-            ->execute([$id, $opp['player_id'], $won ? $id : $opp['player_id'], $ratingChange, $goldEarned]);
+        $fightLogJson = json_encode($result['log'] ?? [], JSON_UNESCAPED_UNICODE);
+        $pdo->prepare("INSERT INTO pvp_history (attacker_id, defender_id, winner_id, rating_change, gold_reward, fight_log) VALUES (?, ?, ?, ?, ?, ?)")
+            ->execute([$id, $opp['player_id'], $won ? $id : $opp['player_id'], $ratingChange, $goldEarned, $fightLogJson]);
 
         savePlayer($id, $player);
 

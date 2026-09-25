@@ -88,7 +88,12 @@
         { "id": "mat_cuu_u_hac_thuy", "name": "Cửu U Hắc Thủy", "tier": 4, "category": "essence", "description": "Chất lỏng huyền bí đặc thù lạnh thấu linh hồn chắt lọc từ đáy vực Cửu U Thần Uyên.", "stackable": true, "sellPrice": 500 },
         { "id": "mat_tinh_tieu_thach", "name": "Tinh Tiêu Thạch", "tier": 4, "category": "spirit", "description": "Khoáng thạch tinh tú đặc thù ngưng tụ từ bụi sao băng giữa Chư Thiên Tinh Hải.", "stackable": true, "sellPrice": 450 },
         { "id": "mat_hon_don_khi", "name": "Hỗn Độn Khí Tinh", "tier": 5, "category": "essence", "description": "Khí tức nguyên thủy đặc thù trước khi vũ trụ khai sinh, trôi nổi tại Hỗn Độn Tiên Vực.", "stackable": true, "sellPrice": 2500 },
-        { "id": "mat_hon_nguyen_chau", "name": "Hỗn Nguyên Đạo Châu", "tier": 5, "category": "rare", "description": "Hạt ngọc tối thượng đặc thù kết tinh từ đại đạo vô thượng trong Hỗn Nguyên Đạo Cảnh.", "stackable": true, "sellPrice": 5000 }
+        { "id": "mat_hon_nguyen_chau", "name": "Hỗn Nguyên Đạo Châu", "tier": 5, "category": "rare", "description": "Hạt ngọc tối thượng đặc thù kết tinh từ đại đạo vô thượng trong Hỗn Nguyên Đạo Cảnh.", "stackable": true, "sellPrice": 5000 },
+        { "id": "da_cuong_hoa", "name": "Đá Cường Hóa", "tier": 2, "category": "spirit", "description": "Linh thạch đặc thù dùng để cường hóa trang bị tại Lò Tạo Hóa.", "stackable": true, "sellPrice": 50 },
+        { "id": "quang_dong", "name": "Quặng Đồng", "tier": 1, "category": "spirit", "description": "Quặng đồng thau sơ cấp, nền tảng đúc khí rèn trang bị.", "stackable": true, "sellPrice": 8 },
+        { "id": "quang_bac", "name": "Quặng Bạc", "tier": 2, "category": "spirit", "description": "Quặng bạc sáng loáng, linh khí ẩn chứa, dùng rèn bảo khí trung cấp.", "stackable": true, "sellPrice": 20 },
+        { "id": "quang_vang", "name": "Quặng Vàng", "tier": 3, "category": "spirit", "description": "Quặng vàng rực rỡ, hấp thu nhật nguyệt tinh hoa, rèn trang bị cao cấp.", "stackable": true, "sellPrice": 60 },
+        { "id": "huyen_thiet", "name": "Huyền Thiết", "tier": 3, "category": "spirit", "description": "Huyền thiết ngàn năm cứng rắn vô cùng, tài liệu thượng hạng để rèn bảo khí.", "stackable": true, "sellPrice": 80 }
     ],
     "categories": {
         "basic": { "name": "Cơ bản", "color": "#8e8e8e" },

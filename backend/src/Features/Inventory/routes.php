@@ -39,6 +39,26 @@ return function ($app) {
         ]);
     });
 
+    $app->post('/api/player/{id}/unequip', function (Request $request, Response $response, array $args) {
+        $id = $args['id'];
+        $player = loadPlayer($id);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        $body = $request->getParsedBody();
+        $slot = $body['slot'] ?? '';
+        try {
+            $item = $player->unequipItem($slot);
+            savePlayer($id, $player);
+            return jsonResponse($response, [
+                'success' => true,
+                'message' => $item ? "Đã tháo {$item->name}" : "Ô trang bị trống",
+                'player' => $player->toArray(),
+            ]);
+        } catch (\Exception $e) {
+            return jsonResponse($response, ['error' => $e->getMessage()], 400);
+        }
+    });
+
     // === USE ITEM (MANUALS, CONSUMABLES) ===
     $app->post('/api/player/{id}/use', function (Request $request, Response $response, array $args) {
         $id = $args['id'];
@@ -139,5 +159,31 @@ return function ($app) {
         $file = __DIR__ . '/../../../data/medicines.json';
         $medicines = json_decode(file_get_contents($file), true);
         return jsonResponse($response, ['medicines' => $medicines]);
+    });
+
+    $app->get('/api/data/materials', function (Request $request, Response $response) {
+        $mats = \App\Core\GameDataRepository::getMaterials();
+        $file = __DIR__ . '/../../../data/materials.json';
+        if (file_exists($file)) {
+            $json = json_decode(file_get_contents($file), true);
+            $fileMats = $json['materials'] ?? [];
+            $existingIds = array_column($mats, 'id');
+            foreach ($fileMats as $fm) {
+                if (!in_array($fm['id'], $existingIds)) {
+                    $mats[] = $fm;
+                }
+            }
+        }
+        $byId = [];
+        foreach ($mats as $m) {
+            if (isset($m['id'])) {
+                $byId[$m['id']] = $m;
+            }
+        }
+        return jsonResponse($response, [
+            'success' => true,
+            'data' => $byId,
+            'materials' => $mats,
+        ]);
     });
 };

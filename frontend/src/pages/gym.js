@@ -10,13 +10,13 @@ export function pageGym(el, ctx) {
     ['dexterity', '🎯', 'Khéo léo', 'Tăng dodge, escape, stealth'],
     ['defense', '🛡', 'Phòng thủ', 'Giảm sát thương nhận vào'],
   ]
-  const energyCost = 5
-  const canTrain = p.currentEnergy >= energyCost && !p.hospitalRemaining
+  const staminaCost = 5
+  const canTrain = p.currentStamina >= staminaCost && !p.hospitalRemaining
 
   el.innerHTML = `
     <div class="page-header">
       <h1>🏋 Rèn luyện</h1>
-      <div class="actions"><span class="text-dim">🔮 ${p.currentEnergy}/${p.maxEnergy} linh lực · Chi phí: ${energyCost}/lần</span></div>
+      <div class="actions"><span class="text-dim">🏃 ${p.currentStamina}/${p.maxStamina} thể lực · Chi phí: 5 thể lực/lần</span></div>
     </div>
     ${p.hospitalRemaining > 0 ? `<div class="panel"><div class="panel-body" style="text-align:center;color:var(--red)">🏥 Đang tịnh dưỡng, không thể rèn luyện! Còn ${p.hospitalRemaining}s</div></div>` : ''}
     <div class="panel">
@@ -36,8 +36,8 @@ export function pageGym(el, ctx) {
     <div class="panel">
       <div class="panel-title">💡 Lưu ý</div>
       <div class="panel-body text-dim" style="font-size:12px">
-        Mỗi lần rèn luyện tốn <strong>${energyCost} linh lực</strong> và tăng <strong>+1</strong> chỉ số đã chọn.<br>
-        Linh lực hồi phục theo thời gian. Tập trung vào chỉ số phù hợp với lối chơi của bạn.
+        Mỗi lần rèn luyện tốn <strong>5 thể lực</strong> và tăng <strong>+1</strong> chỉ số đã chọn.<br>
+        Thể lực hồi phục theo thời gian. Tập trung vào chỉ số phù hợp với lối chơi của bạn.
       </div>
     </div>`
 
