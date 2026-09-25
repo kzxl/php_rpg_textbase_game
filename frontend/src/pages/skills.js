@@ -110,6 +110,14 @@ export function pageSkills(el, ctx) {
       actionHtml = `<button class="btn btn--sm ${canEquip ? 'btn--blue' : 'btn--outline'} equip-btn" data-eq="1" data-sid="${s.id}" ${canEquip ? '' : 'title="Đã đầy ô kỹ năng!"'}>Trang Bị</button>`
     }
 
+    // Trigger probability calculation for active skills
+    const tierChances = { 1: 55, 2: 45, 3: 40, 4: 35, 5: 30, 6: 25, 7: 20 }
+    const baseChance = s.triggerChance || tierChances[s.tier || 1] || 40
+    const dexBonus = Math.floor((player.stats?.dexterity || 10) / 10)
+    const levelBonus = Math.max(0, (s.level || 1) - 1)
+    const stanceBonus = (player.activeStance === 'breaker') ? 5 : 0
+    const totalChance = isLearned ? Math.min(85, Math.max(15, baseChance + levelBonus + dexBonus + stanceBonus)) : baseChance
+
     return `
       <div class="skill-card ${isLearned ? '' : 'locked'} ${s.equipped && !isPassive ? 'equipped' : ''}">
         <div class="skill-card-header">
@@ -134,7 +142,14 @@ export function pageSkills(el, ctx) {
             ${(s.requirements || []).map(r => `<span class="req-tag">🔒 ${r}</span>`).join(' ')}
           </div>
         `}
-        ${s.cost ? `<div class="skill-card-cost">🔵 ${s.cost} Linh Lực / lần xuất chiêu</div>` : ''}
+        ${!isPassive ? `
+          <div class="skill-card-cost" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px; padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);">
+            <span>🔵 ${s.cost || 0} Linh Lực</span>
+            <span style="color:#f59e0b; font-weight:700;" title="Xác suất xuất chiêu: Cơ bản ${baseChance}% + Cấp (+${levelBonus}%) + Mẫn tiệp (+${dexBonus}%)${stanceBonus ? ' + Thế phá quy (+5%)' : ''}">
+              🎯 Xác suất xuất chiêu: ${totalChance}%
+            </span>
+          </div>
+        ` : ''}
       </div>
     `
   }
@@ -188,7 +203,7 @@ export function pageSkills(el, ctx) {
             <span style="color: #fff;">${equippedSkills.length}/${maxSlots}</span>
           </div>
           <div class="text-dim text-xs" style="margin-top: 2px;">
-            Cảnh giới hiện tại (${player.realmInfo?.fullName || 'Phàm Cấp'}) cho phép trang bị tối đa <b>${maxSlots}</b> chiêu thức kích hoạt trong giao đấu.
+            Cảnh giới hiện tại (${player.realmInfo?.fullName || 'Phàm Cấp'}) cho phép trang bị tối đa <b>${maxSlots}</b> chiêu thức. Mỗi hiệp đấu sẽ tung xúc xắc theo <b>xác suất kích hoạt</b> và tiêu hao Linh Lực thực chiến.
           </div>
         </div>
         <div class="loadout-slots" style="display: flex; gap: 8px;">

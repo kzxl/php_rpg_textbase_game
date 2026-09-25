@@ -663,6 +663,8 @@ function renderCombatLogLines(log) {
     if (l.includes('VẾT NỨT THIÊN ĐẠO') || l.includes('Khai thác Lỗi')) return `<div class="glitch-burst" style="color:#d8b4fe;font-weight:bold;text-shadow:0 0 8px rgba(192,132,252,0.4)">${l}</div>`
     if (l.includes('Thế Du Đạo') || l.includes('nương theo kẽ hở')) return `<div class="flow-dodge" style="color:#67e8f9;font-weight:600">${l}</div>`
     if (l.includes('Kim Thân Bất Diệt')) return `<div class="undying-proc" style="color:#fde047;font-weight:600">${l}</div>`
+    if (l.includes('Kích Hoạt') || l.includes('Xuất chiêu')) return `<div class="skill-proc" style="color:#38bdf8;font-weight:700;background:rgba(56,189,248,0.12);padding:3px 8px;border-radius:4px;margin:2px 0;border-left:3px solid #38bdf8;">${l}</div>`
+    if (l.includes('thường công')) return `<div class="normal-attack" style="color:var(--text-dim);font-style:italic;margin:2px 0;">${l}</div>`
     if (l.includes('linh lực') && l.includes('+')) return `<div class="energy" style="color:var(--cyan)">${l}</div>`
     if (l.includes('linh lực')) return `<div class="energy-cost" style="color:var(--blue)">${l}</div>`
     if (l.includes('hụt')) return `<div class="miss" style="color:var(--text-dim)">${l}</div>`

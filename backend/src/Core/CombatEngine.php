@@ -138,7 +138,8 @@ class CombatEngine
                 if ($weaponTypes !== null) {
                     $weapon = $attacker->equipment['weapon'] ?? null;
                     $weaponBase = $weapon ? $weapon->baseType : 'unarmed';
-                    if (!in_array($weaponBase, $weaponTypes)) {
+                    $isValidWeapon = ($weapon !== null) && ($weaponBase === 'weapon' || in_array($weaponBase, $weaponTypes));
+                    if (!$isValidWeapon) {
                         $this->log("❌ {$skill['name']} cần vũ khí: " . implode('/', $weaponTypes));
                         return $this->result('invalid_weapon', 0, $defender);
                     }
@@ -146,6 +147,8 @@ class CombatEngine
 
                 $this->log("⚡ Xuất chiêu: [{$skill['name']}]");
             }
+        } else {
+            $this->log("⚔️ {$attacker->name} vận kình xuất thường công");
         }
 
         // Kiểm tra hành vi Liều Mạng (Near-death attack)
@@ -515,22 +518,29 @@ class CombatEngine
                 break;
             }
 
-            // AI Skill Selection (Tự động tự chọn skill tốn năng lượng)
+            // ⚔️ XÁC SUẤT XUẤT CHIÊU KỸ NĂNG CHỦ ĐỘNG (Active Skill Trigger Chance)
             $skillToUse = null;
-            $activeSkills = array_filter($player->skills ?? [], function($ps) use ($player) {
-                $s = $player->getActiveSkill($ps['id'] ?? $ps);
-                return $s && ($s['type'] ?? '') === 'active';
-            });
-            if (!empty($activeSkills)) {
-                $affordable = array_filter($activeSkills, function($ps) use ($player) {
-                     $s = $player->getActiveSkill($ps['id'] ?? $ps);
-                     return $s && $player->currentEnergy >= ($s['cost'] ?? 0);
-                });
-                if (!empty($affordable)) {
-                    $chosenPs = $affordable[array_rand($affordable)];
-                    $skillToUse = $chosenPs['id'] ?? $chosenPs;
-                    $sData = $player->getActiveSkill($skillToUse);
-                    $player->currentEnergy -= ($sData['cost'] ?? 0);
+            $equippedActives = $player->getEquippedActiveSkills();
+            if (!empty($equippedActives)) {
+                $candidates = $equippedActives;
+                shuffle($candidates);
+                foreach ($candidates as $cand) {
+                    $sId = is_array($cand) ? ($cand['id'] ?? '') : $cand;
+                    $sData = $player->getActiveSkill($sId);
+                    if (!$sData) continue;
+
+                    $cost = (int)($sData['cost'] ?? 0);
+                    // Phải đủ Linh Lực khả dụng để xuất chiêu
+                    if ($player->currentEnergy >= $cost) {
+                        $chance = $player->getSkillTriggerChance($sData);
+                        $roll = mt_rand(1, 100);
+                        if ($roll <= $chance) {
+                            $skillToUse = $sId;
+                            $player->currentEnergy -= $cost;
+                            $allLogs[] = "⚡ [Kích Hoạt {$chance}%] {$player->name} bạo phát linh lực, thi triển [{$sData['name']}]! (-{$cost} Linh Lực)";
+                            break; // Đã kích hoạt 1 chiêu thức hiệp này
+                        }
+                    }
                 }
             }
 
@@ -800,25 +810,65 @@ class CombatEngine
         $maxTurns = 15;
 
         for ($turn = 1; $turn <= $maxTurns; $turn++) {
+            // Attacker roll active skill
+            $aSkill = null;
+            $aMul = 1.0;
+            $aActives = $attacker->getEquippedActiveSkills();
+            if (!empty($aActives)) {
+                shuffle($aActives);
+                foreach ($aActives as $sk) {
+                    $chance = $attacker->getSkillTriggerChance($sk);
+                    if (mt_rand(1, 100) <= $chance) {
+                        $aSkill = $sk;
+                        $aMul = (float)($sk['damageMultiplier'] ?? 1.3);
+                        break;
+                    }
+                }
+            }
+
             // Attacker attacks
-            $aDmg = max(1, (int)(($aStr * 2 + $aDex) * rand(80, 120) / 100 - $dDef * 0.5));
+            $aDmg = max(1, (int)((($aStr * 2 + $aDex) * $aMul) * rand(80, 120) / 100 - $dDef * 0.5));
             $dodge = rand(1, 100) <= min(30, $dSpd - $aSpd + 10);
             if ($dodge) {
                 $log[] = "Turn {$turn}: {$defender->name} né tránh!";
             } else {
                 $dHp -= $aDmg;
-                $log[] = "Turn {$turn}: {$attacker->name} gây {$aDmg} sát thương";
+                if ($aSkill) {
+                    $log[] = "Turn {$turn}: ⚡ [Kích Hoạt] {$attacker->name} thi triển [{$aSkill['name']}] gây {$aDmg} sát thương!";
+                } else {
+                    $log[] = "Turn {$turn}: ⚔️ {$attacker->name} xuất thường công gây {$aDmg} sát thương";
+                }
             }
             if ($dHp <= 0) { return ['winner' => 'attacker', 'log' => $log]; }
 
+            // Defender roll active skill
+            $dSkill = null;
+            $dMul = 1.0;
+            $dActives = $defender->getEquippedActiveSkills();
+            if (!empty($dActives)) {
+                shuffle($dActives);
+                foreach ($dActives as $sk) {
+                    $chance = $defender->getSkillTriggerChance($sk);
+                    if (mt_rand(1, 100) <= $chance) {
+                        $dSkill = $sk;
+                        $dMul = (float)($sk['damageMultiplier'] ?? 1.3);
+                        break;
+                    }
+                }
+            }
+
             // Defender attacks
-            $dDmg = max(1, (int)(($dStr * 2 + $dDex) * rand(80, 120) / 100 - $aDef * 0.5));
+            $dDmg = max(1, (int)((($dStr * 2 + $dDex) * $dMul) * rand(80, 120) / 100 - $aDef * 0.5));
             $dodge2 = rand(1, 100) <= min(30, $aSpd - $dSpd + 10);
             if ($dodge2) {
                 $log[] = "Turn {$turn}: {$attacker->name} né tránh!";
             } else {
                 $aHp -= $dDmg;
-                $log[] = "Turn {$turn}: {$defender->name} gây {$dDmg} sát thương";
+                if ($dSkill) {
+                    $log[] = "Turn {$turn}: ⚡ [Kích Hoạt] {$defender->name} thi triển [{$dSkill['name']}] gây {$dDmg} sát thương!";
+                } else {
+                    $log[] = "Turn {$turn}: ⚔️ {$defender->name} xuất thường công gây {$dDmg} sát thương";
+                }
             }
             if ($aHp <= 0) { return ['winner' => 'defender', 'log' => $log]; }
         }

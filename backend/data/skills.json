@@ -11,6 +11,7 @@
             "weaponTypes": ["sword", "mace", "axe"],
             "damageMultiplier": 1.5,
             "cost": 15,
+            "triggerChance": 55,
             "cooldown": 0,
             "modifiers": [],
             "tier": 1,
@@ -28,6 +29,7 @@
             "weaponTypes": ["sword", "dagger"],
             "damageMultiplier": 0.8,
             "cost": 15,
+            "triggerChance": 45,
             "cooldown": 0,
             "lifesteal": 0.3,
             "modifiers": [
@@ -48,6 +50,7 @@
             "weaponTypes": ["sword", "spear", "dagger"],
             "damageMultiplier": 0.7,
             "cost": 25,
+            "triggerChance": 40,
             "cooldown": 0,
             "multiHit": 2,
             "modifiers": [
@@ -68,6 +71,7 @@
             "weaponTypes": null,
             "damageMultiplier": 1.2,
             "cost": 40,
+            "triggerChance": 35,
             "cooldown": 0,
             "statusEffect": {
                 "type": "burn",
@@ -92,6 +96,7 @@
             "weaponTypes": null,
             "damageMultiplier": 1.5,
             "cost": 60,
+            "triggerChance": 30,
             "cooldown": 0,
             "statusEffect": {
                 "type": "freeze",
@@ -115,6 +120,7 @@
             "weaponTypes": ["sword"],
             "damageMultiplier": 1.8,
             "cost": 100,
+            "triggerChance": 25,
             "cooldown": 0,
             "ignoreDefense": true,
             "modifiers": [],
@@ -133,6 +139,7 @@
             "weaponTypes": ["dagger"],
             "damageMultiplier": 0.5,
             "cost": 10,
+            "triggerChance": 50,
             "cooldown": 0,
             "statusEffect": {
                 "type": "poison",

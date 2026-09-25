@@ -500,11 +500,57 @@ class Player
      */
     public function getActiveSkill(string $skillId): ?array
     {
-        $skill = $this->skills[$skillId] ?? null;
-        if ($skill && ($skill['type'] ?? 'active') === 'active') {
-            return $skill;
+        $found = null;
+        if (isset($this->skills[$skillId]) && is_array($this->skills[$skillId])) {
+            $found = $this->skills[$skillId];
+        } else {
+            foreach ($this->skills as $s) {
+                if (is_array($s) && ($s['id'] ?? '') === $skillId) {
+                    $found = $s;
+                    break;
+                }
+            }
+        }
+        if ($found && ($found['type'] ?? 'active') === 'active') {
+            return $found;
         }
         return null;
+    }
+
+    /**
+     * Get all currently equipped active skills.
+     */
+    public function getEquippedActiveSkills(): array
+    {
+        $actives = [];
+        foreach ($this->skills as $s) {
+            if (is_array($s) && !empty($s['isEquipped']) && ($s['type'] ?? '') === 'active') {
+                $actives[] = $s;
+            }
+        }
+        return $actives;
+    }
+
+    /**
+     * Calculate effective trigger chance for an active skill.
+     * Takes into account: base triggerChance, skill mastery level, dexterity, and stance.
+     */
+    public function getSkillTriggerChance(array $skill): int
+    {
+        $tierChances = [1 => 55, 2 => 45, 3 => 40, 4 => 35, 5 => 30, 6 => 25, 7 => 20];
+        $baseChance = (int)($skill['triggerChance'] ?? ($tierChances[$skill['tier'] ?? 1] ?? 40));
+
+        // +1% per skill mastery level above level 1
+        $levelBonus = max(0, ((int)($skill['level'] ?? 1) - 1));
+
+        // Dexterity bonus (+1% per 10 Dexterity)
+        $dex = $this->getFinalStats()['dexterity'] ?? 10;
+        $dexBonus = (int)floor($dex / 10);
+
+        // Stance bonus: Thế Phá Quy (Breaker) tăng 5% xác suất xuất chiêu bạo phát
+        $stanceBonus = ($this->activeStance ?? '') === 'breaker' ? 5 : 0;
+
+        return min(85, max(15, $baseChance + $levelBonus + $dexBonus + $stanceBonus));
     }
 
     /**
