@@ -1,19 +1,41 @@
-/**
- * Quests Page — Nhiệm Vụ Tracker
- */
+import { pageDailyQuest } from './dailyquest.js'
+
 export function pageQuests(el, ctx) {
   const { state, api, notify, renderGame } = ctx
-  const p = state.player
+  const activeTab = state._questTab || 'npc'
 
   el.innerHTML = `
     <div class="page-header">
-      <h2>🏷️ Nhiệm Vụ</h2>
-      <p class="page-subtitle">Theo dõi tiến độ nhiệm vụ từ các NPC</p>
+      <h2>📜 Thiên Cơ Nhiệm Vụ</h2>
+      <p class="page-subtitle">Theo dõi tiến độ kỳ duyên NPC và nhiệm vụ nhật thường</p>
     </div>
-    <div id="questList" class="quest-container">
-      <div class="loading-spinner">⏳ Đang tải...</div>
+    <div class="tab-bar" style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid rgba(255,255,255,0.1)">
+      <button class="tab-btn ${activeTab === 'npc' ? 'active' : ''}" data-qtab="npc" style="flex:1;padding:10px;border:none;background:${activeTab === 'npc' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'npc' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'npc' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'npc' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
+        📜 Kỳ Duyên NPC
+      </button>
+      <button class="tab-btn ${activeTab === 'daily' ? 'active' : ''}" data-qtab="daily" style="flex:1;padding:10px;border:none;background:${activeTab === 'daily' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'daily' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'daily' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'daily' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
+        📋 Nhật Thường Hàng Ngày
+      </button>
+    </div>
+    <div id="questTabContent">
+      <div id="questList" class="quest-container">
+        <div class="loading-spinner">⏳ Đang tải...</div>
+      </div>
     </div>
   `
+
+  el.querySelectorAll('[data-qtab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state._questTab = btn.dataset.qtab
+      pageQuests(el, ctx)
+    })
+  })
+
+  const contentEl = el.querySelector('#questTabContent')
+  if (activeTab === 'daily') {
+    pageDailyQuest(contentEl, ctx)
+    return
+  }
 
   loadQuests()
 

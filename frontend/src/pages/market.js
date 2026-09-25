@@ -1,8 +1,10 @@
 /**
- * Giao Dịch Đài – Player Marketplace + Cướp Đoạt (Mugging)
- * Tabs: Browse Market, My Listings, Sell Form, Mugging
+ * Giao Dịch Đài – Player Marketplace + Cướp Đoạt (Mugging) + Sàn Đấu Giá
+ * Tabs: Browse Market, My Listings, Auction House, Mugging
  * Torn-style accordion, search/filter, and PVP gold theft
  */
+import { pageAuction } from './auction.js'
+
 export function pageMarket(el, ctx) {
   const { state, api, notify, updateSidebar } = ctx
   const pid = state.playerId
@@ -61,15 +63,20 @@ export function pageMarket(el, ctx) {
       <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <button class="btn btn--sm ${m.tab === 'browse' ? 'btn--blue' : 'btn--dark'}" data-mtab="browse">🛒 Sạp Hàng</button>
         <button class="btn btn--sm ${m.tab === 'my' ? 'btn--blue' : 'btn--dark'}" data-mtab="my">📦 Sạp Tôi (${m.myListings.length}/10)</button>
+        <button class="btn btn--sm ${m.tab === 'auction' ? 'btn--gold' : 'btn--dark'}" data-mtab="auction">⚖️ Sàn Đấu Giá</button>
         <button class="btn btn--sm ${m.tab === 'mug' ? 'btn--red' : 'btn--dark'}" data-mtab="mug">⚔️ Cướp Đoạt</button>
         <button class="btn btn--sm btn--gold" id="btnShowList">➕ Đăng Bán</button>
       </div>
 
       ${m.showListForm ? renderListForm(p) : ''}
 
-      ${m.tab === 'browse' ? renderBrowse() : (m.tab === 'my' ? renderMyListings() : renderMugging())}
+      ${m.tab === 'browse' ? renderBrowse() : (m.tab === 'my' ? renderMyListings() : (m.tab === 'auction' ? '<div id="auctionSubContent"></div>' : renderMugging()))}
     `
     bindMarketEvents()
+    if (m.tab === 'auction') {
+      const sub = el.querySelector('#auctionSubContent')
+      if (sub) pageAuction(sub, ctx)
+    }
   }
 
   function renderBrowse() {

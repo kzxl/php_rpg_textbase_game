@@ -333,6 +333,23 @@ function renderGame() {
   const currentAreaData = state.exploration ? state.exploration[p.currentArea || 'thanh_lam_tran'] : null
   const areaName = currentAreaData ? currentAreaData.name : 'Khám Phá'
 
+  // Manage collapsed navigation groups
+  const collapsedNav = state._collapsedNav || JSON.parse(localStorage.getItem('collapsedNav') || '{}')
+  state._collapsedNav = collapsedNav
+
+  const pageToSection = {
+    stats: 'tuchan', glitch: 'tuchan', skills: 'tuchan', education: 'tuchan', library: 'tuchan', inventory: 'tuchan',
+    combat: 'hanhtrinh', travel: 'hanhtrinh', dungeon: 'hanhtrinh', tiencanh: 'hanhtrinh', quests: 'hanhtrinh', dailyquest: 'hanhtrinh', crimes: 'hanhtrinh',
+    arena: 'tranhdau', tower: 'tranhdau', worldboss: 'tranhdau',
+    housing: 'tienphu', guild: 'tienphu', alchemy: 'tienphu',
+    market: 'thuonghoi', auction: 'thuonghoi', npcshop: 'thuonghoi', gacha: 'thuonghoi',
+    admin: 'vothuong'
+  }
+  const activeSec = pageToSection[state.currentPage]
+  if (activeSec) {
+    collapsedNav[activeSec] = false
+  }
+
   app.innerHTML = `
     <div class="game-layout">
       <!-- SIDEBAR -->
@@ -409,79 +426,114 @@ function renderGame() {
         </div>
 
         <ul class="nav" style="${(p.travelRemaining || 0) > 0 ? 'pointer-events:none; opacity:0.6;' : ''}">
-          <li class="nav-section">TỰ THÂN</li>
-          <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
-            <span class="icon">🏋</span> Rèn Luyện
-            ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>' : ''}
+          <!-- PHÂN HỆ 1: TU CHÂN (Tự Thân & Tu Luyện) -->
+          <li class="nav-section ${collapsedNav.tuchan ? 'collapsed' : ''}" data-section="tuchan">
+            <span>TU CHÂN</span>
+            <span class="section-indicator">▾</span>
           </li>
-          <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
-            <span class="icon">🎒</span> Túi Đồ
-            ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--orange)">⏳</span>` : ''}
-          </li>
-          <li class="nav-item ${state.currentPage === 'skills' || state.currentPage === 'education' ? 'active' : ''}" data-page="skills">
-            <span class="icon">⚡</span> Kỹ Năng
-          </li>
-          <li class="nav-item ${state.currentPage === 'glitch' ? 'active' : ''}" data-page="glitch" style="background: rgba(192, 132, 252, 0.08); border-left: 2px solid #c084fc;">
-            <span class="icon">🌌</span> Dị Biến Thiên Đạo
-            <span class="badge" style="background: #a855f7;">${p.glitchInsight || 0}</span>
-          </li>
+          <div class="nav-group ${collapsedNav.tuchan ? 'collapsed' : ''}" id="sec-tuchan">
+            <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
+              <span class="icon">🧘</span> Tu Luyện & Cảnh Giới
+              ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite" title="Có thể đột phá!">!</span>' : ''}
+            </li>
+            <li class="nav-item ${state.currentPage === 'glitch' ? 'active' : ''}" data-page="glitch" style="background: rgba(168, 85, 247, 0.08); border-left: 2px solid #c084fc;">
+              <span class="icon">🌌</span> Dị Biến Thiên Đạo
+              <span class="badge" style="background: #a855f7;" title="Điểm Thấu Triệt">${p.glitchInsight || 0}</span>
+            </li>
+            <li class="nav-item ${['skills', 'education', 'library'].includes(state.currentPage) ? 'active' : ''}" data-page="skills">
+              <span class="icon">⚡</span> Công Pháp & Kỹ Năng
+            </li>
+            <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
+              <span class="icon">🎒</span> Càn Khôn Túi
+              ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--orange)" title="Đan độc">⏳</span>` : ''}
+            </li>
+          </div>
 
+          <!-- PHÂN HỆ 2: HÀNH TRÌNH (Khám Phá & Lộ Trình) -->
+          <li class="nav-section ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" data-section="hanhtrinh">
+            <span>HÀNH TRÌNH</span>
+            <span class="section-indicator">▾</span>
+          </li>
+          <div class="nav-group ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" id="sec-hanhtrinh">
+            <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
+              <span class="icon">🔍</span> Thám Hiểm (${areaName})
+            </li>
+            <li class="nav-item ${['travel', 'dungeon', 'tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
+              <span class="icon">🗺️</span> Ngao Du Bát Hoang
+              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
+            </li>
+            <li class="nav-item ${['quests', 'dailyquest'].includes(state.currentPage) ? 'active' : ''}" data-page="quests">
+              <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
+              ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
+            </li>
+            <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
+              <span class="icon">💀</span> Thí Luyện Ác Nghiệp
+            </li>
+          </div>
 
-          <li class="nav-item ${['travel','dungeon','tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
-            <span class="icon">🚶</span> Ngao Du
-            ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
+          <!-- PHÂN HỆ 3: TRANH ĐẤU (Chiến Đấu & Thử Thách) -->
+          <li class="nav-section ${collapsedNav.tranhdau ? 'collapsed' : ''}" data-section="tranhdau">
+            <span>TRANH ĐẤU</span>
+            <span class="section-indicator">▾</span>
           </li>
-          <li class="nav-item ${state.currentPage === 'quests' || state.currentPage === 'dailyquest' ? 'active' : ''}" data-page="quests">
-            <span class="icon">📜</span> Nhiệm Vụ
-            ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
-          </li>
-          <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
-            <span class="icon">💀</span> Ác Nghiệp
-          </li>
+          <div class="nav-group ${collapsedNav.tranhdau ? 'collapsed' : ''}" id="sec-tranhdau">
+            <li class="nav-item ${state.currentPage === 'arena' ? 'active' : ''}" data-page="arena">
+              <span class="icon">⚔️</span> Luận Đạo Đấu Trường
+            </li>
+            <li class="nav-item ${state.currentPage === 'tower' ? 'active' : ''}" data-page="tower">
+              <span class="icon">🗼</span> Thiên Phần Tháp
+            </li>
+            <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
+              <span class="icon">🐉</span> Ma Thú Xâm Lăng
+              <span class="badge" style="background:var(--red); font-size:9px">Boss</span>
+            </li>
+          </div>
 
-          <li class="nav-section">NGAO DU</li>
-          <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
-            <span class="icon">🔍</span> Khám Phá (${areaName})
+          <!-- PHÂN HỆ 4: TIÊN PHỦ (Phương Ngoại & Thế Giới) -->
+          <li class="nav-section ${collapsedNav.tienphu ? 'collapsed' : ''}" data-section="tienphu">
+            <span>TIÊN PHỦ</span>
+            <span class="section-indicator">▾</span>
           </li>
+          <div class="nav-group ${collapsedNav.tienphu ? 'collapsed' : ''}" id="sec-tienphu">
+            <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
+              <span class="icon">🏠</span> Động Phủ Tu Tiên
+            </li>
+            <li class="nav-item ${state.currentPage === 'guild' ? 'active' : ''}" data-page="guild">
+              <span class="icon">🏯</span> Tông Môn Bang Hội
+            </li>
+            <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
+              <span class="icon">⚒️</span> Luyện Đan & Đúc Khí
+            </li>
+          </div>
 
-          <li class="nav-section">CHIẾN ĐẤU</li>
-          <li class="nav-item ${state.currentPage === 'arena' ? 'active' : ''}" data-page="arena">
-            <span class="icon">⚔️</span> Đấu Trường
+          <!-- PHÂN HỆ 5: THƯƠNG HỘI (Kinh Tế & Vận May) -->
+          <li class="nav-section ${collapsedNav.thuonghoi ? 'collapsed' : ''}" data-section="thuonghoi">
+            <span>THƯƠNG HỘI</span>
+            <span class="section-indicator">▾</span>
           </li>
-          <li class="nav-item ${state.currentPage === 'tower' ? 'active' : ''}" data-page="tower">
-            <span class="icon">🗼</span> Thiên Phần Tháp
-          </li>
-
-          <li class="nav-section">THẾ GIỚI</li>
-          <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
-            <span class="icon">🏠</span> Động Phủ
-          </li>
-          <li class="nav-item ${state.currentPage === 'guild' ? 'active' : ''}" data-page="guild">
-            <span class="icon">🏯</span> Tông Môn
-          </li>
-          <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
-            <span class="icon">⚒️</span> Chế Tác
-          </li>
-          <li class="nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki">
-            <span class="icon">📚</span> Tri Thức
-          </li>
-          <li class="nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard">
-            <span class="icon">🏆</span> Xếp Hạng
-          </li>
-
-          <li class="nav-section">KINH TẾ</li>
-          <li class="nav-item ${state.currentPage === 'market' || state.currentPage === 'auction' ? 'active' : ''}" data-page="market">
-            <span class="icon">🏪</span> Giao Dịch & Đấu Giá
-          </li>
-          <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
-            <span class="icon">🧓</span> Thương Nhân
-          </li>
+          <div class="nav-group ${collapsedNav.thuonghoi ? 'collapsed' : ''}" id="sec-thuonghoi">
+            <li class="nav-item ${['market', 'auction'].includes(state.currentPage) ? 'active' : ''}" data-page="market">
+              <span class="icon">🏪</span> Phường Thị & Đấu Giá
+            </li>
+            <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
+              <span class="icon">🧓</span> Tiên Các Thương Nhân
+            </li>
+            <li class="nav-item ${state.currentPage === 'gacha' ? 'active' : ''}" data-page="gacha">
+              <span class="icon">🎰</span> Thiên Cơ Đài (Tầm Bảo)
+            </li>
+          </div>
 
           ${p.role === 'admin' ? `
-          <li class="nav-section">VÔ THƯỢNG</li>
-          <li class="nav-item ${state.currentPage === 'admin' ? 'active' : ''}" data-page="admin">
-            <span class="icon">⚙️</span> Admin
-          </li>` : ''}
+          <!-- PHÂN HỆ 6: VÔ THƯỢNG (Admin) -->
+          <li class="nav-section ${collapsedNav.vothuong ? 'collapsed' : ''}" data-section="vothuong">
+            <span>VÔ THƯỢNG</span>
+            <span class="section-indicator">▾</span>
+          </li>
+          <div class="nav-group ${collapsedNav.vothuong ? 'collapsed' : ''}" id="sec-vothuong">
+            <li class="nav-item ${state.currentPage === 'admin' ? 'active' : ''}" data-page="admin">
+              <span class="icon">⚙️</span> Thiên Đạo Quản Trị
+            </li>
+          </div>` : ''}
         </ul>
       </aside>
 
@@ -515,6 +567,21 @@ function renderGame() {
       // Close popup if moving to other main pages? (Optional, here we keep it independent)
       state.currentPage = item.dataset.page
       renderGame()
+    })
+  })
+
+  // Collapsible section toggle events
+  document.querySelectorAll('.nav-section[data-section]').forEach(sec => {
+    sec.addEventListener('click', () => {
+      const secKey = sec.dataset.section
+      state._collapsedNav = state._collapsedNav || {}
+      state._collapsedNav[secKey] = !state._collapsedNav[secKey]
+      localStorage.setItem('collapsedNav', JSON.stringify(state._collapsedNav))
+      const grp = document.getElementById(`sec-${secKey}`)
+      if (grp) {
+        grp.classList.toggle('collapsed', state._collapsedNav[secKey])
+        sec.classList.toggle('collapsed', state._collapsedNav[secKey])
+      }
     })
   })
 

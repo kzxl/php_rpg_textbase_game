@@ -2,6 +2,7 @@
  * Ngao Du — Travel + Bí Cảnh (Dungeon) with Pure 2D Map UI (Zero Three.js)
  */
 import { pageDungeon } from './dungeon.js'
+import { pageTienCanh } from './tiencanh.js'
 
 export function pageTravel(el, ctx) {
   const { state } = ctx
@@ -9,8 +10,8 @@ export function pageTravel(el, ctx) {
 
   el.innerHTML = `
     <div class="page-header">
-      <h1>🗺️ Ngao Du</h1>
-      <div class="text-sm text-dim">Khám phá thế giới tu tiên và chinh phục bí cảnh.</div>
+      <h1>🗺️ Ngao Du Bát Hoang</h1>
+      <div class="text-sm text-dim">Khám phá thế giới tu tiên, chinh phục bí cảnh và tầm bảo tiên cảnh.</div>
     </div>
     <div class="tab-bar" style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid rgba(255,255,255,0.1)">
       <button class="tab-btn ${activeTab === 'map' ? 'active' : ''}" data-tab="map" style="flex:1;padding:10px;border:none;background:${activeTab === 'map' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'map' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'map' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'map' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
@@ -18,6 +19,9 @@ export function pageTravel(el, ctx) {
       </button>
       <button class="tab-btn ${activeTab === 'dungeon' ? 'active' : ''}" data-tab="dungeon" style="flex:1;padding:10px;border:none;background:${activeTab === 'dungeon' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'dungeon' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'dungeon' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'dungeon' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
         ⚡ Bí Cảnh
+      </button>
+      <button class="tab-btn ${activeTab === 'tiencanh' ? 'active' : ''}" data-tab="tiencanh" style="flex:1;padding:10px;border:none;background:${activeTab === 'tiencanh' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'tiencanh' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'tiencanh' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'tiencanh' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
+        🌌 Tiên Cảnh (Atlas)
       </button>
     </div>
     <div id="travelTabContent"></div>
@@ -33,8 +37,10 @@ export function pageTravel(el, ctx) {
   const contentEl = el.querySelector('#travelTabContent')
   if (activeTab === 'map') {
     loadTravelMap(contentEl, ctx)
-  } else {
+  } else if (activeTab === 'dungeon') {
     pageDungeon(contentEl, ctx)
+  } else {
+    pageTienCanh(contentEl, ctx)
   }
 }
 

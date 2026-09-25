@@ -4,6 +4,7 @@
  * Tab 4: Education tree (studying, nodes, timer)
  */
 import { pageEducation } from './education.js'
+import { pageLibrary } from './library.js'
 
 export function pageSkills(el, ctx) {
   const { state, api, notify, renderGame } = ctx
@@ -14,7 +15,8 @@ export function pageSkills(el, ctx) {
     combat:   { icon: '⚔️', name: 'Chiến Đấu', desc: 'Chiêu thức sử dụng trong giao đấu' },
     life:     { icon: '🛠️', name: 'Sinh Hoạt', desc: 'Thu thập, chế tạo, sinh tồn' },
     internal: { icon: '🧘', name: 'Nội Công', desc: 'Thụ động tăng cường bản thân' },
-    gongfa:   { icon: '📖', name: 'Công Pháp', desc: 'Tu luyện công pháp, nâng cao cảnh giới' }
+    gongfa:   { icon: '📖', name: 'Công Pháp', desc: 'Tu luyện công pháp, nâng cao cảnh giới' },
+    library:  { icon: '📚', name: 'Tàng Kinh Các', desc: 'Kho tàng bí tịch nhân gian' }
   }
 
   let activeTab = localStorage.getItem('skillsTab') || 'combat'
@@ -25,6 +27,8 @@ export function pageSkills(el, ctx) {
       const tabsHtml = Object.entries(categories).map(([key, cat]) => {
         const count = key === 'gongfa'
           ? (state.educationTrees || []).length
+          : key === 'library'
+          ? (allSkills || []).length
           : pSkills.filter(ps => {
               const id = typeof ps === 'string' ? ps : ps.id
               const master = allSkills.find(s => s.id === id)
@@ -59,6 +63,45 @@ export function pageSkills(el, ctx) {
       return
     }
 
+    // === TÀNG KINH CÁC TAB → Delegate to library page ===
+    if (activeTab === 'library') {
+      const tabsHtml = Object.entries(categories).map(([key, cat]) => {
+        const count = key === 'gongfa'
+          ? (state.educationTrees || []).length
+          : key === 'library'
+          ? (allSkills || []).length
+          : pSkills.filter(ps => {
+              const id = typeof ps === 'string' ? ps : ps.id
+              const master = allSkills.find(s => s.id === id)
+              return master && (master.category || 'combat') === key
+            }).length
+        return `<button class="skill-tab ${key === activeTab ? 'active' : ''}" data-tab="${key}">
+          ${cat.icon} ${cat.name} <span class="skill-tab-count">${count}</span>
+        </button>`
+      }).join('')
+
+      el.innerHTML = `
+        <div class="page-header">
+          <h1>⚡ Kỹ Năng & Công Pháp</h1>
+          <div class="text-dim text-sm">Thông thạo tăng theo sử dụng — mỗi level tăng hiệu quả.</div>
+        </div>
+        <div class="skill-tabs">${tabsHtml}</div>
+        <div id="library-content"></div>
+      `
+      el.querySelectorAll('.skill-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeTab = btn.dataset.tab
+          localStorage.setItem('skillsTab', activeTab)
+          render()
+        })
+      })
+      const libEl = el.querySelector('#library-content')
+      if (libEl) {
+        pageLibrary(libEl, ctx)
+      }
+      return
+    }
+
     // === SKILL TABS (combat / life / internal) ===
     const learned = pSkills.map(ps => {
       const id = typeof ps === 'string' ? ps : ps.id
@@ -77,6 +120,8 @@ export function pageSkills(el, ctx) {
     const tabsHtml = Object.entries(categories).map(([key, cat]) => {
       const count = key === 'gongfa'
         ? (state.educationTrees || []).length
+        : key === 'library'
+        ? (allSkills || []).length
         : learned.filter(s => (s.category || 'combat') === key).length
       return `<button class="skill-tab ${key === activeTab ? 'active' : ''}" data-tab="${key}">
         ${cat.icon} ${cat.name} <span class="skill-tab-count">${count}</span>
