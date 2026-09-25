@@ -14,6 +14,7 @@ export function pageCombat(el, ctx) {
   const herbRate = areaRates.find(r => r.type === 'herb')?.weight || 0
   const mineralRate = areaRates.find(r => r.type === 'mineral')?.weight || 0
   const monsterRate = areaRates.find(r => r.type === 'monster')?.weight || 0
+  const specialtyNames = currentAreaData?.specialtyNames || []
 
   el.innerHTML = `
     <div class="page-header">
@@ -38,11 +39,16 @@ export function pageCombat(el, ctx) {
       <div class="panel-body text-center" style="padding: 24px 16px;">
         <h2 class="text-lg text-gold mb-sm">Dò Thám Xung Quanh</h2>
         <p class="text-dim mb-xs">Tiêu hao thể lực để tìm kiếm tài nguyên, kỳ ngộ hoặc yêu thú.</p>
-        <div class="flex gap-2 justify-center flex-wrap mb-md text-xs">
+        <div class="flex gap-2 justify-center flex-wrap mb-sm text-xs">
           <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">🌿 Thảo Dược: ~${herbRate}%</span>
           <span class="badge" style="background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3);">⛏️ Mạch Khoáng: ~${mineralRate}%</span>
           <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">👾 Yêu Thú: ~${monsterRate}%</span>
         </div>
+        ${specialtyNames.length ? `
+          <div class="text-xs mb-md" style="color: #facc15; background: rgba(234, 179, 8, 0.08); border: 1px dashed rgba(234, 179, 8, 0.3); border-radius: 6px; padding: 5px 12px; display: inline-block;">
+            💎 <strong>Đặc Thù Bản Đồ:</strong> ${specialtyNames.join(' · ')}
+          </div>
+        ` : ''}
         <div class="flex justify-center gap-2 flex-wrap">
           <button class="btn btn--gold btn--lg" id="btnExplore" style="min-width: 150px; display: flex; justify-content: center; align-items: center; gap: 8px;">
             <span>🔍 Tìm Kiếm</span>

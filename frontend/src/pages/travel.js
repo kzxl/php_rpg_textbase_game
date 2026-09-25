@@ -129,6 +129,7 @@ async function loadTravelMap(container, ctx) {
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
               <span class="badge" style="background:rgba(255,255,255,0.08);font-size:11px">Yêu Cầu: Lv.${currentArea?.min_level || 1}+</span>
               ${envEffect ? `<span class="badge" style="background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.25);font-size:11px">${envEffect}</span>` : ''}
+              ${currentConfig?.specialtyNames?.length ? `<span class="badge" style="background:rgba(234,179,8,0.12);color:#facc15;border:1px solid rgba(234,179,8,0.3);font-size:11px">💎 Đặc Sản: ${currentConfig.specialtyNames.join(' · ')}</span>` : ''}
             </div>
           </div>
         </div>
@@ -185,7 +186,7 @@ async function loadTravelMap(container, ctx) {
                       ${a.description || 'Vùng đất hoang sơ chưa rõ lai lịch.'}
                     </div>
 
-                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px">
+                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px">
                       <span class="badge" style="font-size:10px; padding:2px 6px; background:${tooLow ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)'}; color:${tooLow ? 'var(--red)' : 'var(--text-dim)'}">
                         Lv.${a.min_level || 1}+
                       </span>
@@ -196,6 +197,22 @@ async function loadTravelMap(container, ctx) {
                         🏃 -${aStaminaCost} TL (Dò thám)
                       </span>
                     </div>
+
+                    ${exploArea?.specialtyNames?.length ? `
+                      <div style="font-size:10px; color:#facc15; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.25); border-radius:4px; padding:3px 6px; margin-bottom:6px; line-height:1.3">
+                        💎 <strong>Đặc sản:</strong> ${exploArea.specialtyNames.join(' · ')}
+                      </div>
+                    ` : ''}
+
+                    ${exploArea?.rates ? `
+                      <div style="display:flex; gap:6px; font-size:10px; margin-bottom:8px; opacity:0.85">
+                        <span style="color:#34d399">🌿 ~${exploArea.rates.find(r => r.type === 'herb')?.weight || 0}%</span>
+                        <span style="color:rgba(255,255,255,0.2)">·</span>
+                        <span style="color:#38bdf8">⛏️ ~${exploArea.rates.find(r => r.type === 'mineral')?.weight || 0}%</span>
+                        <span style="color:rgba(255,255,255,0.2)">·</span>
+                        <span style="color:#f87171">👾 ~${exploArea.rates.find(r => r.type === 'monster')?.weight || 0}%</span>
+                      </div>
+                    ` : ''}
 
                     ${aEnvEffect ? `
                       <div style="font-size:10px; color:var(--gold); background:rgba(255,215,0,0.05); padding:3px 6px; border-radius:4px; margin-bottom:10px; border-left:2px solid var(--gold)">

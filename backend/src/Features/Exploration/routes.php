@@ -244,152 +244,99 @@ return function ($app) {
                     $eventResult = ['type' => 'nothing', 'message' => 'Không khí nặng nề bao trùm... nhưng chẳng thấy gì.'];
                 }
 
-            } elseif ($type === 'herb' && !empty($selectedEvent['pools'])) {
-                $pool = $selectedEvent['pools'];
-                $matId = $pool[array_rand($pool)];
-                $matData = GameDataRepository::getMaterialById($matId);
-                $matName = $matData ? $matData['name'] : $matId;
-                $tier = (int)($matData['tier'] ?? 1);
+            } elseif (($type === 'herb' || $type === 'mineral' || $type === 'material') && !empty($selectedEvent['pools'])) {
+                $specialties = $areaData['specialties'] ?? [];
+                
+                // Helper to roll from weighted or unweighted pool while factoring in specialties
+                $rollFromPool = function(array $pool, array $specialties): array {
+                    $items = [];
+                    $totalWeight = 0;
+                    foreach ($pool as $entry) {
+                        if (is_array($entry)) {
+                            $id = $entry['id'];
+                            $weight = (int)($entry['weight'] ?? 10);
+                            $isSpec = !empty($entry['isSpecialty']) || in_array($id, $specialties);
+                        } else {
+                            $id = (string)$entry;
+                            $isSpec = in_array($id, $specialties);
+                            $weight = $isSpec ? 30 : 50;
+                        }
+                        $items[] = ['id' => $id, 'weight' => $weight, 'isSpecialty' => $isSpec];
+                        $totalWeight += $weight;
+                    }
+                    $roll = mt_rand(1, max(1, $totalWeight));
+                    $cum = 0;
+                    foreach ($items as $item) {
+                        $cum += $item['weight'];
+                        if ($roll <= $cum) {
+                            return $item;
+                        }
+                    }
+                    return $items[0] ?? ['id' => (is_array($pool[0]) ? $pool[0]['id'] : $pool[0]), 'isSpecialty' => false];
+                };
 
-                $skillLevel = $player->getSkillLevel('hai_duoc');
-                if ($skillLevel <= 0) $skillLevel = 1;
+                $picked = $rollFromPool($selectedEvent['pools'], $specialties);
+                $matId = $picked['id'];
+                $isSpecialty = $picked['isSpecialty'];
 
-                // Yield: 1 + floor((skillLevel - 1) / 3) => Lv1-3: 1, Lv4-6: 2, Lv7-9: 3, Lv10+: 4
-                $baseQty = 1 + intdiv(max(0, $skillLevel - 1), 3);
-
-                // Critical Harvest proc: base 10% + 3% per level (capped at 50%)
-                $critChance = min(50, 10 + $skillLevel * 3);
-                $isCritical = mt_rand(1, 100) <= $critChance;
-                $quantity = $isCritical ? ($baseQty * 2) : $baseQty;
-
-                // Bonus Spirit Stones if critical
-                $bonusGold = $isCritical ? mt_rand(10, 30) * max(1, $tier) : 0;
-                if ($bonusGold > 0) {
-                    $player->gold += $bonusGold;
-                }
-
-                $player->materials[$matId] = ($player->materials[$matId] ?? 0) + $quantity;
-
-                // XP Gain based on Tier: Tier * 15 + (critical ? 10 : 0)
-                $xpGained = ($tier * 15) + ($isCritical ? 10 : 0);
-                $levelUp = $player->gainSkillXp('hai_duoc', $xpGained);
-
-                \App\Core\PlayerRepository::saveSkills($id, $player);
-
-                // Quest progress for collect-type quests
-                $npcsData = GameDataRepository::getNpcs();
-                $questNotifs = $player->updateQuestProgress('collect', $matId, $quantity, $npcsData);
-
-                $eventResult = [
-                    'type' => 'herb',
-                    'title' => '🌿 Dược Thảo Thiên Nhiên',
-                    'message' => $isCritical
-                        ? "🌟 [BỘI THU DƯỢC LIỆU] Nhờ Hái Dược thuật tinh thấu (Cấp {$skillLevel}), bạn thu hoạch trọn vẹn {$quantity}x {$matName}!"
-                        : "🌿 Phát hiện linh thảo sinh trưởng! Thu hái được {$quantity}x {$matName}.",
-                    'itemId' => $matId,
-                    'itemName' => $matName,
-                    'quantity' => $quantity,
-                    'isCritical' => $isCritical,
-                    'skillId' => 'hai_duoc',
-                    'skillName' => 'Hái Dược',
-                    'skillLevel' => $skillLevel,
-                    'skillXpGained' => $xpGained,
-                    'levelUp' => $levelUp,
-                    'bonusGold' => $bonusGold,
-                    'questNotifications' => $questNotifs
-                ];
-
-            } elseif ($type === 'mineral' && !empty($selectedEvent['pools'])) {
-                $pool = $selectedEvent['pools'];
-                $matId = $pool[array_rand($pool)];
-                $matData = GameDataRepository::getMaterialById($matId);
-                $matName = $matData ? $matData['name'] : $matId;
-                $tier = (int)($matData['tier'] ?? 1);
-
-                $skillLevel = $player->getSkillLevel('khai_khoang');
-                if ($skillLevel <= 0) $skillLevel = 1;
-
-                // Yield: 1 + floor((skillLevel - 1) / 3) => Lv1-3: 1, Lv4-6: 2, Lv7-9: 3, Lv10+: 4
-                $baseQty = 1 + intdiv(max(0, $skillLevel - 1), 3);
-
-                // Deep Vein Critical proc: base 10% + 3% per level (capped at 50%)
-                $critChance = min(50, 10 + $skillLevel * 3);
-                $isCritical = mt_rand(1, 100) <= $critChance;
-                $quantity = $isCritical ? ($baseQty * 2) : $baseQty;
-
-                // Bonus Spirit Stones if critical
-                $bonusGold = $isCritical ? mt_rand(15, 40) * max(1, $tier) : 0;
-                if ($bonusGold > 0) {
-                    $player->gold += $bonusGold;
-                }
-
-                $player->materials[$matId] = ($player->materials[$matId] ?? 0) + $quantity;
-
-                // XP Gain based on Tier: Tier * 15 + (critical ? 10 : 0)
-                $xpGained = ($tier * 15) + ($isCritical ? 10 : 0);
-                $levelUp = $player->gainSkillXp('khai_khoang', $xpGained);
-
-                \App\Core\PlayerRepository::saveSkills($id, $player);
-
-                // Quest progress for collect-type quests
-                $npcsData = GameDataRepository::getNpcs();
-                $questNotifs = $player->updateQuestProgress('collect', $matId, $quantity, $npcsData);
-
-                $eventResult = [
-                    'type' => 'mineral',
-                    'title' => '⛏️ Mạch Khoáng Thiên Địa',
-                    'message' => $isCritical
-                        ? "💎 [MẠCH KHOÁNG ĐẠI PHÁT] Đục thủng cổ thạch (Khai Khoáng Cấp {$skillLevel}), bạn khai thác được {$quantity}x {$matName} thượng phẩm!"
-                        : "⛏️ Phát hiện quặng tinh thạch thiên địa! Khai thác được {$quantity}x {$matName}.",
-                    'itemId' => $matId,
-                    'itemName' => $matName,
-                    'quantity' => $quantity,
-                    'isCritical' => $isCritical,
-                    'skillId' => 'khai_khoang',
-                    'skillName' => 'Khai Khoáng',
-                    'skillLevel' => $skillLevel,
-                    'skillXpGained' => $xpGained,
-                    'levelUp' => $levelUp,
-                    'bonusGold' => $bonusGold,
-                    'questNotifications' => $questNotifs
-                ];
-
-            } elseif ($type === 'material' && !empty($selectedEvent['pools'])) {
-                $pool = $selectedEvent['pools'];
-                $matId = $pool[array_rand($pool)];
                 $matData = GameDataRepository::getMaterialById($matId);
                 $matName = $matData ? $matData['name'] : $matId;
                 $matCategory = $matData ? ($matData['category'] ?? 'basic') : 'basic';
                 $tier = (int)($matData['tier'] ?? 1);
 
-                $isHerb = ($matCategory === 'herb') || str_contains($matId, 'thao') || str_contains($matId, 'chi') || str_contains($matId, 'hoa');
-                $isMineral = ($matCategory === 'elemental' || $matCategory === 'spirit' || str_contains($matId, 'thach') || str_contains($matId, 'tinh') || str_contains($matId, 'kim_loai') || str_contains($matId, 'loi_dia'));
+                // Determine effective handler type
+                $effectiveType = $type;
+                if ($type === 'material') {
+                    $isHerb = ($matCategory === 'herb') || str_contains($matId, 'thao') || str_contains($matId, 'chi') || str_contains($matId, 'hoa') || str_contains($matId, 'diep');
+                    $isMineral = ($matCategory === 'elemental' || $matCategory === 'spirit' || str_contains($matId, 'thach') || str_contains($matId, 'tinh') || str_contains($matId, 'kim_loai') || str_contains($matId, 'loi_dia') || str_contains($matId, 'khoang'));
+                    if ($isHerb) $effectiveType = 'herb';
+                    elseif ($isMineral) $effectiveType = 'mineral';
+                }
 
-                if ($isHerb) {
+                if ($effectiveType === 'herb') {
                     $skillLevel = $player->getSkillLevel('hai_duoc');
                     if ($skillLevel <= 0) $skillLevel = 1;
+
+                    // Base yield + specialty bonus
                     $baseQty = 1 + intdiv(max(0, $skillLevel - 1), 3);
                     $critChance = min(50, 10 + $skillLevel * 3);
                     $isCritical = mt_rand(1, 100) <= $critChance;
                     $quantity = $isCritical ? ($baseQty * 2) : $baseQty;
+
+                    // Bonus spirit stones on crit / specialty
                     $bonusGold = $isCritical ? mt_rand(10, 30) * max(1, $tier) : 0;
+                    if ($isSpecialty) $bonusGold += mt_rand(15, 30);
                     if ($bonusGold > 0) $player->gold += $bonusGold;
+
                     $player->materials[$matId] = ($player->materials[$matId] ?? 0) + $quantity;
-                    $xpGained = ($tier * 15) + ($isCritical ? 10 : 0);
+
+                    // XP Gain based on Tier + crit + specialty
+                    $xpGained = ($tier * 15) + ($isCritical ? 10 : 0) + ($isSpecialty ? 15 : 0);
                     $levelUp = $player->gainSkillXp('hai_duoc', $xpGained);
+
                     \App\Core\PlayerRepository::saveSkills($id, $player);
+
                     $npcsData = GameDataRepository::getNpcs();
                     $questNotifs = $player->updateQuestProgress('collect', $matId, $quantity, $npcsData);
+
+                    $msg = $isSpecialty
+                        ? ($isCritical
+                            ? "🌟 [BỘI THU ĐẶC SẢN VÙNG MIỀN] Nhờ Hái Dược thuật tinh thấu (Cấp {$skillLevel}), bạn thu hoạch trọn vẹn {$quantity}x {$matName} (Đặc sản {$areaData['name']})!"
+                            : "🌟 [ĐẶC THÙ BẢN ĐỒ] Tìm thấy linh thảo đặc trưng của {$areaData['name']}! Thu hái được {$quantity}x {$matName}.")
+                        : ($isCritical
+                            ? "🌟 [BỘI THU DƯỢC LIỆU] Nhờ Hái Dược thuật tinh thấu (Cấp {$skillLevel}), bạn thu hoạch trọn vẹn {$quantity}x {$matName}!"
+                            : "🌿 Phát hiện linh thảo sinh trưởng! Thu hái được {$quantity}x {$matName}.");
+
                     $eventResult = [
                         'type' => 'herb',
-                        'title' => '🌿 Dược Thảo Thiên Nhiên',
-                        'message' => $isCritical
-                            ? "🌟 [BỘI THU DƯỢC LIỆU] Nhờ Hái Dược thuật tinh thấu (Cấp {$skillLevel}), bạn thu hoạch trọn vẹn {$quantity}x {$matName}!"
-                            : "🌿 Phát hiện linh thảo sinh trưởng! Thu hái được {$quantity}x {$matName}.",
+                        'title' => $isSpecialty ? "🌟 Dược Thảo Đặc Thù ({$areaData['name']})" : '🌿 Dược Thảo Thiên Nhiên',
+                        'message' => $msg,
                         'itemId' => $matId,
                         'itemName' => $matName,
                         'quantity' => $quantity,
                         'isCritical' => $isCritical,
+                        'isSpecialty' => $isSpecialty,
+                        'areaName' => $areaData['name'],
                         'skillId' => 'hai_duoc',
                         'skillName' => 'Hái Dược',
                         'skillLevel' => $skillLevel,
@@ -398,31 +345,48 @@ return function ($app) {
                         'bonusGold' => $bonusGold,
                         'questNotifications' => $questNotifs
                     ];
-                } elseif ($isMineral) {
+
+                } elseif ($effectiveType === 'mineral') {
                     $skillLevel = $player->getSkillLevel('khai_khoang');
                     if ($skillLevel <= 0) $skillLevel = 1;
+
                     $baseQty = 1 + intdiv(max(0, $skillLevel - 1), 3);
                     $critChance = min(50, 10 + $skillLevel * 3);
                     $isCritical = mt_rand(1, 100) <= $critChance;
                     $quantity = $isCritical ? ($baseQty * 2) : $baseQty;
+
                     $bonusGold = $isCritical ? mt_rand(15, 40) * max(1, $tier) : 0;
+                    if ($isSpecialty) $bonusGold += mt_rand(20, 45);
                     if ($bonusGold > 0) $player->gold += $bonusGold;
+
                     $player->materials[$matId] = ($player->materials[$matId] ?? 0) + $quantity;
-                    $xpGained = ($tier * 15) + ($isCritical ? 10 : 0);
+
+                    $xpGained = ($tier * 15) + ($isCritical ? 10 : 0) + ($isSpecialty ? 15 : 0);
                     $levelUp = $player->gainSkillXp('khai_khoang', $xpGained);
+
                     \App\Core\PlayerRepository::saveSkills($id, $player);
+
                     $npcsData = GameDataRepository::getNpcs();
                     $questNotifs = $player->updateQuestProgress('collect', $matId, $quantity, $npcsData);
+
+                    $msg = $isSpecialty
+                        ? ($isCritical
+                            ? "💎 [ĐẠI MẠCH KHOÁNG BẢN ĐỊA] Đục thủng cổ thạch (Khai Khoáng Cấp {$skillLevel}), bạn đào được {$quantity}x {$matName} (Đặc sản {$areaData['name']})!"
+                            : "💎 [KHOÁNG MẠCH BẢN ĐỊA] Phát hiện khoáng thạch đặc thù của {$areaData['name']}! Khai thác được {$quantity}x {$matName}.")
+                        : ($isCritical
+                            ? "💎 [MẠCH KHOÁNG ĐẠI PHÁT] Đục thủng cổ thạch (Khai Khoáng Cấp {$skillLevel}), bạn khai thác được {$quantity}x {$matName} thượng phẩm!"
+                            : "⛏️ Phát hiện quặng tinh thạch thiên địa! Khai thác được {$quantity}x {$matName}.");
+
                     $eventResult = [
                         'type' => 'mineral',
-                        'title' => '⛏️ Mạch Khoáng Thiên Địa',
-                        'message' => $isCritical
-                            ? "💎 [MẠCH KHOÁNG ĐẠI PHÁT] Đục thủng cổ thạch (Khai Khoáng Cấp {$skillLevel}), bạn khai thác được {$quantity}x {$matName} thượng phẩm!"
-                            : "⛏️ Phát hiện quặng tinh thạch thiên địa! Khai thác được {$quantity}x {$matName}.",
+                        'title' => $isSpecialty ? "💎 Mạch Khoáng Đặc Thù ({$areaData['name']})" : '⛏️ Mạch Khoáng Thiên Địa',
+                        'message' => $msg,
                         'itemId' => $matId,
                         'itemName' => $matName,
                         'quantity' => $quantity,
                         'isCritical' => $isCritical,
+                        'isSpecialty' => $isSpecialty,
+                        'areaName' => $areaData['name'],
                         'skillId' => 'khai_khoang',
                         'skillName' => 'Khai Khoáng',
                         'skillLevel' => $skillLevel,
@@ -431,6 +395,7 @@ return function ($app) {
                         'bonusGold' => $bonusGold,
                         'questNotifications' => $questNotifs
                     ];
+
                 } else {
                     $quantity = mt_rand(1, 2);
                     $player->materials[$matId] = ($player->materials[$matId] ?? 0) + $quantity;
@@ -438,13 +403,18 @@ return function ($app) {
                     $questNotifs = $player->updateQuestProgress('collect', $matId, $quantity, $npcsData);
                     $eventResult = [
                         'type' => 'material',
-                        'message' => "📦 Nhặt được {$quantity}x {$matName} từ tàn tích hoang dã.",
+                        'message' => $isSpecialty
+                            ? "🌟 [VẬT LIỆU BẢN ĐỊA] Nhặt được {$quantity}x {$matName} (Đặc sản {$areaData['name']}) từ tàn tích hoang dã."
+                            : "📦 Nhặt được {$quantity}x {$matName} từ tàn tích hoang dã.",
                         'itemId' => $matId,
                         'itemName' => $matName,
                         'quantity' => $quantity,
+                        'isSpecialty' => $isSpecialty,
+                        'areaName' => $areaData['name'],
                         'questNotifications' => $questNotifs
                     ];
                 }
+
 
             } elseif ($type === 'item' && !empty($selectedEvent['rarities'])) {
                 $rarities = $selectedEvent['rarities'];

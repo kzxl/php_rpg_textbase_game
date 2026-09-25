@@ -68,7 +68,27 @@
         { "id": "mat_loi_de_vu", "name": "Lôi Đế Vũ", "tier": 4, "category": "elemental", "description": "Lông vũ tích điện của Thần Điểu Lôi Đế.", "stackable": true, "sellPrice": 400 },
         { "id": "mat_huyet_ma_ban_giap", "name": "Huyết Ma Bản Giáp", "tier": 5, "category": "rare", "description": "Mảnh giáp xương của Huyết Ma Thượng Cổ bất hoại.", "stackable": true, "sellPrice": 1500 },
         { "id": "mat_noi_dan_lon", "name": "Nội Đan Lớn", "tier": 4, "category": "spirit", "description": "Nội đan quái vật cao cấp, năng lượng bàng bạc.", "stackable": true, "sellPrice": 300 },
-        { "id": "mat_noi_dan_cuc", "name": "Cực Phẩm Nội Đan", "tier": 5, "category": "spirit", "description": "Nội đan cửu phẩm yêu hoàng vạn năm.", "stackable": true, "sellPrice": 1200 }
+        { "id": "mat_noi_dan_cuc", "name": "Cực Phẩm Nội Đan", "tier": 5, "category": "spirit", "description": "Nội đan cửu phẩm yêu hoàng vạn năm.", "stackable": true, "sellPrice": 1200 },
+
+        { "id": "mat_thao_moc_thanh_lam", "name": "Thanh Lam Diệp", "tier": 1, "category": "herb", "description": "Lá thảo mộc đặc thù của trấn Thanh Lam, hương thơm thanh khiết giúp định tâm.", "stackable": true, "sellPrice": 12 },
+        { "id": "mat_thiet_khoang_tho", "name": "Thiết Khoáng Thô", "tier": 1, "category": "spirit", "description": "Quặng sắt thô lộ thiên đặc thù vùng ngoại ô Thanh Lam Trấn, nền tảng rèn đúc.", "stackable": true, "sellPrice": 10 },
+        { "id": "mat_nhua_hac_phong", "name": "Nhựa Hắc Phong Mộc", "tier": 1, "category": "basic", "description": "Nhựa đen quánh đặc thù của cổ thụ Hắc Phong Lâm, dùng chế độc dược hoặc keo giáp.", "stackable": true, "sellPrice": 15 },
+        { "id": "mat_hac_thach", "name": "Hắc Phong Thạch", "tier": 1, "category": "basic", "description": "Đá đen trầm tích đặc thù ngâm trong gió độc Hắc Phong Lâm hàng trăm năm.", "stackable": true, "sellPrice": 14 },
+        { "id": "mat_u_hon_thach", "name": "U Hồn Thạch", "tier": 2, "category": "spirit", "description": "Khoáng thạch đặc thù của Vọng Linh Cốc, hấp thụ âm khí và linh hồn phiêu bạt.", "stackable": true, "sellPrice": 35 },
+        { "id": "mat_bang_phach_thach", "name": "Băng Phách Thạch", "tier": 2, "category": "elemental", "description": "Quặng tinh thể hàn băng đặc thù vùng cực bắc Bắc Sương Cảnh, tỏa ra hàn khí thấu xương.", "stackable": true, "sellPrice": 45 },
+        { "id": "mat_co_moc_tam", "name": "Cổ Mộc Tinh Tâm", "tier": 2, "category": "basic", "description": "Lõi thần mộc tinh túy đặc thù của Cổ Mộc Linh Viên, chứa dồi dào sinh cơ Mộc hệ.", "stackable": true, "sellPrice": 40 },
+        { "id": "mat_sa_tinh_thao", "name": "Sa Tinh Thảo", "tier": 2, "category": "herb", "description": "Thảo dược gai đặc thù sinh trưởng kiên cường giữa bão cát tử thần Ám Sát Hoang.", "stackable": true, "sellPrice": 35 },
+        { "id": "mat_hac_sa_tinh", "name": "Hắc Sa Tinh", "tier": 2, "category": "elemental", "description": "Tinh thể cát đen đặc thù kết tinh dưới sấm sét sa mạc Ám Sát Hoang.", "stackable": true, "sellPrice": 50 },
+        { "id": "mat_thiet_huyet_khoang", "name": "Thiết Huyết Quặng", "tier": 3, "category": "spirit", "description": "Mạch khoáng sắt đỏ au đặc thù của Thiết Huyết Sơn, chứa hỏa khí và sát khí nồng nặc.", "stackable": true, "sellPrice": 65 },
+        { "id": "mat_loi_tinh_thach", "name": "Lôi Kiếp Thạch", "tier": 3, "category": "elemental", "description": "Khoáng thạch đặc thù đáy Thiên Kiếp Uyên, trải qua muôn vàn đạo thiên lôi gọt giũa.", "stackable": true, "sellPrice": 85 },
+        { "id": "mat_huyet_tinh_thach", "name": "Huyết Ma Cốt Tinh", "tier": 3, "category": "spirit", "description": "Hóa thạch đặc thù cô đọng từ huyết nhục ma thần tại Huyết Ma Chiến Trường viễn cổ.", "stackable": true, "sellPrice": 90 },
+        { "id": "mat_dia_hoa_tinh", "name": "Địa Hỏa Tinh Thạch", "tier": 3, "category": "elemental", "description": "Tinh thạch hỏa hệ đặc thù kết tinh từ lõi mắc-ma Thiên Hỏa Linh Địa.", "stackable": true, "sellPrice": 80 },
+        { "id": "mat_u_minh_thao", "name": "U Minh Quỷ Thảo", "tier": 3, "category": "herb", "description": "Cỏ âm linh đặc thù mọc ven bờ Vong Xuyên của U Minh Quỷ Vực, phát sáng ma mị.", "stackable": true, "sellPrice": 95 },
+        { "id": "mat_tran_phap_tan_phien", "name": "Tàn Phiến Trận Đồ", "tier": 4, "category": "rare", "description": "Mảnh vỡ ngọc thạch đặc thù khắc đại trận viễn cổ thu thập từ Thiên Đạo Tàn Tích.", "stackable": true, "sellPrice": 350 },
+        { "id": "mat_cuu_u_hac_thuy", "name": "Cửu U Hắc Thủy", "tier": 4, "category": "essence", "description": "Chất lỏng huyền bí đặc thù lạnh thấu linh hồn chắt lọc từ đáy vực Cửu U Thần Uyên.", "stackable": true, "sellPrice": 500 },
+        { "id": "mat_tinh_tieu_thach", "name": "Tinh Tiêu Thạch", "tier": 4, "category": "spirit", "description": "Khoáng thạch tinh tú đặc thù ngưng tụ từ bụi sao băng giữa Chư Thiên Tinh Hải.", "stackable": true, "sellPrice": 450 },
+        { "id": "mat_hon_don_khi", "name": "Hỗn Độn Khí Tinh", "tier": 5, "category": "essence", "description": "Khí tức nguyên thủy đặc thù trước khi vũ trụ khai sinh, trôi nổi tại Hỗn Độn Tiên Vực.", "stackable": true, "sellPrice": 2500 },
+        { "id": "mat_hon_nguyen_chau", "name": "Hỗn Nguyên Đạo Châu", "tier": 5, "category": "rare", "description": "Hạt ngọc tối thượng đặc thù kết tinh từ đại đạo vô thượng trong Hỗn Nguyên Đạo Cảnh.", "stackable": true, "sellPrice": 5000 }
     ],
     "categories": {
         "basic": { "name": "Cơ bản", "color": "#8e8e8e" },

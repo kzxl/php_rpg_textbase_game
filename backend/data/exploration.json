@@ -18,27 +18,56 @@
                 "type": "herb",
                 "weight": 25,
                 "pools": [
-                    "linh_thao",
-                    "huyet_thao",
-                    "doc_thao"
+                    {
+                        "id": "linh_thao",
+                        "weight": 45
+                    },
+                    {
+                        "id": "huyet_thao",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_thao_moc_thanh_lam",
+                        "weight": 20,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 10,
                 "pools": [
-                    "mat_khong_gian_manh",
-                    "mat_kim_loai_linh",
-                    "mat_tinh_thach"
+                    {
+                        "id": "mat_khong_gian_manh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_kim_loai_linh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_thiet_khoang_tho",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_thit_tho",
-                    "mat_da_tho",
-                    "mat_xuong_vun"
+                    {
+                        "id": "mat_thit_tho",
+                        "weight": 45
+                    },
+                    {
+                        "id": "mat_da_tho",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_xuong_vun",
+                        "weight": 15
+                    }
                 ]
             },
             {
@@ -69,7 +98,15 @@
         "id": "thanh_lam_tran",
         "staminaCost": 10,
         "minLevel": 1,
-        "travelTime": 0
+        "travelTime": 0,
+        "specialties": [
+            "mat_thao_moc_thanh_lam",
+            "mat_thiet_khoang_tho"
+        ],
+        "specialtyNames": [
+            "Thanh Lam Diệp",
+            "Thiết Khoáng Thô"
+        ]
     },
     "hac_phong_lam": {
         "name": "Hắc Phong Lâm",
@@ -90,27 +127,56 @@
                 "type": "herb",
                 "weight": 25,
                 "pools": [
-                    "thanh_linh_thao",
-                    "hoa_linh_chi",
-                    "bang_linh_thao"
+                    {
+                        "id": "thanh_linh_thao",
+                        "weight": 40
+                    },
+                    {
+                        "id": "hoa_linh_chi",
+                        "weight": 35
+                    },
+                    {
+                        "id": "bang_linh_thao",
+                        "weight": 25
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 10,
                 "pools": [
-                    "mat_kim_loai_linh",
-                    "mat_tinh_thach"
+                    {
+                        "id": "mat_kim_loai_linh",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_tinh_thach",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_hac_thach",
+                        "weight": 25,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_go_linh",
-                    "mat_nhua_cay",
-                    "mat_da_ran",
-                    "mat_noc_xa"
+                    {
+                        "id": "mat_go_linh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_nhua_hac_phong",
+                        "weight": 35,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_da_ran",
+                        "weight": 30
+                    }
                 ]
             },
             {
@@ -142,7 +208,15 @@
         "id": "hac_phong_lam",
         "staminaCost": 12,
         "minLevel": 8,
-        "travelTime": 15
+        "travelTime": 15,
+        "specialties": [
+            "mat_nhua_hac_phong",
+            "mat_hac_thach"
+        ],
+        "specialtyNames": [
+            "Nhựa Hắc Phong Mộc",
+            "Hắc Phong Thạch"
+        ]
     },
     "vong_linh_coc": {
         "name": "Vong Linh Cốc",
@@ -163,28 +237,56 @@
                 "type": "herb",
                 "weight": 15,
                 "pools": [
-                    "doc_thao",
-                    "kim_linh_thao",
-                    "mat_am_hon_thao"
+                    {
+                        "id": "doc_thao",
+                        "weight": 45
+                    },
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 25
+                    },
+                    {
+                        "id": "mat_am_hon_thao",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 20,
                 "pools": [
-                    "mat_tinh_thach",
-                    "mat_kim_loai_linh",
-                    "mat_khong_gian_thach"
+                    {
+                        "id": "mat_tinh_thach",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_khong_gian_thach",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_u_hon_thach",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_hon_tan",
-                    "mat_manh_ky_uc",
-                    "mat_xuong_vun",
-                    "mat_noi_dan_nho"
+                    {
+                        "id": "mat_hon_tan",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_manh_ky_uc",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_noi_dan_nho",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -216,7 +318,15 @@
         "id": "vong_linh_coc",
         "staminaCost": 15,
         "minLevel": 18,
-        "travelTime": 25
+        "travelTime": 25,
+        "specialties": [
+            "mat_am_hon_thao",
+            "mat_u_hon_thach"
+        ],
+        "specialtyNames": [
+            "Ám Hồn Thảo",
+            "U Hồn Thạch"
+        ]
     },
     "bac_suong_canh": {
         "name": "Bắc Sương Cảnh",
@@ -237,25 +347,52 @@
                 "type": "herb",
                 "weight": 25,
                 "pools": [
-                    "bang_linh_thao",
-                    "mat_huyen_bang_hoa",
-                    "thanh_linh_thao"
+                    {
+                        "id": "bang_linh_thao",
+                        "weight": 45
+                    },
+                    {
+                        "id": "thanh_linh_thao",
+                        "weight": 25
+                    },
+                    {
+                        "id": "mat_huyen_bang_hoa",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 12,
                 "pools": [
-                    "mat_tinh_thach",
-                    "mat_kim_loai_linh"
+                    {
+                        "id": "mat_tinh_thach",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_kim_loai_linh",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_bang_phach_thach",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 8,
                 "pools": [
-                    "mat_noi_dan_nho",
-                    "mat_xuong_vun"
+                    {
+                        "id": "mat_noi_dan_nho",
+                        "weight": 50
+                    },
+                    {
+                        "id": "mat_xuong_vun",
+                        "weight": 50
+                    }
                 ]
             },
             {
@@ -288,7 +425,15 @@
         "id": "bac_suong_canh",
         "staminaCost": 18,
         "minLevel": 30,
-        "travelTime": 35
+        "travelTime": 35,
+        "specialties": [
+            "mat_huyen_bang_hoa",
+            "mat_bang_phach_thach"
+        ],
+        "specialtyNames": [
+            "Huyền Băng Hoa",
+            "Băng Phách Thạch"
+        ]
     },
     "co_moc_linh_vien": {
         "name": "Cổ Mộc Linh Viên",
@@ -309,28 +454,56 @@
                 "type": "herb",
                 "weight": 35,
                 "pools": [
-                    "linh_thao",
-                    "thanh_linh_thao",
-                    "hoa_linh_chi",
-                    "mat_huyen_thien_hoa",
-                    "kim_linh_thao"
+                    {
+                        "id": "linh_thao",
+                        "weight": 30
+                    },
+                    {
+                        "id": "thanh_linh_thao",
+                        "weight": 25
+                    },
+                    {
+                        "id": "hoa_linh_chi",
+                        "weight": 20
+                    },
+                    {
+                        "id": "mat_huyen_thien_hoa",
+                        "weight": 25,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 10,
                 "pools": [
-                    "mat_tinh_thach",
-                    "mat_khong_gian_thach"
+                    {
+                        "id": "mat_tinh_thach",
+                        "weight": 60
+                    },
+                    {
+                        "id": "mat_khong_gian_thach",
+                        "weight": 40
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_go_linh",
-                    "mat_nhua_cay",
-                    "mat_hat_moc"
+                    {
+                        "id": "mat_go_linh",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_co_moc_tam",
+                        "weight": 35,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hat_moc",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -362,7 +535,15 @@
         "id": "co_moc_linh_vien",
         "staminaCost": 22,
         "minLevel": 45,
-        "travelTime": 45
+        "travelTime": 45,
+        "specialties": [
+            "mat_huyen_thien_hoa",
+            "mat_co_moc_tam"
+        ],
+        "specialtyNames": [
+            "Huyền Thiên Hoa",
+            "Cổ Mộc Tinh Tâm"
+        ]
     },
     "am_sat_hoang": {
         "name": "Ám Sát Hoang",
@@ -383,25 +564,48 @@
                 "type": "herb",
                 "weight": 10,
                 "pools": [
-                    "doc_thao",
-                    "mat_am_hon_thao"
+                    {
+                        "id": "doc_thao",
+                        "weight": 50
+                    },
+                    {
+                        "id": "mat_sa_tinh_thao",
+                        "weight": 50,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_tinh_thach",
-                    "mat_kim_loai_linh",
-                    "mat_huyet_tinh"
+                    {
+                        "id": "mat_tinh_thach",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_kim_loai_linh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_hac_sa_tinh",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_noi_dan_trung",
-                    "mat_vo_cung"
+                    {
+                        "id": "mat_noi_dan_trung",
+                        "weight": 50
+                    },
+                    {
+                        "id": "mat_vo_cung",
+                        "weight": 50
+                    }
                 ]
             },
             {
@@ -433,7 +637,15 @@
         "id": "am_sat_hoang",
         "staminaCost": 26,
         "minLevel": 65,
-        "travelTime": 60
+        "travelTime": 60,
+        "specialties": [
+            "mat_sa_tinh_thao",
+            "mat_hac_sa_tinh"
+        ],
+        "specialtyNames": [
+            "Sa Tinh Thảo",
+            "Hắc Sa Tinh"
+        ]
     },
     "thiet_huyet_son": {
         "name": "Thiết Huyết Sơn",
@@ -454,25 +666,48 @@
                 "type": "herb",
                 "weight": 10,
                 "pools": [
-                    "kim_linh_thao"
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 100
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 30,
                 "pools": [
-                    "mat_kim_loai_linh",
-                    "mat_tinh_thach",
-                    "mat_tinh_hoa",
-                    "mat_loi_tinh"
+                    {
+                        "id": "mat_kim_loai_linh",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_tinh_thach",
+                        "weight": 25
+                    },
+                    {
+                        "id": "mat_tinh_hoa",
+                        "weight": 25,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_thiet_huyet_khoang",
+                        "weight": 20,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_huyet_tinh",
-                    "mat_vo_cung"
+                    {
+                        "id": "mat_huyet_tinh",
+                        "weight": 60
+                    },
+                    {
+                        "id": "mat_vo_cung",
+                        "weight": 40
+                    }
                 ]
             },
             {
@@ -504,7 +739,15 @@
         "id": "thiet_huyet_son",
         "staminaCost": 30,
         "minLevel": 90,
-        "travelTime": 75
+        "travelTime": 75,
+        "specialties": [
+            "mat_thiet_huyet_khoang",
+            "mat_tinh_hoa"
+        ],
+        "specialtyNames": [
+            "Thiết Huyết Quặng",
+            "Tinh Hỏa"
+        ]
     },
     "thien_kiep_uyen": {
         "name": "Thiên Kiếp Uyên",
@@ -525,26 +768,56 @@
                 "type": "herb",
                 "weight": 10,
                 "pools": [
-                    "thien_linh_thao",
-                    "kim_linh_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 40
+                    },
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 60
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 30,
                 "pools": [
-                    "mat_loi_tinh",
-                    "mat_hac_tinh",
-                    "mat_thien_thach",
-                    "mat_loi_dia"
+                    {
+                        "id": "mat_loi_tinh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_hac_tinh",
+                        "weight": 25
+                    },
+                    {
+                        "id": "mat_thien_thach",
+                        "weight": 20
+                    },
+                    {
+                        "id": "mat_loi_tinh_thach",
+                        "weight": 20,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_ma_nhan",
-                    "mat_linh_hon_di_bien"
+                    {
+                        "id": "mat_hach_sam",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_ma_nhan",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_linh_hon_di_bien",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -576,7 +849,15 @@
         "id": "thien_kiep_uyen",
         "staminaCost": 35,
         "minLevel": 120,
-        "travelTime": 90
+        "travelTime": 90,
+        "specialties": [
+            "mat_hach_sam",
+            "mat_loi_tinh_thach"
+        ],
+        "specialtyNames": [
+            "Hạch Sấm",
+            "Lôi Kiếp Thạch"
+        ]
     },
     "huyet_ma_chien_truong": {
         "name": "Huyết Ma Chiến Trường",
@@ -597,26 +878,52 @@
                 "type": "herb",
                 "weight": 10,
                 "pools": [
-                    "kim_linh_thao",
-                    "mat_am_hon_thao"
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 60
+                    },
+                    {
+                        "id": "mat_am_hon_thao",
+                        "weight": 40
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_huyet_tinh",
-                    "mat_loi_tinh",
-                    "mat_tinh_thach"
+                    {
+                        "id": "mat_huyet_tinh",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_loi_tinh",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_huyet_tinh_thach",
+                        "weight": 30,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_am_khi",
-                    "mat_noi_dan_trung",
-                    "mat_noi_dan_lon"
+                    {
+                        "id": "mat_xac_khi",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_am_khi",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_noi_dan_trung",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -648,7 +955,15 @@
         "id": "huyet_ma_chien_truong",
         "staminaCost": 42,
         "minLevel": 160,
-        "travelTime": 110
+        "travelTime": 110,
+        "specialties": [
+            "mat_huyet_tinh_thach",
+            "mat_xac_khi"
+        ],
+        "specialtyNames": [
+            "Huyết Ma Cốt Tinh",
+            "Xác Khí Cổ"
+        ]
     },
     "thien_hoa_linh_dia": {
         "name": "Thiên Hỏa Linh Địa",
@@ -669,26 +984,52 @@
                 "type": "herb",
                 "weight": 20,
                 "pools": [
-                    "hoa_linh_chi",
-                    "mat_huyen_thien_hoa",
-                    "kim_linh_thao"
+                    {
+                        "id": "hoa_linh_chi",
+                        "weight": 50,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_huyen_thien_hoa",
+                        "weight": 30
+                    },
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 20
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_tinh_hoa",
-                    "mat_loi_tinh",
-                    "mat_tinh_thach"
+                    {
+                        "id": "mat_tinh_hoa",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_dia_hoa_tinh",
+                        "weight": 35,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_loi_tinh",
+                        "weight": 25
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 5,
                 "pools": [
-                    "mat_long_hoa",
-                    "mat_noi_dan_trung"
+                    {
+                        "id": "mat_long_hoa",
+                        "weight": 60
+                    },
+                    {
+                        "id": "mat_noi_dan_trung",
+                        "weight": 40
+                    }
                 ]
             },
             {
@@ -720,7 +1061,15 @@
         "id": "thien_hoa_linh_dia",
         "staminaCost": 50,
         "minLevel": 220,
-        "travelTime": 130
+        "travelTime": 130,
+        "specialties": [
+            "hoa_linh_chi",
+            "mat_dia_hoa_tinh"
+        ],
+        "specialtyNames": [
+            "Hỏa Linh Chi Thượng Phẩm",
+            "Địa Hỏa Tinh Thạch"
+        ]
     },
     "u_minh_quy_vuc": {
         "name": "U Minh Quỷ Vực",
@@ -741,26 +1090,52 @@
                 "type": "herb",
                 "weight": 10,
                 "pools": [
-                    "doc_thao",
-                    "mat_am_hon_thao"
+                    {
+                        "id": "doc_thao",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_u_minh_thao",
+                        "weight": 60,
+                        "isSpecialty": true
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_hac_tinh",
-                    "mat_loi_dia",
-                    "mat_hu_khong_tinh"
+                    {
+                        "id": "mat_hac_tinh",
+                        "weight": 40
+                    },
+                    {
+                        "id": "mat_loi_dia",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_hu_khong_tinh",
+                        "weight": 25
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_ma_nhan",
-                    "mat_linh_hon_di_bien",
-                    "mat_tan_phach"
+                    {
+                        "id": "mat_ma_nhan",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_tan_phach",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_linh_hon_di_bien",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -792,7 +1167,15 @@
         "id": "u_minh_quy_vuc",
         "staminaCost": 60,
         "minLevel": 300,
-        "travelTime": 150
+        "travelTime": 150,
+        "specialties": [
+            "mat_u_minh_thao",
+            "mat_ma_nhan"
+        ],
+        "specialtyNames": [
+            "U Minh Quỷ Thảo",
+            "Ma Nhãn U Minh"
+        ]
     },
     "thien_dao_tan_tich": {
         "name": "Thiên Đạo Tàn Tích",
@@ -813,26 +1196,52 @@
                 "type": "herb",
                 "weight": 15,
                 "pools": [
-                    "thien_linh_thao",
-                    "kim_linh_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 60
+                    },
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 40
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_thien_thach",
-                    "mat_hac_tinh",
-                    "mat_tinh_thach_lon",
-                    "ban_nguyen_tinh"
+                    {
+                        "id": "mat_thien_thach",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hac_tinh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_tinh_thach_lon",
+                        "weight": 25
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_tan_hon",
-                    "mat_linh_hon_di_bien"
+                    {
+                        "id": "mat_tran_phap_tan_phien",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_tan_hon",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_linh_hon_di_bien",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -864,7 +1273,15 @@
         "id": "thien_dao_tan_tich",
         "staminaCost": 72,
         "minLevel": 400,
-        "travelTime": 180
+        "travelTime": 180,
+        "specialties": [
+            "mat_tran_phap_tan_phien",
+            "mat_thien_thach"
+        ],
+        "specialtyNames": [
+            "Tàn Phiến Trận Đồ",
+            "Thiên Thạch Thượng Cổ"
+        ]
     },
     "vo_tan_hu_khong": {
         "name": "Vô Tận Hư Không",
@@ -885,26 +1302,48 @@
                 "type": "herb",
                 "weight": 5,
                 "pools": [
-                    "thien_linh_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 100
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 35,
                 "pools": [
-                    "mat_khong_gian_thach",
-                    "mat_hu_khong_tinh",
-                    "mat_hu_khong",
-                    "mat_gioi_tu_thach",
-                    "mat_tinh_thach_lon"
+                    {
+                        "id": "mat_khong_gian_thach",
+                        "weight": 35,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hu_khong_tinh",
+                        "weight": 30,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hu_khong",
+                        "weight": 20
+                    },
+                    {
+                        "id": "mat_gioi_tu_thach",
+                        "weight": 15
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_linh_hon_di_bien",
-                    "mat_tan_phach"
+                    {
+                        "id": "mat_linh_hon_di_bien",
+                        "weight": 55
+                    },
+                    {
+                        "id": "mat_tan_phach",
+                        "weight": 45
+                    }
                 ]
             },
             {
@@ -936,7 +1375,15 @@
         "id": "vo_tan_hu_khong",
         "staminaCost": 85,
         "minLevel": 550,
-        "travelTime": 210
+        "travelTime": 210,
+        "specialties": [
+            "mat_hu_khong_tinh",
+            "mat_khong_gian_thach"
+        ],
+        "specialtyNames": [
+            "Hư Không Tinh",
+            "Không Gian Thạch"
+        ]
     },
     "cuu_u_than_uyen": {
         "name": "Cửu U Thần Uyên",
@@ -957,27 +1404,52 @@
                 "type": "herb",
                 "weight": 5,
                 "pools": [
-                    "thien_linh_thao",
-                    "mat_am_hon_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 60
+                    },
+                    {
+                        "id": "mat_am_hon_thao",
+                        "weight": 40
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 30,
                 "pools": [
-                    "mat_loi_dia",
-                    "mat_hac_tinh",
-                    "mat_hu_khong",
-                    "ban_nguyen_tinh"
+                    {
+                        "id": "mat_loi_dia",
+                        "weight": 45,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hac_tinh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_hu_khong",
+                        "weight": 20
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_tan_phach",
-                    "mat_noi_dan_lon",
-                    "mat_noi_dan_cuc"
+                    {
+                        "id": "mat_cuu_u_hac_thuy",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_tan_phach",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_noi_dan_lon",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -1009,7 +1481,15 @@
         "id": "cuu_u_than_uyen",
         "staminaCost": 100,
         "minLevel": 750,
-        "travelTime": 250
+        "travelTime": 250,
+        "specialties": [
+            "mat_cuu_u_hac_thuy",
+            "mat_loi_dia"
+        ],
+        "specialtyNames": [
+            "Cửu U Hắc Thủy",
+            "Lõi Địa"
+        ]
     },
     "thai_co_hong_hoang": {
         "name": "Thái Cổ Hồng Hoang",
@@ -1030,27 +1510,52 @@
                 "type": "herb",
                 "weight": 15,
                 "pools": [
-                    "thien_linh_thao",
-                    "kim_linh_thao",
-                    "mat_huyen_thien_hoa"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 50
+                    },
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_huyen_thien_hoa",
+                        "weight": 20
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_thien_thach",
-                    "mat_moc_hoang_tinh",
-                    "mat_loi_dia",
-                    "ban_nguyen_tinh"
+                    {
+                        "id": "mat_moc_hoang_tinh",
+                        "weight": 45,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_thien_thach",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_loi_dia",
+                        "weight": 20
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 5,
                 "pools": [
-                    "mat_ba_vuong_nanh",
-                    "mat_noi_dan_lon"
+                    {
+                        "id": "mat_ba_vuong_nanh",
+                        "weight": 60,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_noi_dan_lon",
+                        "weight": 40
+                    }
                 ]
             },
             {
@@ -1082,7 +1587,15 @@
         "id": "thai_co_hong_hoang",
         "staminaCost": 120,
         "minLevel": 1000,
-        "travelTime": 300
+        "travelTime": 300,
+        "specialties": [
+            "mat_moc_hoang_tinh",
+            "mat_ba_vuong_nanh"
+        ],
+        "specialtyNames": [
+            "Mộc Hoang Tinh",
+            "Nanh Bá Vương Thượng Cổ"
+        ]
     },
     "chu_thien_tinh_hai": {
         "name": "Chư Thiên Tinh Hải",
@@ -1103,26 +1616,48 @@
                 "type": "herb",
                 "weight": 10,
                 "pools": [
-                    "thien_linh_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 100
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 30,
                 "pools": [
-                    "mat_thien_thach",
-                    "mat_gioi_tu_thach",
-                    "mat_tinh_hoa",
-                    "mat_hu_khong_tinh",
-                    "ban_nguyen_tinh"
+                    {
+                        "id": "mat_tinh_tieu_thach",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_thien_thach",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_gioi_tu_thach",
+                        "weight": 20
+                    },
+                    {
+                        "id": "mat_hu_khong_tinh",
+                        "weight": 10
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_loi_de_vu",
-                    "mat_linh_hon_di_bien"
+                    {
+                        "id": "mat_loi_de_vu",
+                        "weight": 50,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_linh_hon_di_bien",
+                        "weight": 50
+                    }
                 ]
             },
             {
@@ -1154,7 +1689,15 @@
         "id": "chu_thien_tinh_hai",
         "staminaCost": 140,
         "minLevel": 1500,
-        "travelTime": 360
+        "travelTime": 360,
+        "specialties": [
+            "mat_tinh_tieu_thach",
+            "mat_loi_de_vu"
+        ],
+        "specialtyNames": [
+            "Tinh Tiêu Thạch",
+            "Lôi Đế Vũ"
+        ]
     },
     "hon_don_tien_vuc": {
         "name": "Hỗn Độn Tiên Vực",
@@ -1175,26 +1718,52 @@
                 "type": "herb",
                 "weight": 15,
                 "pools": [
-                    "thien_linh_thao",
-                    "kim_linh_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 60
+                    },
+                    {
+                        "id": "kim_linh_thao",
+                        "weight": 40
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "mat_gioi_tu_thach",
-                    "mat_hu_khong_tinh",
-                    "mat_tinh_thach_lon",
-                    "ban_nguyen_tinh"
+                    {
+                        "id": "mat_gioi_tu_thach",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hu_khong_tinh",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_tinh_thach_lon",
+                        "weight": 25
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_huyet_ma_ban_giap",
-                    "mat_noi_dan_cuc"
+                    {
+                        "id": "mat_hon_don_khi",
+                        "weight": 45,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_huyet_ma_ban_giap",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_noi_dan_cuc",
+                        "weight": 20
+                    }
                 ]
             },
             {
@@ -1225,7 +1794,15 @@
         "id": "hon_don_tien_vuc",
         "staminaCost": 165,
         "minLevel": 2500,
-        "travelTime": 420
+        "travelTime": 420,
+        "specialties": [
+            "mat_hon_don_khi",
+            "mat_gioi_tu_thach"
+        ],
+        "specialtyNames": [
+            "Hỗn Độn Khí Tinh",
+            "Giới Tử Thạch"
+        ]
     },
     "hon_nguyen_dao_canh": {
         "name": "Hỗn Nguyên Đạo Cảnh",
@@ -1246,26 +1823,52 @@
                 "type": "herb",
                 "weight": 15,
                 "pools": [
-                    "thien_linh_thao"
+                    {
+                        "id": "thien_linh_thao",
+                        "weight": 100
+                    }
                 ]
             },
             {
                 "type": "mineral",
                 "weight": 25,
                 "pools": [
-                    "ban_nguyen_tinh",
-                    "mat_hu_khong",
-                    "mat_thien_thach",
-                    "mat_loi_dia",
-                    "mat_gioi_tu_thach"
+                    {
+                        "id": "ban_nguyen_tinh",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_hu_khong",
+                        "weight": 30
+                    },
+                    {
+                        "id": "mat_thien_thach",
+                        "weight": 20
+                    },
+                    {
+                        "id": "mat_loi_dia",
+                        "weight": 10
+                    }
                 ]
             },
             {
                 "type": "material",
                 "weight": 10,
                 "pools": [
-                    "mat_huyet_ma_ban_giap",
-                    "mat_noi_dan_cuc"
+                    {
+                        "id": "mat_hon_nguyen_chau",
+                        "weight": 40,
+                        "isSpecialty": true
+                    },
+                    {
+                        "id": "mat_huyet_ma_ban_giap",
+                        "weight": 35
+                    },
+                    {
+                        "id": "mat_noi_dan_cuc",
+                        "weight": 25
+                    }
                 ]
             },
             {
@@ -1296,6 +1899,14 @@
         "id": "hon_nguyen_dao_canh",
         "staminaCost": 200,
         "minLevel": 4000,
-        "travelTime": 500
+        "travelTime": 500,
+        "specialties": [
+            "mat_hon_nguyen_chau",
+            "ban_nguyen_tinh"
+        ],
+        "specialtyNames": [
+            "Hỗn Nguyên Đạo Châu",
+            "Bản Nguyên Tinh"
+        ]
     }
 }
