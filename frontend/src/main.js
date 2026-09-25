@@ -429,7 +429,30 @@ function renderGame() {
         </div>
 
         <ul class="nav" style="${(p.travelRemaining || 0) > 0 ? 'pointer-events:none; opacity:0.6;' : ''}">
-          <!-- PHÂN HỆ 1: TU CHÂN (Tự Thân & Tu Luyện) -->
+          <!-- PHÂN HỆ 1: KHÁM PHÁ & HÀNH TRÌNH (Trọng Tâm Gameplay) -->
+          <li class="nav-section ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" data-section="hanhtrinh">
+            <span>⚔️ KHÁM PHÁ & HÀNH TRÌNH</span>
+            <span class="section-indicator">▾</span>
+          </li>
+          <div class="nav-group ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" id="sec-hanhtrinh">
+            <li class="nav-item nav-item--hero ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
+              <span class="icon">🔍</span> Khám Phá (${areaName})
+              <span class="badge" style="background: linear-gradient(135deg, #e8a43a, #f0c030); color: #1a1a2e; font-weight: 800; font-size: 9px; padding: 2px 6px;">CHÍNH</span>
+            </li>
+            <li class="nav-item ${['travel', 'dungeon', 'tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
+              <span class="icon">🗺️</span> Ngao Du Bát Hoang
+              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
+            </li>
+            <li class="nav-item ${['quests', 'dailyquest'].includes(state.currentPage) ? 'active' : ''}" data-page="quests">
+              <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
+              ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
+            </li>
+            <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
+              <span class="icon">💀</span> Thí Luyện Ác Nghiệp
+            </li>
+          </div>
+
+          <!-- PHÂN HỆ 2: TU CHÂN (Tự Thân & Tu Luyện) -->
           <li class="nav-section ${collapsedNav.tuchan ? 'collapsed' : ''}" data-section="tuchan">
             <span>TU CHÂN</span>
             <span class="section-indicator">▾</span>
@@ -449,28 +472,6 @@ function renderGame() {
             <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
               <span class="icon">🎒</span> Càn Khôn Túi
               ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--orange)" title="Đan độc">⏳</span>` : ''}
-            </li>
-          </div>
-
-          <!-- PHÂN HỆ 2: HÀNH TRÌNH (Khám Phá & Lộ Trình) -->
-          <li class="nav-section ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" data-section="hanhtrinh">
-            <span>HÀNH TRÌNH</span>
-            <span class="section-indicator">▾</span>
-          </li>
-          <div class="nav-group ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" id="sec-hanhtrinh">
-            <li class="nav-item ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
-              <span class="icon">🔍</span> Thám Hiểm (${areaName})
-            </li>
-            <li class="nav-item ${['travel', 'dungeon', 'tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
-              <span class="icon">🗺️</span> Ngao Du Bát Hoang
-              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
-            </li>
-            <li class="nav-item ${['quests', 'dailyquest'].includes(state.currentPage) ? 'active' : ''}" data-page="quests">
-              <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
-              ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
-            </li>
-            <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
-              <span class="icon">💀</span> Thí Luyện Ác Nghiệp
             </li>
           </div>
 

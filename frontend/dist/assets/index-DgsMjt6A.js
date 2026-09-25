@@ -33,6 +33,10 @@
       </div>
     </div>
 
+    <!-- KẾT QUẢ KHÁM PHÁ & CHIẾN ĐẤU (Ưu tiên hiển thị ngay trên đầu) -->
+    <div id="exploreResult"></div>
+    <div id="combatResult"></div>
+
     <!-- DẤU VẾT YÊU THÚ (tấn công) -->
     <div class="panel mt-md">
       <div class="panel-title">⚔️ Yêu Thú Đang Rình Rập <span class="subtitle">(Tối đa 5 con)</span></div>
@@ -40,9 +44,6 @@
         <div style="padding: 16px; text-align: center;" class="text-dim">Đang rà soát dấu vết...</div>
       </div>
     </div>
-
-    <div id="combatResult"></div>
-    <div id="exploreResult"></div>
 
     <!-- QUẦN THỂ YÊU THÚ -->
     <div class="panel mt-md">
@@ -2781,7 +2782,30 @@ Không ai có thể vượt qua.
         </div>
 
         <ul class="nav" style="${(a.travelRemaining||0)>0?"pointer-events:none; opacity:0.6;":""}">
-          <!-- PHÂN HỆ 1: TU CHÂN (Tự Thân & Tu Luyện) -->
+          <!-- PHÂN HỆ 1: KHÁM PHÁ & HÀNH TRÌNH (Trọng Tâm Gameplay) -->
+          <li class="nav-section ${d.hanhtrinh?"collapsed":""}" data-section="hanhtrinh">
+            <span>⚔️ KHÁM PHÁ & HÀNH TRÌNH</span>
+            <span class="section-indicator">▾</span>
+          </li>
+          <div class="nav-group ${d.hanhtrinh?"collapsed":""}" id="sec-hanhtrinh">
+            <li class="nav-item nav-item--hero ${E.currentPage==="combat"?"active":""}" data-page="combat">
+              <span class="icon">🔍</span> Khám Phá (${g})
+              <span class="badge" style="background: linear-gradient(135deg, #e8a43a, #f0c030); color: #1a1a2e; font-weight: 800; font-size: 9px; padding: 2px 6px;">CHÍNH</span>
+            </li>
+            <li class="nav-item ${["travel","dungeon","tiencanh"].includes(E.currentPage)?"active":""}" data-page="travel">
+              <span class="icon">🗺️</span> Ngao Du Bát Hoang
+              ${(a.travelRemaining??0)>0?'<span class="badge" style="background:var(--blue)">⏳</span>':""}
+            </li>
+            <li class="nav-item ${["quests","dailyquest"].includes(E.currentPage)?"active":""}" data-page="quests">
+              <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
+              ${(a.activeQuests||[]).filter(f=>f.status==="active").length>0?`<span class="badge" style="background:var(--purple)">${(a.activeQuests||[]).filter(f=>f.status==="active").length}</span>`:""}
+            </li>
+            <li class="nav-item ${E.currentPage==="crimes"?"active":""}" data-page="crimes">
+              <span class="icon">💀</span> Thí Luyện Ác Nghiệp
+            </li>
+          </div>
+
+          <!-- PHÂN HỆ 2: TU CHÂN (Tự Thân & Tu Luyện) -->
           <li class="nav-section ${d.tuchan?"collapsed":""}" data-section="tuchan">
             <span>TU CHÂN</span>
             <span class="section-indicator">▾</span>
@@ -2801,28 +2825,6 @@ Không ai có thể vượt qua.
             <li class="nav-item ${E.currentPage==="inventory"?"active":""}" data-page="inventory">
               <span class="icon">🎒</span> Càn Khôn Túi
               ${(a.medCooldownRemaining??0)>0?'<span class="badge" style="background:var(--orange)" title="Đan độc">⏳</span>':""}
-            </li>
-          </div>
-
-          <!-- PHÂN HỆ 2: HÀNH TRÌNH (Khám Phá & Lộ Trình) -->
-          <li class="nav-section ${d.hanhtrinh?"collapsed":""}" data-section="hanhtrinh">
-            <span>HÀNH TRÌNH</span>
-            <span class="section-indicator">▾</span>
-          </li>
-          <div class="nav-group ${d.hanhtrinh?"collapsed":""}" id="sec-hanhtrinh">
-            <li class="nav-item ${E.currentPage==="combat"?"active":""}" data-page="combat">
-              <span class="icon">🔍</span> Thám Hiểm (${g})
-            </li>
-            <li class="nav-item ${["travel","dungeon","tiencanh"].includes(E.currentPage)?"active":""}" data-page="travel">
-              <span class="icon">🗺️</span> Ngao Du Bát Hoang
-              ${(a.travelRemaining??0)>0?'<span class="badge" style="background:var(--blue)">⏳</span>':""}
-            </li>
-            <li class="nav-item ${["quests","dailyquest"].includes(E.currentPage)?"active":""}" data-page="quests">
-              <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
-              ${(a.activeQuests||[]).filter(f=>f.status==="active").length>0?`<span class="badge" style="background:var(--purple)">${(a.activeQuests||[]).filter(f=>f.status==="active").length}</span>`:""}
-            </li>
-            <li class="nav-item ${E.currentPage==="crimes"?"active":""}" data-page="crimes">
-              <span class="icon">💀</span> Thí Luyện Ác Nghiệp
             </li>
           </div>
 
@@ -2962,4 +2964,4 @@ Không ai có thể vượt qua.
         <div class="bar-track"><div class="bar-fill xp" style="width:${x}%"></div></div>
       </div>
       <div class="sidebar-gold">💎 ${a.gold??0} Linh Thạch</div>`}const o=document.querySelector('.nav-item[data-page="stats"]');if(o){let $="";a.statPoints>0&&($+=`<span class="badge">${a.statPoints}</span>`),(y=a.realmInfo)!=null&&y.canBreakthrough&&($+='<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite">!</span>'),o.querySelectorAll(".badge").forEach(x=>x.remove()),o.insertAdjacentHTML("beforeend",$)}}async function D(){try{const[a,t,e,c,o,k]=await Promise.all([N.getMonsters(),N.getSkills(),N.getItems(),N.getMedicines(),N.getCrimes(),N.getEducation()]);E.monsters=a.monsters||[],E.skills=t.skills||[],E.items=e.items||[],E.medicines=c.medicines||[],E.crimes=o.crimes||[],E.educationTrees=k.trees||[],E.exploration=await N.getExploration(),E.recipes=(await N.getRecipes()).recipes,E.npcs=(await N.getNpcs()).npcs||[]}catch(a){console.error("Lỗi tải dữ liệu:",a)}}function j(a,t="info"){var c;(c=document.querySelector(".notification"))==null||c.remove();const e=document.createElement("div");e.className=`notification ${t}`,e.textContent=a,document.body.appendChild(e),setTimeout(()=>{e.style.opacity="0",e.style.transition="opacity 0.3s",setTimeout(()=>e.remove(),300)},3e3)}Gt();
-//# sourceMappingURL=index-BTBGMPze.js.map
+//# sourceMappingURL=index-DgsMjt6A.js.map

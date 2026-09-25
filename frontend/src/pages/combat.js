@@ -45,6 +45,10 @@ export function pageCombat(el, ctx) {
       </div>
     </div>
 
+    <!-- KẾT QUẢ KHÁM PHÁ & CHIẾN ĐẤU (Ưu tiên hiển thị ngay trên đầu) -->
+    <div id="exploreResult"></div>
+    <div id="combatResult"></div>
+
     <!-- DẤU VẾT YÊU THÚ (tấn công) -->
     <div class="panel mt-md">
       <div class="panel-title">⚔️ Yêu Thú Đang Rình Rập <span class="subtitle">(Tối đa 5 con)</span></div>
@@ -52,9 +56,6 @@ export function pageCombat(el, ctx) {
         <div style="padding: 16px; text-align: center;" class="text-dim">Đang rà soát dấu vết...</div>
       </div>
     </div>
-
-    <div id="combatResult"></div>
-    <div id="exploreResult"></div>
 
     <!-- QUẦN THỂ YÊU THÚ -->
     <div class="panel mt-md">
