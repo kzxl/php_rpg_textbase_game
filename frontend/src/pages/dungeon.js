@@ -74,6 +74,9 @@ export function pageDungeon(el, ctx) {
           const timeEl = el.querySelector(`#countdown-${td.id}`)
           if (timeEl) {
             timeEl.textContent = formatTime(td.remainingSeconds)
+            if (td.remainingSeconds < 900) {
+              timeEl.parentElement?.classList.add('countdown-urgency')
+            }
           }
         } else {
           hasExpired = true
@@ -114,29 +117,49 @@ export function pageDungeon(el, ctx) {
     const isBoss = r.currentWave === r.totalWaves
     const progress = ((r.currentWave - 1) / r.totalWaves * 100).toFixed(0)
     const isExtreme = (r.difficultyMult || 1) >= 2.0
+    const diffMult = (r.difficultyMult || 1.0).toFixed(2)
 
     return `
-      <div class="panel" style="border-color:${isExtreme ? 'var(--red)' : 'var(--gold)'};margin-bottom:16px;box-shadow: 0 0 15px rgba(${isExtreme ? '239, 68, 68' : '234, 179, 8'}, 0.2)">
+      <div class="panel ${isExtreme ? 'realm-card--permanent' : ''}" style="border-color:${isExtreme ? 'var(--red)' : 'var(--gold)'};margin-bottom:16px;box-shadow: 0 0 15px rgba(${isExtreme ? '239, 68, 68' : '234, 179, 8'}, 0.25)">
         <div class="panel-title" style="color:${isExtreme ? 'var(--red)' : 'var(--gold)'};display:flex;justify-content:space-between;align-items:center">
           <span>⚡ Đang Trong Bí Cảnh</span>
-          ${isExtreme ? `<span class="badge" style="background:rgba(239,68,68,0.2);color:#ef4444;border:1px solid #ef4444;font-size:11px">⚠️ Quái Hung Hiểm x${r.difficultyMult}</span>` : ''}
+          ${isExtreme ? `<span class="badge-danger-apex">⚠️ Quái Cuồng Bạo x${diffMult}</span>` : `<span class="badge" style="background:rgba(234,179,8,0.2);color:var(--gold);border:1px solid var(--gold);font-size:11px">Độ Khó x${diffMult}</span>`}
         </div>
         <div class="panel-body" style="padding:14px 16px">
-          <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text-bright)">${r.dungeonName || r.dungeonId}</div>
-          <div style="font-size:12px;opacity:0.7;margin-bottom:10px">
-            ${isBoss ? '🔥 TẦNG CUỐI CÙNG — TRÙM BÍ CẢNH TRẤN THỦ!' : `Đang vượt ải tầng ${r.currentWave} / ${r.totalWaves}`}
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-            <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:10px;overflow:hidden">
-              <div style="width:${progress}%;height:100%;background:linear-gradient(90deg,var(--blue),${isExtreme ? '#ef4444' : 'var(--gold)'});border-radius:4px;transition:width 0.3s"></div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text-bright)">${r.dungeonName || r.dungeonId}</div>
+
+          <!-- Highlight Banner -->
+          ${isBoss ? `
+            <div style="background:linear-gradient(90deg, rgba(239,68,68,0.25) 0%, rgba(185,28,28,0.15) 100%);border:1px solid #ef4444;border-radius:6px;padding:8px 12px;margin-bottom:12px;text-align:center">
+              <span style="font-size:13px;font-weight:800;color:#fca5a5;letter-spacing:0.5px">
+                🔥 TẦNG CUỐI CÙNG — TRÙM BÍ CẢNH TRẤN THỦ! 🔥
+              </span>
             </div>
-            <span style="font-size:12px;font-weight:600;opacity:0.8">Tầng ${r.currentWave}/${r.totalWaves}</span>
+          ` : `
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 12px;margin-bottom:12px">
+              <span style="font-size:12px;opacity:0.85">
+                ⚔️ Đang vượt ải: <strong>Tầng ${r.currentWave} / ${r.totalWaves}</strong>
+              </span>
+            </div>
+          `}
+
+          <!-- Wave Progress Indicator -->
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;margin-bottom:6px">
+              <span style="color:var(--text-dim)">Tiến Độ Ải:</span>
+              <span style="color:${isBoss ? '#fca5a5' : 'var(--gold)'};font-weight:700">Tầng ${r.currentWave} / ${r.totalWaves} (${progress}%)</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:12px;overflow:hidden;padding:1px;border:1px solid rgba(255,255,255,0.1)">
+              <div style="width:${progress}%;height:100%;background:linear-gradient(90deg, var(--blue), ${isExtreme ? '#ef4444' : 'var(--gold)'});border-radius:4px;transition:width 0.3s"></div>
+            </div>
           </div>
+
+          <!-- Action Buttons -->
           <div style="display:flex;gap:10px">
-            <button class="btn ${isExtreme ? 'btn--red' : 'btn--gold'}" id="btnFight" style="flex:1;font-weight:700" ${state.player?.hospitalRemaining > 0 ? 'disabled' : ''}>
-              ${isBoss ? '🐉 Đại Chiến Trùm Cuối!' : '⚔️ Chiến Đấu Tầng ' + r.currentWave}
+            <button class="btn ${isExtreme ? 'btn--red' : 'btn--gold'}" id="btnFight" style="flex:1;font-weight:700;font-size:14px" ${state.player?.hospitalRemaining > 0 ? 'disabled' : ''}>
+              ${isBoss ? '🐉 Đại Chiến Trùm Cuối!' : '⚔️ Tấn Công Ải ' + r.currentWave}
             </button>
-            <button class="btn btn--dark" id="btnAbandon">🚪 Rút Lui</button>
+            <button class="btn btn--dark" id="btnAbandon" style="padding:0 20px">🚪 Rút Lui</button>
           </div>
           ${state.player?.hospitalRemaining > 0 ? '<div style="color:var(--red);font-size:12px;margin-top:10px">🏥 Đang trọng thương, chờ hồi phục khí huyết...</div>' : ''}
         </div>
@@ -198,29 +221,47 @@ export function pageDungeon(el, ctx) {
     return d.timedDungeons.map(td => {
       const curRealm = state.player?.realm ?? 1
       const canEnter = curRealm >= td.requiredRealm
+      const diffMult = (td.difficultyMult || 1.1).toFixed(2)
+      const isUrgent = td.remainingSeconds < 900
+      const regularWaves = td.waves || (td.totalWaves > 1 ? td.totalWaves - 1 : 3)
+
+      const dropPills = [
+        '<span class="specialty-pill specialty-pill--herb">🌿 Linh Thảo</span>',
+        '<span class="specialty-pill specialty-pill--mineral">💎 Huyết Tinh</span>',
+        '<span class="specialty-pill specialty-pill--rare">🐾 Nội Đan</span>',
+        '<span class="specialty-pill specialty-pill--epic">💊 Tẩy Tủy Đan</span>'
+      ].join(' ')
 
       return `
-        <div class="list-item" style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;gap:12px">
-          <div style="font-size:26px;width:36px;text-align:center;padding-top:2px">🌀</div>
-          <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
-              <span style="font-weight:700;color:#e9d5ff;font-size:15px">${td.name}</span>
-              <span class="badge" style="background:rgba(168,85,247,0.25);color:#d8b4fe;border:1px solid #c084fc;font-size:11px;font-weight:700">
-                ⏳ Còn <span id="countdown-${td.id}">${formatTime(td.remainingSeconds)}</span>
-              </span>
-              <span class="badge bg-darker text-xs">Cảnh giới ${td.requiredRealm}+</span>
+        <div class="realm-card--timed" style="margin:12px;padding:16px">
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <div style="font-size:32px;width:40px;text-align:center;padding-top:2px">🌀</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                <span style="font-weight:700;color:#e9d5ff;font-size:16px">${td.name}</span>
+                <span class="realm-badge--timed">Bậc ${td.tier || 1}</span>
+                <span class="badge ${isUrgent ? 'countdown-urgency' : ''}" style="background:rgba(168,85,247,0.25);color:#d8b4fe;border:1px solid #c084fc;font-size:11px;font-weight:700">
+                  ⏳ Còn <span id="countdown-${td.id}">${formatTime(td.remainingSeconds)}</span>
+                </span>
+                ${isUrgent ? '<span class="badge countdown-urgency" style="background:rgba(244,63,94,0.25);color:#fb7185;border:1px solid #f43f5e;font-size:10px;font-weight:800">⚠️ Sắp Tan Biến (&lt; 15p)</span>' : ''}
+                <span class="badge bg-darker text-xs">Cảnh giới ${td.requiredRealm}+</span>
+              </div>
+              <div style="font-size:12px;opacity:0.85;line-height:1.4;margin-bottom:8px">${td.description}</div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;margin-bottom:8px">
+                <span style="color:#d8b4fe">🏰 <strong>${regularWaves} Ải + 1 Thủ Lĩnh</strong></span>
+                <span style="color:#fbbf24">⚡ Độ khó: <strong>x${diffMult}</strong></span>
+                <span style="color:#c084fc">🐉 Thủ Vệ: <strong style="color:#e9d5ff">${td.bossName}</strong></span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px">
+                <span style="opacity:0.7">🎁 Rơi nguyên liệu & đan dược:</span>
+                ${dropPills}
+              </div>
             </div>
-            <div style="font-size:12px;opacity:0.8;line-height:1.4;margin-bottom:6px">${td.description}</div>
-            <div style="font-size:11px;opacity:0.6;display:flex;gap:12px;flex-wrap:wrap">
-              <span>🏰 ${td.totalWaves} Tầng thử thách</span>
-              <span>🐉 Thủ Vệ: <strong>${td.bossName}</strong></span>
-              <span>🎁 Thưởng: Dược liệu, Linh thạch, Đan dược</span>
+            <div style="align-self:center">
+              <button class="btn btn--sm btn--gold" data-enter-disc="${td.id}" ${!canEnter ? 'disabled' : ''}>
+                ${canEnter ? '⚡ Tiến Vào' : '🔒 Cảnh Giới Thấp'}
+              </button>
             </div>
-          </div>
-          <div style="align-self:center">
-            <button class="btn btn--sm btn--gold" data-enter-disc="${td.id}" ${!canEnter ? 'disabled' : ''}>
-              ${canEnter ? '⚡ Tiến Vào' : '🔒 Cảnh Giới Thấp'}
-            </button>
           </div>
         </div>
       `
@@ -240,32 +281,56 @@ export function pageDungeon(el, ctx) {
     return d.permanentDungeons.map(pd => {
       const curRealm = state.player?.realm ?? 1
       const canEnter = curRealm >= pd.requiredRealm
-      const diffMult = pd.difficultyMult || 2.0
+      const diffMult = (pd.difficultyMult || 2.2).toFixed(2)
+      const clearText = pd.clearCount > 0 ? `🏆 Đã phá ${pd.clearCount} lần` : 'Chưa chinh phục'
+      const regularWaves = pd.waves || (pd.totalWaves > 1 ? pd.totalWaves - 1 : 4)
+
+      const dropPills = [
+        '<span class="specialty-pill specialty-pill--rare">🐾 Nội Đan</span>',
+        '<span class="specialty-pill specialty-pill--epic">💊 Tẩy Tủy Đan</span>',
+        '<span class="specialty-pill specialty-pill--legendary">💊 Hoàn Cốt Đan</span>',
+        '<span class="specialty-pill specialty-pill--legendary">📜 Ngọc Giản Cổ Đồ</span>'
+      ].join(' ')
 
       return `
-        <div class="list-item" style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;gap:12px;background:rgba(239,68,68,0.03)">
-          <div style="font-size:26px;width:36px;text-align:center;padding-top:2px">🔱</div>
-          <div style="flex:1">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
-              <span style="font-weight:700;color:#fca5a5;font-size:15px">${pd.name}</span>
-              <span class="badge" style="background:rgba(239,68,68,0.25);color:#fca5a5;border:1px solid #ef4444;font-size:11px;font-weight:700">
-                ⚠️ QUÁI CỰC HUNG HIỂM (x${diffMult})
-              </span>
-              <span class="badge" style="background:rgba(16,185,129,0.15);color:#6ee7b7;font-size:11px">
-                ${pd.isCleared ? `🏆 Đã phá ${pd.clearCount} lần` : 'Chưa Chinh Phục'}
-              </span>
-            </div>
-            <div style="font-size:12px;opacity:0.8;line-height:1.4;margin-bottom:6px">${pd.description}</div>
-            <div style="font-size:11px;opacity:0.6;display:flex;gap:12px;flex-wrap:wrap">
-              <span>🏰 ${pd.totalWaves} Tầng tử chiến</span>
-              <span>🐉 Trùm Cấm Địa: <strong style="color:#f87171">${pd.bossName}</strong></span>
-              <span>💎 Thưởng Thượng Cổ: Cực phẩm nội đan, Ngọc giản quý, Hoàn Cốt Đan</span>
-            </div>
+        <div class="realm-card--permanent" style="margin:12px;padding:16px">
+          <!-- Prominent Hazard Banner -->
+          <div style="background:rgba(220,38,38,0.25);border:1px solid rgba(239,68,68,0.5);border-radius:4px;padding:6px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <span style="color:#fca5a5;font-size:12px;font-weight:800;letter-spacing:0.5px">
+              ⚠️ CỰC HUNG HIỂM: Quái Vật Cuồng Bạo (x${diffMult})
+            </span>
+            <span class="badge-danger-apex">🔥 [Cuồng Bạo]</span>
           </div>
-          <div style="align-self:center">
-            <button class="btn btn--sm btn--red" data-enter-disc="${pd.id}" ${!canEnter ? 'disabled' : ''}>
-              ${canEnter ? '🔥 Khiêu Chiến' : '🔒 Cảnh Giới Thấp'}
-            </button>
+
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <div style="font-size:32px;width:40px;text-align:center;padding-top:2px">🔱</div>
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                <span style="font-weight:700;color:#fca5a5;font-size:16px">${pd.name}</span>
+                <span class="realm-badge--permanent">Cấm Địa Bậc ${pd.tier || 1}</span>
+                <span class="badge" style="background:rgba(239,68,68,0.2);color:#fca5a5;border:1px solid #ef4444;font-size:11px;font-weight:700">
+                  ⚠️ Độ Khó: x${diffMult}
+                </span>
+                <span class="badge" style="background:${pd.clearCount > 0 ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)'};color:${pd.clearCount > 0 ? '#6ee7b7' : 'var(--text-dim)'};border:1px solid ${pd.clearCount > 0 ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.1)'};font-size:11px">
+                  ${clearText}
+                </span>
+                <span class="badge bg-darker text-xs">Cảnh giới ${pd.requiredRealm}+</span>
+              </div>
+              <div style="font-size:12px;opacity:0.85;line-height:1.4;margin-bottom:8px">${pd.description}</div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;margin-bottom:8px">
+                <span style="color:#fca5a5">🏰 <strong>${regularWaves} Ải + 1 Ma Thần</strong></span>
+                <span>🐉 Trùm Cấm Địa: <strong style="color:#f87171"><span class="badge-danger-apex">🔥 [Cuồng Bạo]</span> ${pd.bossName}</strong></span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px">
+                <span style="opacity:0.7">💎 Thưởng Thượng Cổ:</span>
+                ${dropPills}
+              </div>
+            </div>
+            <div style="align-self:center">
+              <button class="btn btn--sm btn--red" data-enter-disc="${pd.id}" ${!canEnter ? 'disabled' : ''}>
+                ${canEnter ? '🔥 Khiêu Chiến' : '🔒 Cảnh Giới Thấp'}
+              </button>
+            </div>
           </div>
         </div>
       `
@@ -275,8 +340,9 @@ export function pageDungeon(el, ctx) {
   function renderMapItems() {
     if (d.mapItems.length === 0) {
       return `
-        <div style="text-align:center;opacity:0.5;padding:20px;font-size:13px">
-          Chưa có Ngọc Giản nào trong Túi Đồ. Hãy đánh bại quái vật để có cơ hội nhận Ngọc Giản!
+        <div style="text-align:center;opacity:0.5;padding:24px 16px;font-size:13px">
+          📜 Chưa có Ngọc Giản nào trong Túi Đồ.<br>
+          <span style="font-size:12px;opacity:0.8">Hãy đánh bại quái vật thế giới để có cơ hội thu thập Ngọc Giản Cổ Đồ!</span>
         </div>
       `
     }
@@ -284,18 +350,24 @@ export function pageDungeon(el, ctx) {
     return d.mapItems.map(m => {
       const dg = m.dungeon
       return `
-        <div class="list-item" style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05)">
+        <div class="list-item" style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.4) 100%);border-left:3px solid #10b981;border-radius:4px;margin:8px 12px;display:flex;align-items:center;gap:12px">
+          <div style="font-size:26px;width:36px;text-align:center">📜</div>
           <div class="item-info" style="flex:1">
-            <div class="item-name" style="font-size:14px;font-weight:600">
-              ${m.item.icon} ${m.item.name} <span style="opacity:0.5;font-size:12px">x${m.quantity}</span>
+            <div class="item-name" style="font-size:14px;font-weight:700;color:#6ee7b7;display:flex;align-items:center;gap:8px">
+              <span>${m.item.icon || '📜'} ${m.item.name}</span>
+              <span class="badge" style="background:rgba(16,185,129,0.2);color:#a7f3d0;font-size:11px">x${m.quantity} Mảnh</span>
             </div>
             ${dg ? `
-              <div class="item-meta" style="font-size:12px;opacity:0.7">
-                ${dg.name} · T${dg.tier} · ${dg.waves + 1} tầng · Boss: ${dg.bossName}
+              <div class="item-meta" style="font-size:12px;opacity:0.8;margin-top:4px">
+                🏛️ ${dg.name} · Bậc T${dg.tier} · 🏰 ${dg.waves + 1} Tầng · 🐉 Boss: <strong style="color:var(--gold)">${dg.bossName}</strong>
               </div>
             ` : ''}
           </div>
-          ${dg ? `<button class="btn btn--sm btn--gold" data-enter="${m.item.id}">⚡ Kích Hoạt</button>` : ''}
+          ${dg ? `
+            <button class="btn btn--sm btn--gold" data-enter="${m.item.id}" style="font-weight:700">
+              ⚡ Kích Hoạt
+            </button>
+          ` : ''}
         </div>
       `
     }).join('')

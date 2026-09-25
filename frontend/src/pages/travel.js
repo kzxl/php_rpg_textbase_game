@@ -4,6 +4,65 @@
 import { pageDungeon } from './dungeon.js'
 import { pageTienCanh } from './tiencanh.js'
 
+/**
+ * Cultivation Realm title resolution across 18 world realms
+ */
+export function getCultivationRealmTitle(level) {
+  const lvl = parseInt(level) || 1
+  if (lvl <= 10) return 'Luyện Khí'
+  if (lvl <= 20) return 'Trúc Cơ'
+  if (lvl <= 30) return 'Kim Đan'
+  if (lvl <= 40) return 'Nguyên Anh'
+  if (lvl <= 50) return 'Hóa Thần'
+  if (lvl <= 65) return 'Luyện Hư'
+  if (lvl <= 80) return 'Hợp Thể'
+  if (lvl <= 100) return 'Đại Thừa'
+  if (lvl <= 120) return 'Độ Kiếp'
+  if (lvl <= 135) return 'Chân Tiên'
+  if (lvl <= 145) return 'Kim Tiên'
+  if (lvl <= 155) return 'Thái Ất'
+  return 'Đại La / Hỗn Nguyên'
+}
+
+/**
+ * Environmental stat modifier color classification
+ */
+export function getModifierTagClass(text) {
+  if (!text) return 'modifier-tag--buff'
+  const t = text.toLowerCase()
+  if (t.includes('st nhận') || t.includes('gây & nhận') || t.includes('huyết chiến') || t.includes('hỗn loạn')) {
+    return 'modifier-tag--hybrid'
+  }
+  if (t.includes('-10%') || t.includes('-15%') || t.includes('đóng băng: -') || t.includes('u minh: -') || (t.includes('-') && !t.includes('->'))) {
+    return 'modifier-tag--debuff'
+  }
+  return 'modifier-tag--buff'
+}
+
+/**
+ * Specialty raw material category badge with R1 inventory icons
+ */
+export function getSpecialtyBadge(name) {
+  const n = (name || '').toLowerCase()
+  let icon = '🌿'
+  let cls = 'specialty-pill--herb'
+
+  if (n.includes('thạch') || n.includes('khoáng') || n.includes('quặng') || n.includes('thiết') || n.includes('tinh thạch') || n.includes('kim loại') || n.includes('thần thạch')) {
+    icon = '⛏️'
+    cls = 'specialty-pill--mineral'
+  } else if (n.includes('nanh') || n.includes('cốt') || n.includes('vũ') || n.includes('nhãn') || n.includes('xác') || n.includes('thịt') || n.includes('da') || n.includes('hạch') || n.includes('yêu thú') || n.includes('nội đan')) {
+    icon = '🐾'
+    cls = 'specialty-pill--beast'
+  } else if (n.includes('thảo') || n.includes('diệp') || n.includes('hoa') || n.includes('chi') || n.includes('nhựa') || n.includes('mộc') || n.includes('cây')) {
+    icon = '🌿'
+    cls = 'specialty-pill--herb'
+  } else if (n.includes('tinh') || n.includes('châu') || n.includes('khí') || n.includes('thủy') || n.includes('phiến')) {
+    icon = '⛏️'
+    cls = 'specialty-pill--mineral'
+  }
+  return `<span class="specialty-pill ${cls}">${icon} ${name}</span>`
+}
+
 export function pageTravel(el, ctx) {
   const { state } = ctx
   const activeTab = state._travelTab || 'map'
@@ -126,11 +185,18 @@ async function loadTravelMap(container, ctx) {
               </div>
             </div>
             ${currentArea?.description ? `<div class="text-sm text-dim" style="margin-top:6px;line-height:1.4">${currentArea.description}</div>` : ''}
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-              <span class="badge" style="background:rgba(255,255,255,0.08);font-size:11px">Yêu Cầu: Lv.${currentArea?.min_level || 1}+</span>
-              ${envEffect ? `<span class="badge" style="background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.25);font-size:11px">${envEffect}</span>` : ''}
-              ${currentConfig?.specialtyNames?.length ? `<span class="badge" style="background:rgba(234,179,8,0.12);color:#facc15;border:1px solid rgba(234,179,8,0.3);font-size:11px">💎 Đặc Sản: ${currentConfig.specialtyNames.join(' · ')}</span>` : ''}
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
+              <span class="badge" style="background:rgba(255,255,255,0.08);font-size:11px;font-weight:600">
+                Yêu Cầu: Lv.${currentArea?.min_level || 1}+ · ${getCultivationRealmTitle(currentArea?.min_level || 1)} Cảnh
+              </span>
+              ${envEffect ? `<span class="modifier-tag ${getModifierTagClass(envEffect)}">${envEffect}</span>` : ''}
             </div>
+            ${currentConfig?.specialtyNames?.length ? `
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px">
+                <span style="font-size:11px;color:var(--text-dim)">💎 Đặc Sản:</span>
+                ${currentConfig.specialtyNames.map(s => getSpecialtyBadge(s)).join(' ')}
+              </div>
+            ` : ''}
           </div>
         </div>
       `}
@@ -151,6 +217,8 @@ async function loadTravelMap(container, ctx) {
               const aStaminaCost = parseInt(a.stamina_cost) || exploArea?.staminaCost || 10
               const aEnvEffect = envMap[a.id] || ''
               const aTier = a.tier || 'Bát Hoang'
+              const realmTitle = getCultivationRealmTitle(a.min_level)
+              const specialtiesList = exploArea?.specialtyNames || a.specialties || []
               const stamBg = aStaminaCost >= 100 ? 'rgba(239,68,68,0.2)' : aStaminaCost >= 40 ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.06)'
               const stamColor = aStaminaCost >= 100 ? 'var(--red)' : aStaminaCost >= 40 ? 'var(--gold)' : 'var(--text-dim)'
 
@@ -188,7 +256,7 @@ async function loadTravelMap(container, ctx) {
 
                     <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px">
                       <span class="badge" style="font-size:10px; padding:2px 6px; background:${tooLow ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)'}; color:${tooLow ? 'var(--red)' : 'var(--text-dim)'}">
-                        Lv.${a.min_level || 1}+
+                        Lv.${a.min_level || 1}+ · ${realmTitle} Cảnh
                       </span>
                       <span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.06); color:var(--text-dim)">
                         ${travelTime > 0 ? `⏱ ${travelTime}s` : '⚡ Tức thời'}
@@ -198,9 +266,12 @@ async function loadTravelMap(container, ctx) {
                       </span>
                     </div>
 
-                    ${exploArea?.specialtyNames?.length ? `
-                      <div style="font-size:10px; color:#facc15; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.25); border-radius:4px; padding:3px 6px; margin-bottom:6px; line-height:1.3">
-                        💎 <strong>Đặc sản:</strong> ${exploArea.specialtyNames.join(' · ')}
+                    ${specialtiesList.length ? `
+                      <div style="margin-bottom:8px">
+                        <div style="font-size:10px; color:var(--text-dim); margin-bottom:3px">Đặc sản tài nguyên:</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:4px">
+                          ${specialtiesList.map(s => getSpecialtyBadge(typeof s === 'string' ? s : s.name)).join('')}
+                        </div>
                       </div>
                     ` : ''}
 
@@ -215,8 +286,10 @@ async function loadTravelMap(container, ctx) {
                     ` : ''}
 
                     ${aEnvEffect ? `
-                      <div style="font-size:10px; color:var(--gold); background:rgba(255,215,0,0.05); padding:3px 6px; border-radius:4px; margin-bottom:10px; border-left:2px solid var(--gold)">
-                        ${aEnvEffect}
+                      <div style="margin-bottom:10px">
+                        <div class="modifier-tag ${getModifierTagClass(aEnvEffect)}">
+                          ${aEnvEffect}
+                        </div>
                       </div>
                     ` : ''}
                   </div>
@@ -228,7 +301,7 @@ async function loadTravelMap(container, ctx) {
                       </button>
                     ` : tooLow ? `
                       <button class="btn btn--block btn--sm" disabled style="opacity:0.5; cursor:not-allowed">
-                        Cần Đạt Cấp ${a.min_level}
+                        Cần Đạt Cấp ${a.min_level} (${realmTitle})
                       </button>
                     ` : `
                       <button class="btn btn--blue btn--block btn--sm" data-travel="${a.id}" ${traveling ? 'disabled' : ''}>
