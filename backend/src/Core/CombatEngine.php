@@ -238,13 +238,14 @@ class CombatEngine
                 $finalHitLabel = 'crit';
             }
 
-            // 5. Defense reduction & Dấu ấn Vạn Vật Chi Lý (monster_insight)
+            // 5. MDG Standard: Dynamic Defense reduction & Level Suppression
             $def = $ignoreDefense ? 0 : $dStats['defense'];
             if (in_array('monster_insight', $attacker->unlockedImprints ?? [], true)) {
                 $def = (int)round($def * 0.85);
             }
-            $reduction = StatEngine::calcDamageReduction($def);
-            $finalDamage = max(0, (int) round($currentDamage * (1 - $reduction / 100)));
+            $reduction = StatEngine::calcDamageReduction($def, $currentDamage);
+            $suppression = StatEngine::calcLevelSuppression($attacker->level, $defender->level);
+            $finalDamage = max(1, (int) round($currentDamage * (1 - $reduction / 100) * $suppression));
 
             // Monster Mastery Tier 2/4/5: Sát thương tăng thêm
             if (($this->monsterMasteryBonus['damageBonusPct'] ?? 0) > 0) {
@@ -388,8 +389,9 @@ class CombatEngine
             $baseDamage *= 1.5;
         }
 
-        $reduction = StatEngine::calcDamageReduction($dStats['defense']);
-        $finalDamage = max(0, (int) round($baseDamage * (1 - $reduction / 100)));
+        $reduction = StatEngine::calcDamageReduction($dStats['defense'], $baseDamage);
+        $suppression = StatEngine::calcLevelSuppression($attacker->level, $defender->level);
+        $finalDamage = max(0, (int) round($baseDamage * (1 - $reduction / 100) * $suppression));
 
         // Monster Mastery Tier 3+ (Đại Thành): Giảm sát thương nhận vào từ quái vật này
         if (($this->monsterMasteryBonus['damageReductionPct'] ?? 0) > 0 && $finalDamage > 0) {
@@ -617,20 +619,87 @@ class CombatEngine
                     \App\Core\GameDataRepository::addEvent($player->id, 'mastery', "Thông thạo quái vật [{$monster->name}] đạt {$newTierInfo['name']} ({$newTierInfo['stars']})!");
                 }
 
-                // Phase 9: Boss / Monster Drops (Items & Manuals) with Mastery Drop Bonus
-                $dropRarity = null;
-                $dropBonus = $this->monsterMasteryBonus['dropBonusPct'] ?? 0;
-                if (($monster->getRawData()['isBoss'] ?? false) || $monster->level >= 10) {
-                    $dropRoll = mt_rand(1, 100) - $dropBonus;
-                    if ($dropRoll <= 50) $dropRarity = 'epic'; // 50% rớt hàng Epic
-                    else if ($dropRoll <= 90) $dropRarity = 'legendary'; // 40%
-                } else if ((mt_rand(1, 100) - $dropBonus) <= 5) {
-                    $dropRarity = 'rare'; // 5% quái thường rớt Rare
+                // ========================================================
+                // THE 5-STEP DROP PIPELINE (MDG STANDARD LOOT ENGINE)
+                // 1. IIQ (Item Quantity)
+                // 2. IIR (Item Rarity)
+                // 3. iLvl (Item Level scaling)
+                // 4. Multi-Category Drops (Materials, Catalysts, Gear, Meds)
+                // 5. Visual Loot Feedback & Dopamine Tiering
+                // ========================================================
+                $dropBonus = (int)($this->monsterMasteryBonus['dropBonusPct'] ?? 0);
+                $mRaw = $monster->getRawData();
+                $isBoss = !empty($mRaw['isBoss']) || in_array('boss', $mRaw['tags'] ?? []) || ($monster->level >= 15);
+                $lootItems = [];
+
+                // 1. Monster Signature Materials (from monster drops table)
+                foreach ($mRaw['drops'] ?? [] as $dr) {
+                    $effChance = min(95, ($dr['chance'] ?? 30) + $dropBonus);
+                    if (mt_rand(1, 100) <= $effChance) {
+                        $minQ = $dr['qty'][0] ?? 1;
+                        $maxQ = $dr['qty'][1] ?? 1;
+                        $qty = mt_rand($minQ, $maxQ);
+                        $dType = $dr['type'] ?? 'material';
+                        $itemId = $dr['itemId'];
+
+                        if ($dType === 'medicine') {
+                            $player->medicines[$itemId] = ($player->medicines[$itemId] ?? 0) + $qty;
+                        } else {
+                            $player->materials[$itemId] = ($player->materials[$itemId] ?? 0) + $qty;
+                        }
+
+                        $matInfo = \App\Core\GameDataRepository::getMaterialById($itemId);
+                        $matName = $matInfo ? $matInfo['name'] : $itemId;
+                        $lootItems[] = [
+                            'name' => $matName,
+                            'type' => $dType,
+                            'quantity' => $qty,
+                            'rarity' => 'common',
+                            'color' => '#34d399',
+                            'icon' => '📦'
+                        ];
+                        $allLogs[] = "📦 Thu hoạch yêu thú: {$matName} x{$qty}";
+                    }
                 }
 
-                if ($dropRarity) {
+                // 2. Crafting Catalysts & Essence (Tinh Thạch / Kim Loại Linh / Đá Cường Hóa)
+                $catalystChance = $isBoss ? 85 : (25 + $dropBonus);
+                if (mt_rand(1, 100) <= $catalystChance) {
+                    $catPool = ['mat_tinh_thach', 'mat_kim_loai_linh', 'da_cuong_hoa', 'mat_tinh_hoa'];
+                    $catId = $catPool[array_rand($catPool)];
+                    $catQty = $isBoss ? mt_rand(2, 4) : mt_rand(1, 2);
+                    $player->materials[$catId] = ($player->materials[$catId] ?? 0) + $catQty;
+                    $matInfo = \App\Core\GameDataRepository::getMaterialById($catId);
+                    $catName = $matInfo ? $matInfo['name'] : $catId;
+                    $lootItems[] = [
+                        'name' => $catName,
+                        'type' => 'catalyst',
+                        'quantity' => $catQty,
+                        'rarity' => 'uncommon',
+                        'color' => '#38bdf8',
+                        'icon' => '💎'
+                    ];
+                    $allLogs[] = "💎 Tinh thạch rèn đúc: {$catName} x{$catQty}";
+                }
+
+                // 3. Equipment & Manual Drops with IIR Tiering (Trang Bị & Bí Tịch)
+                $equipChance = $isBoss ? 100 : (20 + $dropBonus);
+                if (mt_rand(1, 100) <= $equipChance) {
+                    $rRoll = mt_rand(1, 100) - $dropBonus;
+                    if ($isBoss) {
+                        if ($rRoll <= 20) $dropRarity = 'legendary';
+                        elseif ($rRoll <= 60) $dropRarity = 'epic';
+                        else $dropRarity = 'rare';
+                    } else {
+                        if ($rRoll <= 2) $dropRarity = 'legendary';
+                        elseif ($rRoll <= 10) $dropRarity = 'epic';
+                        elseif ($rRoll <= 30) $dropRarity = 'rare';
+                        elseif ($rRoll <= 65) $dropRarity = 'uncommon';
+                        else $dropRarity = 'common';
+                    }
+
                     $itemSys = new \App\Systems\ItemSystem();
-                    $isManual = mt_rand(1, 100) <= 20; // 20% rớt Bí Tịch
+                    $isManual = (mt_rand(1, 100) <= 15);
                     $item = null;
                     if ($isManual) {
                         $manuals = array_filter($itemSys->getAll(), fn($i) => ($i['category'] ?? '') === 'manual' && ($i['rarity'] ?? 'common') === $dropRarity);
@@ -640,16 +709,62 @@ class CombatEngine
                         }
                     }
                     if (!$item) {
-                        $item = $itemSys->generateRandomItem($dropRarity, null, $monster->level);
+                        $item = $itemSys->generateRandomItem($dropRarity, null, max(1, $monster->level));
                     }
+
                     $player->inventory[] = $item;
-                    $allLogs[] = "🎁 Nhận chiến lợi phẩm: {$item->name} ({$dropRarity})";
+
+                    $rarityColors = [
+                        'legendary' => '#f59e0b',
+                        'epic'      => '#a855f7',
+                        'rare'      => '#facc15',
+                        'uncommon'  => '#10b981',
+                        'common'    => '#94a3b8'
+                    ];
+                    $rColor = $rarityColors[$dropRarity] ?? '#94a3b8';
+                    $lootItems[] = [
+                        'name' => $item->name,
+                        'type' => 'equipment',
+                        'rarity' => $dropRarity,
+                        'color' => $rColor,
+                        'icon' => ($dropRarity === 'legendary' || $dropRarity === 'epic') ? '🌟' : '⚔️'
+                    ];
+
+                    if ($dropRarity === 'legendary' || $dropRarity === 'epic') {
+                        $allLogs[] = "🌟 [CHIẾN LỢI PHẨM CỰC PHẨM] Nhận được {$item->name} ({$dropRarity})!";
+                    } else {
+                        $allLogs[] = "⚔️ Nhận trang bị: {$item->name} ({$dropRarity})";
+                    }
+                }
+
+                // 4. Medicine Drops (Hồi Huyết & Đan Dược Thăng Cấp)
+                $medChance = $isBoss ? 55 : (15 + (int)($dropBonus / 2));
+                if (mt_rand(1, 100) <= $medChance) {
+                    $medPool = ($monster->level >= 10 || $isBoss) ? ['tay_tuy_dan', 'hoan_cot_dan'] : ['mat_huyet_tinh', 'tay_tuy_dan'];
+                    $medId = $medPool[array_rand($medPool)];
+                    $player->medicines[$medId] = ($player->medicines[$medId] ?? 0) + 1;
+                    $medName = ($medId === 'tay_tuy_dan') ? 'Tẩy Tủy Đan' : (($medId === 'hoan_cot_dan') ? 'Hoàn Cốt Đan' : 'Huyết Tinh');
+                    $lootItems[] = [
+                        'name' => $medName,
+                        'type' => 'medicine',
+                        'quantity' => 1,
+                        'rarity' => 'rare',
+                        'color' => '#fb923c',
+                        'icon' => '💊'
+                    ];
+                    $allLogs[] = "💊 Đan dược cơ duyên: {$medName} x1";
                 }
 
                 if ($player->level > $prevLevel) {
                     $allLogs[] = "🎉 Đột phá! Cấp {$player->level}!";
                 }
-                $rewards = ['xp' => $xp, 'gold' => $goldReward, 'prevLevel' => $prevLevel, 'monsterLevel' => $monster->level ?? 1];
+                $rewards = [
+                    'xp' => $xp,
+                    'gold' => $goldReward,
+                    'prevLevel' => $prevLevel,
+                    'monsterLevel' => $monster->level ?? 1,
+                    'lootItems' => $lootItems
+                ];
                 $unlocked = \App\Systems\GlitchSystem::trackBehavior($player, 'monster_kills', 1);
                 if ($player->currentHp > 0 && ($player->currentHp / max(1, $player->maxHp)) <= 0.10) {
                     $unlockedClutch = \App\Systems\GlitchSystem::trackBehavior($player, 'clutch_kills', 1);

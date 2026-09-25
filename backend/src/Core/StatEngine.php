@@ -123,25 +123,26 @@ class StatEngine
     }
 
     /**
-     * Hit chance = attacker.speed / (attacker.speed + defender.dexterity) × 100
-     * Capped at 95%
+     * Hit chance based on attacker speed vs defender dexterity.
+     * Base 60% + ratio scaling up to 95%, floor 20%.
      */
     public static function calcHitChance(float $attackerSpeed, float $defenderDex): float
     {
-        if ($attackerSpeed + $defenderDex <= 0) return 50.0;
-        $chance = ($attackerSpeed / ($attackerSpeed + $defenderDex)) * 100;
-        return min(95.0, round($chance, 2));
+        if ($attackerSpeed <= 0 && $defenderDex <= 0) return 75.0;
+        $ratio = ($attackerSpeed + 1) / max(1.0, ($attackerSpeed + $defenderDex));
+        $chance = 60.0 + ($ratio * 35.0);
+        return min(95.0, max(20.0, round($chance, 2)));
     }
 
     /**
-     * Dodge chance = defender.dex / (defender.dex + attacker.speed) × 100
-     * Capped at 75%
+     * Dodge chance: Evasion roll based on defender dexterity vs attacker speed.
+     * Capped at 35% for standard entities to prevent combat stalemates.
      */
     public static function calcDodgeChance(float $defenderDex, float $attackerSpeed): float
     {
-        if ($defenderDex + $attackerSpeed <= 0) return 0.0;
-        $chance = ($defenderDex / ($defenderDex + $attackerSpeed)) * 100;
-        return min(75.0, round($chance, 2));
+        if ($defenderDex <= 0) return 0.0;
+        $chance = ($defenderDex / ($defenderDex + 2.5 * max(1.0, $attackerSpeed))) * 100.0;
+        return min(35.0, round($chance, 2));
     }
 
     /**
@@ -161,13 +162,35 @@ class StatEngine
     }
 
     /**
-     * Damage reduction = defense / (defense + 100), capped at 90%
+     * MDG Standard: Dynamic Armor Mitigation vs Raw Damage
+     * Formula: Armor Reduction (%) = Armor / (Armor + 5 * RawDamage) * 100
+     * Caps at 85%. Effective against light hits, but heavy strikes pierce through.
      */
-    public static function calcDamageReduction(float $defense): float
+    public static function calcDamageReduction(float $defense, float $rawDamage = 25.0): float
     {
         if ($defense <= 0) return 0.0;
-        $reduction = ($defense / ($defense + 100)) * 100;
-        return min(90.0, round($reduction, 2));
+        $effRaw = max(8.0, $rawDamage);
+        $reduction = ($defense / ($defense + 5.0 * $effRaw)) * 100.0;
+        return min(85.0, round($reduction, 2));
+    }
+
+    /**
+     * Level / Realm Gap Suppression (Áp Chế Cảnh Giới)
+     * Returns a multiplier for outgoing damage based on level delta.
+     */
+    public static function calcLevelSuppression(int $attackerLevel, int $defenderLevel): float
+    {
+        $diff = $attackerLevel - $defenderLevel;
+        if ($diff < 0) {
+            // Attacker is lower level: penalty up to -35%
+            $penalty = min(0.35, abs($diff) * 0.05);
+            return max(0.65, 1.0 - $penalty);
+        } elseif ($diff > 0) {
+            // Attacker is higher level: small advantage up to +20%
+            $bonus = min(0.20, $diff * 0.03);
+            return 1.0 + $bonus;
+        }
+        return 1.0;
     }
 
     /**

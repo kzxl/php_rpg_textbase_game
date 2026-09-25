@@ -736,6 +736,31 @@ async function doCombat(ctx, monsterId, instanceId = null) {
           </div>
         </div>
 
+        <!-- MDG Standard: Categorized Loot Drop Panel -->
+        ${r.rewards?.lootItems?.length ? `
+          <div class="panel-body" style="background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(255,255,255,0.1); padding: 12px 16px;">
+            <div style="font-size: 12px; font-weight: 700; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="display:flex;align-items:center;gap:6px">🎁 CHIẾN LỢI PHẨM THU ĐƯỢC</span>
+              <span class="badge" style="background:rgba(234,179,8,0.2);color:#facc15;font-size:10px">${r.rewards.lootItems.length} MÓN</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px;">
+              ${r.rewards.lootItems.map(item => `
+                <div style="background: rgba(255,255,255,0.04); border: 1px solid ${item.color || 'rgba(255,255,255,0.15)'}; border-radius: 6px; padding: 8px 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3)">
+                  <div style="font-size: 22px;">${item.icon || '📦'}</div>
+                  <div style="flex: 1; overflow: hidden;">
+                    <div style="font-weight: 700; font-size: 13px; color: ${item.color || 'var(--text-bright)'}; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
+                      ${item.name} ${item.quantity > 1 ? `<span style="opacity:0.8">x${item.quantity}</span>` : ''}
+                    </div>
+                    <div style="font-size: 10px; opacity: 0.6; text-transform: uppercase;">
+                      ${item.rarity || item.type}
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
         <!-- Combat Log -->
         <div class="panel-body no-pad" style="border-top: 1px solid var(--border);">
           <div style="padding: 8px 16px; background: rgba(0,0,0,0.2); font-size: 11px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">
