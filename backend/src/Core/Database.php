@@ -31,11 +31,15 @@ class Database
             $config['DB_NAME'] ?? 'rpg_engine'
         );
 
+        date_default_timezone_set('Asia/Ho_Chi_Minh');
+
         self::$instance = new \PDO($dsn, $config['DB_USER'] ?? 'root', $config['DB_PASS'] ?? '', [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
             \PDO::ATTR_EMULATE_PREPARES => false,
         ]);
+
+        self::$instance->exec("SET time_zone = '+07:00'");
 
         return self::$instance;
     }

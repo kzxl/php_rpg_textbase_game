@@ -315,6 +315,11 @@ class GameAPI {
       method: 'POST', body: JSON.stringify({ mapItemId }),
     })
   }
+  enterDiscoveredDungeon(id, discoveredId) {
+    return this.request(`/player/${id}/dungeon/enter-discovered`, {
+      method: 'POST', body: JSON.stringify({ discoveredId }),
+    })
+  }
   fightDungeonWave(id) {
     return this.request(`/player/${id}/dungeon/fight`, { method: 'POST' })
   }

@@ -451,6 +451,40 @@ async function doExplore(ctx) {
           <button class="btn btn--blue" id="btnExploreContinue">Tiếp tục</button>
         </div>
       `;
+    } else if (ev.type === 'dungeon_discovery') {
+      const isTimed = (ev.realmType === 'timed');
+      const icon = isTimed ? '🌀' : '🌋';
+      const badgeText = isTimed ? `⏳ HUYỄN CẢNH CÓ HẠN (${ev.remainingMinutes || 60} PHÚT)` : `⚠️ CẤM ĐỊA THƯỢNG CỔ (QUÁI x${ev.difficultyMult || 2.5})`;
+      const badgeStyle = isTimed ? 'background:rgba(168,85,247,0.25);color:#d8b4fe;border:1px solid #c084fc;' : 'background:rgba(239,68,68,0.25);color:#fca5a5;border:1px solid #ef4444;';
+
+      html += `
+        <div style="font-size: 48px; margin-bottom: 8px; animation: pulse 1s infinite;">${icon}</div>
+        <div class="badge mb-xs" style="font-size: 11px; padding: 4px 12px; font-weight: 700; ${badgeStyle}">
+          ${badgeText}
+        </div>
+        <div class="text-lg ${isTimed ? 'text-gold' : 'text-red'} bold mb-sm" style="font-size: 16px;">
+          ${ev.message}
+        </div>
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 420px; text-align: left;">
+          <div style="font-weight:700;font-size:14px;color:var(--text-bright);margin-bottom:4px">
+            ${isTimed ? '✨' : '🔱'} ${ev.name}
+          </div>
+          <div style="font-size:12px;opacity:0.8;line-height:1.4;margin-bottom:6px">
+            ${ev.description || 'Lối vào bí cảnh đã được phát hiện và mở ra trên bản đồ.'}
+          </div>
+          <div style="font-size:11px;opacity:0.6">
+            🏰 Thử thách: ${(ev.waves || 3) + 1} Tầng · ${isTimed ? `⏳ Hạn dùng: ${ev.remainingMinutes} phút` : 'Vô hạn (Tồn tại vĩnh viễn)'}
+          </div>
+        </div>
+        <div class="flex gap-2 justify-center mt-md w-full">
+          <button class="btn ${isTimed ? 'btn--gold' : 'btn--red'} flex-1" id="btnGoToDungeon">
+            ${isTimed ? '⚡ Đến Bí Cảnh Ngay' : '🔥 Khiêu Chiến Cấm Địa'}
+          </button>
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>
+            ${hasEnoughStamina ? `🔍 Dò Thám Tiếp (-${cost} TL)` : `❌ Hết Thể Lực`}
+          </button>
+        </div>
+      `;
     } else {
       html += `
         <div style="font-size: 32px; margin-bottom: 8px;">✨</div>
@@ -493,6 +527,19 @@ async function doExplore(ctx) {
     if (ev.type === 'npc' && ev.npcId) {
       document.getElementById('btnNpcInteract')?.addEventListener('click', async () => {
         await showNpcQuests(ctx, ev.npcId, rEl)
+      })
+    }
+
+    if (ev.type === 'dungeon_discovery') {
+      document.getElementById('btnGoToDungeon')?.addEventListener('click', () => {
+        state._travelTab = 'dungeon'
+        const travelNav = document.querySelector('[data-page="travel"]')
+        if (travelNav) {
+          travelNav.click()
+        } else if (typeof ctx.renderGame === 'function') {
+          state.currentPage = 'travel'
+          ctx.renderGame()
+        }
       })
     }
     

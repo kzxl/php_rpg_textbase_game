@@ -184,6 +184,72 @@ return function ($app) {
                 }
             }
         }
+
+        // ========================================
+        // SECRET REALM DISCOVERY (Kỳ Ngộ Bí Cảnh)
+        // Rate: 6% (60/1000)
+        // 2 Types:
+        //   1. Timed: Countdown timer, expires and disappears
+        //   2. Permanent: Extreme difficulty, monsters x2.0 - x3.5
+        // ========================================
+        if ($selectedEvent !== null) {
+            $realmRoll = mt_rand(1, 1000);
+            if ($realmRoll <= 60) {
+                $disc = \App\Core\SecretRealmRegistry::generateDiscovery($player, $player->currentArea);
+                if ($disc) {
+                    $pdo = \App\Core\Database::pdo();
+                    $stmt = $pdo->prepare("
+                        INSERT INTO player_discovered_dungeons 
+                        (player_id, dungeon_key, realm_type, name, description, tier, required_realm, difficulty_mult, waves, area_id, discovered_at, expires_at, is_cleared, status, monster_pool, boss_data, rewards_data)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 'available', ?, ?, ?)
+                    ");
+                    $stmt->execute([
+                        $disc['player_id'],
+                        $disc['dungeon_key'],
+                        $disc['realm_type'],
+                        $disc['name'],
+                        $disc['description'],
+                        $disc['tier'],
+                        $disc['required_realm'],
+                        $disc['difficulty_mult'],
+                        $disc['waves'],
+                        $disc['area_id'],
+                        $disc['discovered_at'],
+                        $disc['expires_at'],
+                        $disc['monster_pool'],
+                        $disc['boss_data'],
+                        $disc['rewards_data'],
+                    ]);
+                    $discId = (int)$pdo->lastInsertId();
+
+                    $isTimed = ($disc['realm_type'] === 'timed');
+                    $expiresTimestamp = $disc['expires_at'] ? strtotime($disc['expires_at']) : null;
+                    $remainingMinutes = $expiresTimestamp ? max(1, (int)round(($expiresTimestamp - time()) / 60)) : null;
+
+                    if ($isTimed) {
+                        $msg = "🌀 [KỲ NGỘ BÍ CẢNH] Không gian chấn động dữ dội! Bạn vô tình phát hiện [{$disc['name']}] đang hé mở lối vào! Linh khí đang tiêu tán nhanh chóng, bí cảnh sẽ biến mất sau {$remainingMinutes} phút! Hãy vào tab Bí Cảnh để khám phá ngay!";
+                    } else {
+                        $msg = "🌋 [CẤM ĐỊA THƯỢNG CỔ] Động trời địa biến! Bạn đã đào phá phong ấn cổ xưa, khai mở vĩnh viễn [{$disc['name']}]! Nơi đây tử khí ngập tràn, quái thú cực kỳ hung hãn (Sức mạnh x{$disc['difficulty_mult']}), xin hãy chuẩn bị kỹ lưỡng!";
+                    }
+
+                    $eventResult = [
+                        'type' => 'dungeon_discovery',
+                        'discoveredId' => $discId,
+                        'realmType' => $disc['realm_type'],
+                        'dungeonKey' => $disc['dungeon_key'],
+                        'name' => $disc['name'],
+                        'description' => $disc['description'],
+                        'tier' => $disc['tier'],
+                        'difficultyMult' => $disc['difficulty_mult'],
+                        'waves' => $disc['waves'],
+                        'expiresAt' => $disc['expires_at'],
+                        'remainingMinutes' => $remainingMinutes,
+                        'message' => $msg,
+                    ];
+                    $selectedEvent = null; // Skip regular area event
+                }
+            }
+        }
         
         if ($selectedEvent) {
             $type = $selectedEvent['type'];

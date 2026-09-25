@@ -62,22 +62,95 @@ return function ($app) {
             }
         }
 
-        // Also check for active run
+        // Check discovered dungeons and active run
         $pdo = Database::pdo();
+
+        // 1. Auto-expire outdated timed dungeons
+        $pdo->exec("UPDATE player_discovered_dungeons SET status = 'expired' WHERE realm_type = 'timed' AND status = 'available' AND expires_at <= NOW()");
+
+        // 2. Fetch discovered dungeons
+        $stmt = $pdo->prepare("
+            SELECT id, dungeon_key, realm_type, name, description, tier, required_realm, difficulty_mult, waves, area_id, discovered_at, expires_at, is_cleared, clear_count, status, boss_data, rewards_data
+            FROM player_discovered_dungeons 
+            WHERE player_id = ? AND status != 'expired' 
+            ORDER BY realm_type ASC, id DESC
+        ");
+        $stmt->execute([$id]);
+        $discoveredList = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $timedDungeons = [];
+        $permanentDungeons = [];
+        $now = time();
+
+        foreach ($discoveredList as $item) {
+            $bossInfo = json_decode($item['boss_data'] ?? '{}', true) ?: [];
+            $entry = [
+                'id' => (int)$item['id'],
+                'dungeonKey' => $item['dungeon_key'],
+                'realmType' => $item['realm_type'],
+                'name' => $item['name'],
+                'description' => $item['description'],
+                'tier' => (int)$item['tier'],
+                'requiredRealm' => (int)$item['required_realm'],
+                'difficultyMult' => (float)$item['difficulty_mult'],
+                'waves' => (int)$item['waves'],
+                'totalWaves' => (int)$item['waves'] + 1,
+                'isCleared' => (bool)$item['is_cleared'],
+                'clearCount' => (int)$item['clear_count'],
+                'bossName' => $bossInfo['name'] ?? 'Thủ Vệ Bí Cảnh',
+                'discoveredAt' => $item['discovered_at'],
+                'expiresAt' => $item['expires_at'],
+            ];
+
+            if ($item['realm_type'] === 'timed') {
+                $expTime = $item['expires_at'] ? strtotime($item['expires_at']) : 0;
+                $remSec = max(0, $expTime - $now);
+                $entry['remainingSeconds'] = $remSec;
+                if ($remSec > 0 && $item['status'] === 'available') {
+                    $timedDungeons[] = $entry;
+                }
+            } else {
+                $permanentDungeons[] = $entry;
+            }
+        }
+
+        // 3. Check for active run
         $stmt = $pdo->prepare("SELECT * FROM dungeon_runs WHERE player_id = ? AND status = 'active' ORDER BY started_at DESC LIMIT 1");
         $stmt->execute([$id]);
         $activeRun = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        return jsonResponse($response, [
-            'mapItems' => $playerMaps,
-            'activeRun' => $activeRun ? [
+        $activeRunData = null;
+        if ($activeRun) {
+            $dungeonName = $activeRun['dungeon_id'];
+            if (!empty($activeRun['discovered_id'])) {
+                $dStmt = $pdo->prepare("SELECT name FROM player_discovered_dungeons WHERE id = ?");
+                $dStmt->execute([$activeRun['discovered_id']]);
+                $foundName = $dStmt->fetchColumn();
+                if ($foundName) $dungeonName = $foundName;
+            } else {
+                foreach ($dungeonData['dungeons'] as $d) {
+                    if ($d['id'] === $activeRun['dungeon_id']) { $dungeonName = $d['name']; break; }
+                }
+            }
+
+            $activeRunData = [
                 'id' => (int)$activeRun['id'],
                 'dungeonId' => $activeRun['dungeon_id'],
+                'dungeonName' => $dungeonName,
+                'discoveredId' => $activeRun['discovered_id'] ? (int)$activeRun['discovered_id'] : null,
+                'difficultyMult' => (float)($activeRun['difficulty_mult'] ?? 1.0),
                 'currentWave' => (int)$activeRun['current_wave'],
                 'totalWaves' => (int)$activeRun['total_waves'],
                 'bossDefeated' => (bool)$activeRun['boss_defeated'],
                 'startedAt' => $activeRun['started_at'],
-            ] : null,
+            ];
+        }
+
+        return jsonResponse($response, [
+            'mapItems' => $playerMaps,
+            'timedDungeons' => $timedDungeons,
+            'permanentDungeons' => $permanentDungeons,
+            'activeRun' => $activeRunData,
         ]);
     });
 
@@ -133,7 +206,7 @@ return function ($app) {
 
         // Create dungeon run
         $totalWaves = $dungeon['waves'] + 1; // +1 for boss wave
-        $stmt = $pdo->prepare("INSERT INTO dungeon_runs (player_id, dungeon_id, map_item_id, current_wave, total_waves) VALUES (?, ?, ?, 1, ?)");
+        $stmt = $pdo->prepare("INSERT INTO dungeon_runs (player_id, dungeon_id, map_item_id, current_wave, total_waves, difficulty_mult) VALUES (?, ?, ?, 1, ?, 1.0)");
         $stmt->execute([$id, $dungeon['id'], $mapItemId, $totalWaves]);
         $runId = $pdo->lastInsertId();
 
@@ -143,6 +216,82 @@ return function ($app) {
                 'id' => (int)$runId,
                 'dungeonId' => $dungeon['id'],
                 'dungeonName' => $dungeon['name'],
+                'currentWave' => 1,
+                'totalWaves' => $totalWaves,
+                'bossDefeated' => false,
+            ],
+            'player' => $player->toArray(),
+        ]);
+    });
+
+    // === ENTER DISCOVERED DUNGEON (Timed or Permanent) ===
+    $app->post('/api/player/{id}/dungeon/enter-discovered', function (Request $request, Response $response, array $args) {
+        $id = $args['id'];
+        $player = loadPlayer($id);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        $body = $request->getParsedBody();
+        $discoveredId = (int)($body['discoveredId'] ?? 0);
+        if (!$discoveredId) return jsonResponse($response, ['error' => 'Thiếu mã Bí Cảnh khám phá!'], 400);
+
+        $pdo = Database::pdo();
+
+        // Check no active run
+        $stmt = $pdo->prepare("SELECT id FROM dungeon_runs WHERE player_id = ? AND status = 'active'");
+        $stmt->execute([$id]);
+        if ($stmt->fetch()) {
+            return jsonResponse($response, ['error' => 'Đang trong Bí Cảnh khác! Hãy hoàn thành hoặc bỏ cuộc trước.'], 400);
+        }
+
+        // Fetch discovered dungeon
+        $stmt = $pdo->prepare("SELECT * FROM player_discovered_dungeons WHERE id = ? AND player_id = ?");
+        $stmt->execute([$discoveredId, $id]);
+        $disc = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$disc) {
+            return jsonResponse($response, ['error' => 'Bí Cảnh không tồn tại hoặc không thuộc về bạn!'], 404);
+        }
+
+        // Check timed expiration
+        if ($disc['realm_type'] === 'timed') {
+            if ($disc['status'] !== 'available' || (strtotime($disc['expires_at']) <= time())) {
+                $pdo->prepare("UPDATE player_discovered_dungeons SET status = 'expired' WHERE id = ?")->execute([$disc['id']]);
+                return jsonResponse($response, ['error' => '⚡ Bí Cảnh này đã hết hạn và tiêu tán vào hư không!'], 400);
+            }
+        }
+
+        // Check realm requirement
+        if ($player->getRealm() < (int)$disc['required_realm']) {
+            return jsonResponse($response, ['error' => "Cảnh giới chưa đủ để vào Bí Cảnh này! Yêu cầu Cảnh Giới: Cấp {$disc['required_realm']}"], 400);
+        }
+
+        // Check hospital / travel
+        if ($player->isHospitalized()) return jsonResponse($response, ['error' => 'Đang tịnh dưỡng!'], 400);
+        if ($player->isTraveling()) return jsonResponse($response, ['error' => 'Đang di chuyển!'], 400);
+
+        // Create dungeon run
+        $totalWaves = (int)$disc['waves'] + 1; // +1 for boss wave
+        $diffMult = (float)$disc['difficulty_mult'];
+
+        $stmt = $pdo->prepare("
+            INSERT INTO dungeon_runs (player_id, dungeon_id, map_item_id, discovered_id, current_wave, total_waves, difficulty_mult)
+            VALUES (?, ?, '', ?, 1, ?, ?)
+        ");
+        $stmt->execute([$id, $disc['dungeon_key'], $disc['id'], $totalWaves, $diffMult]);
+        $runId = $pdo->lastInsertId();
+
+        $prefix = ($disc['realm_type'] === 'timed') ? '⏳' : '🔱';
+        $warning = ($diffMult >= 2.0) ? " (⚠️ Quái vật cuồng bạo x{$diffMult} sức mạnh!)" : "";
+
+        return jsonResponse($response, [
+            'message' => "{$prefix} Lối vào mở ra! Đã tiến vào [{$disc['name']}]{$warning}!",
+            'run' => [
+                'id' => (int)$runId,
+                'dungeonId' => $disc['dungeon_key'],
+                'dungeonName' => $disc['name'],
+                'discoveredId' => (int)$disc['id'],
+                'realmType' => $disc['realm_type'],
+                'difficultyMult' => $diffMult,
                 'currentWave' => 1,
                 'totalWaves' => $totalWaves,
                 'bossDefeated' => false,
@@ -165,36 +314,95 @@ return function ($app) {
 
         if ($player->isHospitalized()) return jsonResponse($response, ['error' => 'Đang tịnh dưỡng!'], 400);
 
-        $dungeonData = $getDungeons();
-        $dungeon = null;
-        foreach ($dungeonData['dungeons'] as $d) {
-            if ($d['id'] === $run['dungeon_id']) { $dungeon = $d; break; }
-        }
-        if (!$dungeon) return jsonResponse($response, ['error' => 'Dữ liệu Bí Cảnh lỗi!'], 500);
-
         $currentWave = (int)$run['current_wave'];
         $totalWaves = (int)$run['total_waves'];
         $isBossWave = ($currentWave === $totalWaves);
 
-        // Create monster for this wave
-        if ($isBossWave) {
-            $monsterData = $dungeon['boss'];
-        } else {
-            $pool = $dungeon['monsterPool'];
-            $monsterId = $pool[array_rand($pool)];
-            $monsterData = GameDataRepository::getMonsterById($monsterId);
-            if (!$monsterData) {
-                // Fallback
-                $monsterData = [
-                    'id' => 'dungeon_mob', 'name' => 'Bí Cảnh Yêu Thú',
-                    'stats' => ['hp' => 50, 'strength' => 10, 'speed' => 8, 'dexterity' => 8, 'defense' => 5],
-                    'xpReward' => 50, 'goldReward' => [10, 20], 'effects' => [], 'drops' => [],
-                ];
+        // Check if this run is from a discovered dungeon
+        $disc = null;
+        if (!empty($run['discovered_id'])) {
+            $discStmt = $pdo->prepare("SELECT * FROM player_discovered_dungeons WHERE id = ?");
+            $discStmt->execute([$run['discovered_id']]);
+            $disc = $discStmt->fetch(\PDO::FETCH_ASSOC);
+        }
+
+        $dungeonName = $run['dungeon_id'];
+        $tier = 1;
+        $xpBonus = 1.0;
+        $goldBonus = 1.0;
+
+        if ($disc) {
+            $dungeonName = $disc['name'];
+            $tier = (int)$disc['tier'];
+            $diffMult = (float)($run['difficulty_mult'] ?? $disc['difficulty_mult'] ?? 1.0);
+            $rewards = json_decode($disc['rewards_data'] ?? '{}', true) ?: [];
+            $xpBonus = (float)($rewards['xpBonus'] ?? 1.5);
+            $goldBonus = (float)($rewards['goldBonus'] ?? 1.5);
+
+            if ($isBossWave) {
+                $monsterData = json_decode($disc['boss_data'], true);
+                if (!$monsterData) {
+                    $monsterData = ['id' => 'disc_boss', 'name' => 'Bí Cảnh Trùm', 'stats' => ['hp' => 500, 'strength' => 30, 'defense' => 15, 'speed' => 15, 'dexterity' => 15], 'xpReward' => 300, 'goldReward' => [100, 200]];
+                }
+                // For permanent / extreme dungeons, multiply boss stats
+                if ($diffMult > 1.0) {
+                    $monsterData['stats']['hp'] = (int)round(($monsterData['stats']['hp'] ?? 500) * $diffMult);
+                    $monsterData['stats']['strength'] = (int)round(($monsterData['stats']['strength'] ?? 30) * $diffMult);
+                    $monsterData['stats']['speed'] = (int)round(($monsterData['stats']['speed'] ?? 15) * max(1.0, 1 + ($diffMult - 1) * 0.35));
+                    $monsterData['stats']['dexterity'] = (int)round(($monsterData['stats']['dexterity'] ?? 15) * max(1.0, 1 + ($diffMult - 1) * 0.35));
+                    $monsterData['stats']['defense'] = (int)round(($monsterData['stats']['defense'] ?? 15) * max(1.0, 1 + ($diffMult - 1) * 0.45));
+                }
+            } else {
+                $pool = json_decode($disc['monster_pool'] ?? '[]', true) ?: ['tho_lang'];
+                $monsterId = $pool[array_rand($pool)];
+                $monsterData = GameDataRepository::getMonsterById($monsterId);
+                if (!$monsterData) {
+                    $monsterData = [
+                        'id' => 'disc_mob', 'name' => 'Bí Cảnh Yêu Thú',
+                        'stats' => ['hp' => 50, 'strength' => 10, 'speed' => 8, 'dexterity' => 8, 'defense' => 5],
+                        'xpReward' => 50, 'goldReward' => [10, 20], 'effects' => [], 'drops' => [],
+                    ];
+                }
+                // Scale normal monster stats by wave and extreme difficulty multiplier
+                $scaleFactor = (1 + ($currentWave - 1) * 0.15 + ($tier - 1) * 0.2) * $diffMult;
+                foreach (['hp', 'strength', 'speed', 'dexterity', 'defense'] as $s) {
+                    $monsterData['stats'][$s] = (int)round(($monsterData['stats'][$s] ?? 10) * $scaleFactor);
+                }
+                if ($diffMult >= 2.0) {
+                    $monsterData['name'] = "🔥 [Cuồng Bạo] " . $monsterData['name'];
+                }
             }
-            // Scale monster stats by wave number and dungeon tier
-            $scaleFactor = 1 + ($currentWave - 1) * 0.15 + ($dungeon['tier'] - 1) * 0.2;
-            foreach (['hp', 'strength', 'speed', 'dexterity', 'defense'] as $s) {
-                $monsterData['stats'][$s] = (int)round(($monsterData['stats'][$s] ?? 10) * $scaleFactor);
+        } else {
+            // Standard map item dungeon
+            $dungeonData = $getDungeons();
+            $dungeon = null;
+            foreach ($dungeonData['dungeons'] as $d) {
+                if ($d['id'] === $run['dungeon_id']) { $dungeon = $d; break; }
+            }
+            if (!$dungeon) return jsonResponse($response, ['error' => 'Dữ liệu Bí Cảnh lỗi!'], 500);
+
+            $dungeonName = $dungeon['name'];
+            $tier = (int)$dungeon['tier'];
+            $xpBonus = $dungeon['rewards']['xpBonus'] ?? 1.0;
+            $goldBonus = $dungeon['rewards']['goldBonus'] ?? 1.0;
+
+            if ($isBossWave) {
+                $monsterData = $dungeon['boss'];
+            } else {
+                $pool = $dungeon['monsterPool'];
+                $monsterId = $pool[array_rand($pool)];
+                $monsterData = GameDataRepository::getMonsterById($monsterId);
+                if (!$monsterData) {
+                    $monsterData = [
+                        'id' => 'dungeon_mob', 'name' => 'Bí Cảnh Yêu Thú',
+                        'stats' => ['hp' => 50, 'strength' => 10, 'speed' => 8, 'dexterity' => 8, 'defense' => 5],
+                        'xpReward' => 50, 'goldReward' => [10, 20], 'effects' => [], 'drops' => [],
+                    ];
+                }
+                $scaleFactor = 1 + ($currentWave - 1) * 0.15 + ($tier - 1) * 0.2;
+                foreach (['hp', 'strength', 'speed', 'dexterity', 'defense'] as $s) {
+                    $monsterData['stats'][$s] = (int)round(($monsterData['stats'][$s] ?? 10) * $scaleFactor);
+                }
             }
         }
 
@@ -208,9 +416,6 @@ return function ($app) {
         $waveLoot = [];
 
         if ($result['result'] === 'win') {
-            // Apply xp/gold bonuses
-            $xpBonus = $dungeon['rewards']['xpBonus'] ?? 1.0;
-            $goldBonus = $dungeon['rewards']['goldBonus'] ?? 1.0;
             $xpGain = (int)round(($monsterData['xpReward'] ?? 50) * $xpBonus);
             $goldGain = (int)round(mt_rand($monsterData['goldReward'][0] ?? 10, $monsterData['goldReward'][1] ?? 30) * $goldBonus);
 
@@ -237,11 +442,28 @@ return function ($app) {
                 $pdo->prepare("UPDATE dungeon_runs SET status = 'completed', boss_defeated = 1, completed_at = NOW(), loot_log = ? WHERE id = ?")
                     ->execute([json_encode($waveLoot), $run['id']]);
 
+                // Update discovered dungeon record
+                if ($disc) {
+                    if ($disc['realm_type'] === 'timed') {
+                        $pdo->prepare("UPDATE player_discovered_dungeons SET status = 'cleared', is_cleared = 1, cleared_at = NOW() WHERE id = ?")
+                            ->execute([$disc['id']]);
+                    } else {
+                        $pdo->prepare("UPDATE player_discovered_dungeons SET is_cleared = 1, clear_count = clear_count + 1, cleared_at = NOW() WHERE id = ?")
+                            ->execute([$disc['id']]);
+                    }
+                }
+
                 savePlayer($id, $player);
+
+                $completeMsg = $disc 
+                    ? ($disc['realm_type'] === 'permanent' 
+                        ? "🔱 Thần uy cái thế! Bạn đã vượt qua tất cả thử thách hung hiểm, bình định [{$dungeonName}]! Trảm sát {$monsterData['name']}!" 
+                        : "🏆 Hoàn thành Bí Cảnh [{$dungeonName}]! Đã đánh bại {$monsterData['name']} trước khi linh khí tiêu tán!")
+                    : "🏆 Bí Cảnh [{$dungeonName}] hoàn thành! Đã đánh bại {$monsterData['name']}!";
 
                 return jsonResponse($response, [
                     'result' => 'dungeon_complete',
-                    'message' => "🏆 Bí Cảnh [{$dungeon['name']}] hoàn thành! Đã đánh bại {$monsterData['name']}!",
+                    'message' => $completeMsg,
                     'wave' => $currentWave,
                     'totalWaves' => $totalWaves,
                     'isBoss' => true,
@@ -275,7 +497,7 @@ return function ($app) {
 
             return jsonResponse($response, [
                 'result' => 'dungeon_failed',
-                'message' => "💀 Thất bại ở tầng {$currentWave}! Bí Cảnh sụp đổ!",
+                'message' => "💀 Thất bại ở tầng {$currentWave}! Bí Cảnh cuồng bạo đánh trọng thương!",
                 'wave' => $currentWave,
                 'totalWaves' => $totalWaves,
                 'isBoss' => $isBossWave,
@@ -307,8 +529,15 @@ return function ($app) {
         $result = [];
         foreach ($runs as $run) {
             $dname = $run['dungeon_id'];
-            foreach ($dungeonData['dungeons'] as $d) {
-                if ($d['id'] === $run['dungeon_id']) { $dname = $d['name']; break; }
+            if (!empty($run['discovered_id'])) {
+                $dStmt = $pdo->prepare("SELECT name FROM player_discovered_dungeons WHERE id = ?");
+                $dStmt->execute([$run['discovered_id']]);
+                $found = $dStmt->fetchColumn();
+                if ($found) $dname = $found;
+            } else {
+                foreach ($dungeonData['dungeons'] as $d) {
+                    if ($d['id'] === $run['dungeon_id']) { $dname = $d['name']; break; }
+                }
             }
             $result[] = [
                 'id' => (int)$run['id'],
