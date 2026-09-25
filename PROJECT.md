@@ -29,8 +29,8 @@ Nghịch Thiên Ký RPG Engine utilizes a decoupled architecture:
 | M1 | Càn Khôn Túi & Lò Tạo Hóa Overhaul | Inventory material pouch tab, +1..+12 enhancement badges, forge shortcuts, unequip route, materials catalog | none | DONE |
 | M2 | Rèn Luyện & Cảnh Giới Overhaul | Physical stamina alignment, armor mitigation curves & evasion breakdowns, tribulation readiness UI | M1 | DONE |
 | M3 | Luận Đạo Đấu Trường Modernization | Opponent challenge cards, ELO win odds, streak badges, collapsible combat logs | M2 | DONE |
-| M4 | Ngao Du Bát Hoang & Bí Cảnh Overhaul | Timed rifts vs permanent forbidden zones differentiation, 18-realm modifiers & specialty badges | M3 | IN_PROGRESS |
-| M5 | Final Milestone: Full E2E & Adversarial Coverage | Pass 100% E2E tests (Tiers 1-4) + White-box adversarial hardening (Tier 5) + Forensic Audit | M-E2E, M4 | PLANNED |
+| M4 | Ngao Du Bát Hoang & Bí Cảnh Overhaul | Timed rifts vs permanent forbidden zones differentiation, 18-realm modifiers & specialty badges | M3 | DONE |
+| M5 | Final Milestone: Full E2E & Adversarial Coverage | Pass 100% E2E tests (Tiers 1-4) + White-box adversarial hardening (Tier 5) + Forensic Audit | M-E2E, M4 | DONE |
 
 ## Interface Contracts
 ### Inventory ↔ Alchemy / Forge

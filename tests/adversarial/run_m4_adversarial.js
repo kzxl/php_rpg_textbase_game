@@ -2,8 +2,9 @@
  * Master Adversarial Test Runner: Milestone M4 Travel & Secret Realms
  * 
  * Orchestrates:
- * 1. m4_travel_secret_realms_stress.test.js (Frontend JS Suite)
- * 2. m4_dungeon_backend_stress.php (Backend PHP Suite)
+ * 1. m4_dungeon_presentation_stress.test.js (Frontend Dungeon Presentation Adversarial Suite)
+ * 2. m4_travel_secret_realms_stress.test.js (Frontend Travel & Secret Realms Suite)
+ * 3. m4_dungeon_backend_stress.php (Backend PHP Engine & Database Suite)
  */
 
 import { execSync } from 'child_process';
@@ -17,20 +18,31 @@ console.log('\n\x1b[1m\x1b[35m==================================================
 console.log('\x1b[1m\x1b[35m  MASTER ADVERSARIAL RUNNER: MILESTONE M4 (TRAVEL & SECRET REALMS)  \x1b[0m');
 console.log('\x1b[1m\x1b[35m====================================================================\x1b[0m\n');
 
-let jsPassed = false;
+let dungeonJsPassed = false;
+let travelJsPassed = false;
 let phpPassed = false;
 
-// 1. Run Frontend JS Test
-console.log('\x1b[1m>>> RUNNING TRAVEL & SECRET REALMS FRONTEND SUITE (JS) ...\x1b[0m\n');
-const jsTestPath = path.resolve(__dirname, 'm4_travel_secret_realms_stress.test.js');
+// 1. Run Frontend Dungeon Presentation Stress Test
+console.log('\x1b[1m>>> RUNNING DUNGEON PRESENTATION ADVERSARIAL SUITE (JS) ...\x1b[0m\n');
+const dungeonJsTestPath = path.resolve(__dirname, 'm4_dungeon_presentation_stress.test.js');
 try {
-  execSync(`node "${jsTestPath}"`, { stdio: 'inherit' });
-  jsPassed = true;
+  execSync(`node "${dungeonJsTestPath}"`, { stdio: 'inherit' });
+  dungeonJsPassed = true;
 } catch (e) {
-  jsPassed = false;
+  dungeonJsPassed = false;
 }
 
-// 2. Run Backend PHP Test
+// 2. Run Frontend Travel & Realms Test
+console.log('\n\x1b[1m>>> RUNNING TRAVEL & SECRET REALMS FRONTEND SUITE (JS) ...\x1b[0m\n');
+const travelJsTestPath = path.resolve(__dirname, 'm4_travel_secret_realms_stress.test.js');
+try {
+  execSync(`node "${travelJsTestPath}"`, { stdio: 'inherit' });
+  travelJsPassed = true;
+} catch (e) {
+  travelJsPassed = false;
+}
+
+// 3. Run Backend PHP Test
 console.log('\n\x1b[1m>>> RUNNING SECRET REALMS BACKEND ENGINE & REST SUITE (PHP) ...\x1b[0m\n');
 const phpTestPath = path.resolve(__dirname, 'm4_dungeon_backend_stress.php');
 try {
@@ -44,11 +56,12 @@ console.log('\n\x1b[1m\x1b[35m==================================================
 console.log('\x1b[1m\x1b[35m                 OVERALL M4 ADVERSARIAL VERDICT                     \x1b[0m');
 console.log('\x1b[1m\x1b[35m====================================================================\x1b[0m');
 
-console.log(`  Frontend & Timer Suite (JS)    : ${jsPassed ? '\x1b[32mPASSED\x1b[0m' : '\x1b[31mFAILED\x1b[0m'}`);
-console.log(`  Backend Engine & REST (PHP)    : ${phpPassed ? '\x1b[32mPASSED\x1b[0m' : '\x1b[31mFAILED\x1b[0m'}`);
+console.log(`  Dungeon Presentation Suite (JS) : ${dungeonJsPassed ? '\x1b[32mPASSED\x1b[0m' : '\x1b[31mFAILED\x1b[0m'}`);
+console.log(`  Travel & 18-Zone Suite (JS)     : ${travelJsPassed ? '\x1b[32mPASSED\x1b[0m' : '\x1b[31mFAILED\x1b[0m'}`);
+console.log(`  Backend Engine & REST (PHP)     : ${phpPassed ? '\x1b[32mPASSED\x1b[0m' : '\x1b[31mFAILED\x1b[0m'}`);
 console.log('--------------------------------------------------------------------');
 
-if (jsPassed && phpPassed) {
+if (dungeonJsPassed && travelJsPassed && phpPassed) {
   console.log('\x1b[32m\x1b[1m  FINAL VERDICT: APPROVE (ALL M4 ADVERSARIAL CHECKS PASSED)\x1b[0m');
   console.log('\x1b[1m\x1b[35m====================================================================\x1b[0m\n');
   process.exit(0);

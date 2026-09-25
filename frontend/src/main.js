@@ -37,10 +37,11 @@ import { pageLeaderboard } from './pages/leaderboard.js'
 import { renderGlitchPage } from './pages/glitch.js'
 
 // ===== STATE =====
+const urlPage = new URLSearchParams(window.location.search).get('page') || (window.location.hash ? window.location.hash.slice(1) : null)
 const state = {
   playerId: null,
   player: null,
-  currentPage: 'combat',
+  currentPage: urlPage || 'combat',
   monsters: [],
   skills: [],
   items: [],
