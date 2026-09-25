@@ -15,9 +15,9 @@ export function pageWiki(el, ctx) {
       </div>
 
       <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
-        ${['lore','realm','combat','skills','explore','tower','dungeon','housing','talent','alchemy','crime','market','tips'].map(t => `
+        ${['lore','realm','combat','skills','explore','tower','dungeon','housing','talent','alchemy','market','tips'].map(t => `
           <button class="btn btn--sm ${state._wikiTab === t ? 'btn--gold' : 'btn--dark'}" data-tab="${t}">
-            ${{lore:'📖 Lore',realm:'🌟 Cảnh Giới',combat:'⚔️ Chiến Đấu',skills:'⚡ Kỹ Năng',explore:'🗺️ Khám Phá',tower:'🗼 Thiên Phần Tháp',dungeon:'🏰 Bí Cảnh',housing:'🏠 Động Phủ',talent:'🧬 Căn Cốt',alchemy:'⚗️ Luyện Đan',crime:'🔪 Phạm Tội',market:'🏪 Thương Mại',tips:'💡 Mẹo'}[t]}
+            ${{lore:'📖 Lore',realm:'🌟 Cảnh Giới',combat:'⚔️ Chiến Đấu',skills:'⚡ Kỹ Năng',explore:'🗺️ Khám Phá',tower:'🗼 Thiên Phần Tháp',dungeon:'🏰 Bí Cảnh',housing:'🏠 Động Phủ',talent:'🧬 Căn Cốt',alchemy:'⚗️ Luyện Đan',market:'🏪 Thương Mại',tips:'💡 Mẹo'}[t]}
           </button>
         `).join('')}
       </div>
@@ -264,19 +264,6 @@ export function pageWiki(el, ctx) {
         </table>
       `,
 
-      crime: `
-        <h3 style="color:var(--gold);margin-bottom:12px">🔪 Hệ Thống Phạm Tội & Cướp</h3>
-        <p>Tiêu Nerve để phạm tội kiếm tiền/vật phẩm. Rủi ro bị bắt → ngồi tù.</p>
-
-        <h4 style="color:var(--blue)">🏴‍☠️ Cướp (Mugging)</h4>
-        <p>Tấn công người chơi khác để cướp Linh thạch. Thắng = lấy 5-15% gold của đối phương. Thua = vào bệnh viện.</p>
-        <ul style="margin:8px 0">
-          <li>Cooldown: 5 phút giữa mỗi lần cướp</li>
-          <li>Không thể cướp khi đang tịnh dưỡng hoặc ngồi tù</li>
-          <li>Nhân vật mới (< Lv5) được bảo vệ</li>
-        </ul>
-      `,
-
       market: `
         <h3 style="color:var(--gold);margin-bottom:12px">🏪 Hệ Thống Thương Mại</h3>
 
@@ -311,7 +298,6 @@ export function pageWiki(el, ctx) {
         <h4 style="color:var(--blue)">💰 Kiếm Tiền</h4>
         <ul style="margin:8px 0">
           <li>Farm quái + bán nguyên liệu cho Thương Nhân NPC</li>
-          <li>Làm Crime → rủi ro cao nhưng lợi nhuận tốt</li>
           <li>Chạy Bí Cảnh → Boss drop đồ giá trị</li>
           <li>Trồng thảo dược ở Dược Viên → thu nhập thụ động</li>
           <li>Chế tác vật phẩm → bán trên sàn Giao Dịch</li>

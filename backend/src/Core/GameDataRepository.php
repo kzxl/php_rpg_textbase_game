@@ -99,55 +99,6 @@ class GameDataRepository
     }
 
     // ============================================
-    // CRIMES
-    // ============================================
-    public static function getCrimes(): array
-    {
-        $stmt = Database::pdo()->query("SELECT * FROM game_crimes ORDER BY nerve_cost, min_skill");
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        return array_map(function($r) {
-            return [
-                'id' => $r['id'],
-                'name' => $r['name'],
-                'category' => $r['category'],
-                'nerveCost' => (int)$r['nerve_cost'],
-                'baseSuccessRate' => (int)$r['base_success_rate'],
-                'minSkill' => (int)$r['min_skill'],
-                'icon' => $r['icon'],
-                'rewards' => json_decode($r['rewards'], true),
-                'failPenalty' => json_decode($r['fail_penalty'], true),
-                'critFailChance' => (int)$r['crit_fail_chance'],
-                'critFailPenalty' => json_decode($r['crit_fail_penalty'], true),
-                'special' => json_decode($r['special'], true) ?: [],
-                'description' => $r['description'],
-            ];
-        }, $rows);
-    }
-
-    public static function getCrimeById(string $id): ?array
-    {
-        $stmt = Database::pdo()->prepare("SELECT * FROM game_crimes WHERE id = ?");
-        $stmt->execute([$id]);
-        $r = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if (!$r) return null;
-        return [
-            'id' => $r['id'],
-            'name' => $r['name'],
-            'category' => $r['category'],
-            'nerveCost' => (int)$r['nerve_cost'],
-            'baseSuccessRate' => (int)$r['base_success_rate'],
-            'minSkill' => (int)$r['min_skill'],
-            'icon' => $r['icon'],
-            'rewards' => json_decode($r['rewards'], true),
-            'failPenalty' => json_decode($r['fail_penalty'], true),
-            'critFailChance' => (int)$r['crit_fail_chance'],
-            'critFailPenalty' => json_decode($r['crit_fail_penalty'], true),
-            'special' => json_decode($r['special'], true) ?: [],
-            'description' => $r['description'],
-        ];
-    }
-
-    // ============================================
     // NPCs + QUESTS
     // ============================================
     public static function getNpcs(): array
@@ -239,7 +190,6 @@ class GameDataRepository
             'skillCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_skills")->fetchColumn(),
             'itemCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_items")->fetchColumn(),
             'materialCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_materials")->fetchColumn(),
-            'crimeCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_crimes")->fetchColumn(),
             'npcCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_npcs")->fetchColumn(),
             'questCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_npc_quests")->fetchColumn(),
             'medicineCount' => (int)$pdo->query("SELECT COUNT(*) FROM game_medicines")->fetchColumn(),
@@ -367,7 +317,6 @@ class GameDataRepository
             'areas' => 'game_areas',
             'items' => 'game_items',
             'materials' => 'game_materials',
-            'crimes' => 'game_crimes',
             'education' => 'game_education_trees',
             'medicines' => 'game_medicines',
             'recipes' => 'game_recipes',

@@ -211,7 +211,6 @@ return function ($app) {
         }
 
         if ($player->isHospitalized()) return jsonResponse($response, ['error' => 'Đang tịnh dưỡng!'], 400);
-        if ($player->isJailed()) return jsonResponse($response, ['error' => 'Đang ngồi tù!'], 400);
 
         // Calculate total waves (base + modifier bonus)
         $totalWaves = $tierInfo['waves'] + 1; // +1 for boss

@@ -10,7 +10,6 @@ import { pageLibrary } from './pages/library.js'
 import { pageStats } from './pages/stats.js'
 import { pageSkills } from './pages/skills.js'
 import { pageInventory } from './pages/inventory.js'
-import { pageCrimes } from './pages/crimes.js'
 import { pageEducation } from './pages/education.js'
 import { pageTravel } from './pages/travel.js'
 import { pageAlchemy } from './pages/alchemy.js'
@@ -213,9 +212,6 @@ function renderStatusEffects(p) {
   if (p.medCooldownUntil && p.medCooldownUntil > now) {
     effects.push({ icon: '💊', label: 'Đan độc', endTime: p.medCooldownUntil, color: 'var(--orange)' })
   }
-  if (p.jailUntil && p.jailUntil > now) {
-    effects.push({ icon: '⛓️', label: 'Ngục tù', endTime: p.jailUntil, color: 'var(--purple)' })
-  }
   if (p.travelArrivesAt && p.travelArrivesAt > now) {
     effects.push({ icon: '🚶', label: 'Di chuyển', endTime: p.travelArrivesAt, color: 'var(--blue)' })
   }
@@ -339,7 +335,7 @@ function renderGame() {
 
   const pageToSection = {
     stats: 'tuchan', glitch: 'tuchan', skills: 'tuchan', education: 'tuchan', library: 'tuchan', inventory: 'tuchan',
-    combat: 'hanhtrinh', travel: 'hanhtrinh', dungeon: 'hanhtrinh', tiencanh: 'hanhtrinh', quests: 'hanhtrinh', dailyquest: 'hanhtrinh', crimes: 'hanhtrinh',
+    combat: 'hanhtrinh', travel: 'hanhtrinh', dungeon: 'hanhtrinh', tiencanh: 'hanhtrinh', quests: 'hanhtrinh', dailyquest: 'hanhtrinh',
     arena: 'tranhdau', tower: 'tranhdau', worldboss: 'tranhdau',
     housing: 'tienphu', guild: 'tienphu', alchemy: 'tienphu',
     market: 'thuonghoi', auction: 'thuonghoi', npcshop: 'thuonghoi', gacha: 'thuonghoi',
@@ -446,9 +442,6 @@ function renderGame() {
             <li class="nav-item ${['quests', 'dailyquest'].includes(state.currentPage) ? 'active' : ''}" data-page="quests">
               <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
               ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
-            </li>
-            <li class="nav-item ${state.currentPage === 'crimes' ? 'active' : ''}" data-page="crimes">
-              <span class="icon">💀</span> Thí Luyện Ác Nghiệp
             </li>
           </div>
 
@@ -677,7 +670,6 @@ function renderPopupContent() {
 // ===== PAGE DISPATCHER =====
 const pageMap = {
   combat: pageCombat,
-  crimes: pageCrimes,
   education: pageEducation,
   stats: pageStats,
   skills: pageSkills,
@@ -788,15 +780,14 @@ function updateSidebar() {
 // ===== UTILITIES =====
 async function loadGameData() {
   try {
-    const [md, sd, id, medsD, crimesD, eduD] = await Promise.all([
+    const [md, sd, id, medsD, eduD] = await Promise.all([
       api.getMonsters(), api.getSkills(), api.getItems(),
-      api.getMedicines(), api.getCrimes(), api.getEducation()
+      api.getMedicines(), api.getEducation()
     ])
     state.monsters = md.monsters || []
     state.skills = sd.skills || []
     state.items = id.items || []
     state.medicines = medsD.medicines || []
-    state.crimes = crimesD.crimes || []
     state.educationTrees = eduD.trees || []
     state.exploration = (await api.getExploration())
     state.recipes = (await api.getRecipes()).recipes

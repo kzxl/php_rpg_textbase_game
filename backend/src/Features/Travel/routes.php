@@ -74,8 +74,7 @@ return function ($app) {
             ], 400);
         }
 
-        // Block if jailed or hospitalized
-        if ($player->isJailed()) return jsonResponse($response, ['error' => 'Đang bị giam!'], 400);
+        // Block if hospitalized
         if ($player->hospitalRemaining() > 0) return jsonResponse($response, ['error' => 'Đang tịnh dưỡng!'], 400);
 
         $body = $request->getParsedBody();

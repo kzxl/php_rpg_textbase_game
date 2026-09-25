@@ -105,7 +105,6 @@ class GameAPI {
   getSkills() { return this.request('/data/skills') }
   getItems() { return this.request('/data/items') }
   getMedicines() { return this.request('/data/medicines') }
-  getCrimes() { return this.request('/data/crimes') }
   getEducation() { return this.request('/data/education') }
   getExploration() { return this.request('/data/exploration') }
   getRecipes() { return this.request('/recipes') }
@@ -159,21 +158,6 @@ class GameAPI {
     return this.request(`/player/${id}/crafting/apply`, {
       method: 'POST', body: JSON.stringify({ currencyId, itemId, lockAffixIndex })
     })
-  }
-
-  // Crimes
-  commitCrime(id, crimeId) {
-    return this.request(`/player/${id}/commit-crime`, {
-      method: 'POST', body: JSON.stringify({ crimeId }),
-    })
-  }
-
-  // Jail
-  escapeJail(id) {
-    return this.request(`/player/${id}/escape-jail`, { method: 'POST' })
-  }
-  bail(id) {
-    return this.request(`/player/${id}/bail`, { method: 'POST' })
   }
 
   // Education

@@ -862,7 +862,6 @@ class Player
             'discoveredNodes' => $this->discoveredNodes,
             'discoveredMonsters' => $this->discoveredMonsters,
             'discoveredItems' => $this->discoveredItems,
-            'acDanh' => $this->getAcDanh(),
             'trackedMonsters' => $this->trackedMonsters,
             'combatBuffs' => $this->combatBuffs,
             'lastMonsterSpawn' => $this->lastMonsterSpawn,
@@ -1041,8 +1040,8 @@ class Player
 
     // === Phase 1 Methods ===
 
-    public function isJailed(): bool { return $this->jailUntil > time(); }
-    public function jailRemaining(): int { return max(0, $this->jailUntil - time()); }
+    public function isJailed(): bool { return false; }
+    public function jailRemaining(): int { return 0; }
 
     // Travel methods
     public function isTraveling(): bool { return $this->travelingTo !== null && $this->travelArrivesAt > 0; }
@@ -1054,26 +1053,6 @@ class Player
         $this->travelingTo = null;
         $this->travelArrivesAt = 0;
         return $areaName;
-    }
-
-    public function jail(int $seconds): void { $this->jailUntil = time() + $seconds; }
-
-    /**
-     * Get Ác Danh (Crime Reputation) title based on crimeExp.
-     */
-    public function getAcDanh(): array
-    {
-        $tiers = [
-            ['min' => 5000, 'name' => 'Ma Đạo Tông Sư', 'icon' => '👿', 'bonus' => 15],
-            ['min' => 2000, 'name' => 'Ác Bá',          'icon' => '💀', 'bonus' => 10],
-            ['min' => 500,  'name' => 'Đại Đạo',        'icon' => '⚔️', 'bonus' => 5],
-            ['min' => 100,  'name' => 'Tiểu Tặc',       'icon' => '🗡️', 'bonus' => 0],
-            ['min' => 0,    'name' => 'Lương Dân',       'icon' => '',   'bonus' => 0],
-        ];
-        foreach ($tiers as $t) {
-            if ($this->crimeExp >= $t['min']) return $t;
-        }
-        return $tiers[count($tiers) - 1];
     }
 
     /**
@@ -1096,203 +1075,11 @@ class Player
         return true;
     }
 
-    public function spendNerve(int $amount): bool
-    {
-        if ($this->nerve < $amount) return false;
-        $this->nerve -= $amount;
-        return true;
-    }
-
-    /**
-     * Execute a crime. Returns result array.
-     */
-    public function commitCrime(array $crime): array
-    {
-        if ($this->isJailed()) return ['outcome' => 'jailed', 'message' => 'Đang bị giam! Không thể phạm tội.'];
-        $cost = $crime['nerveCost'] ?? 2;
-        if ($this->currentStamina < $cost) return ['outcome' => 'no_stamina', 'message' => 'Không đủ Thể Lực!'];
-
-        $cs = $this->crimeSkills[$crime['id']] ?? 0;
-        if ($cs < ($crime['minSkill'] ?? 0)) {
-            return ['outcome' => 'locked', 'message' => "Cần Crime Skill {$crime['minSkill']} để thực hiện!"];
-        }
-
-        $this->currentStamina -= $cost;
-
-        // Category bonus: skills in same category boost success
-        $categoryBonus = 0;
-        $category = $crime['category'] ?? 'theft';
-        foreach ($this->crimeSkills as $cid => $cval) {
-            // Any skill in the same category adds a small cross-bonus
-            $categoryBonus += $cval * 0.1;
-        }
-        $categoryBonus = min(15, $categoryBonus); // Cap at 15%
-
-        // Education tree cross-bonus
-        $eduBonus = 0;
-        $tp = $this->treeProgress;
-        if ($category === 'intel' || $category === 'spy') {
-            // Thiên Cơ (perception) → intel/spy crimes +success
-            $eduBonus = min(10, ($tp['perception'] ?? 0) * 2);
-        } elseif ($category === 'trade' || $category === 'fraud') {
-            // Đan Dược (alchemy) → trade/fraud +gold multiplier (applied later)
-            $eduBonus = min(8, ($tp['alchemy'] ?? 0) * 1.5);
-        } elseif ($category === 'combat') {
-            // Nội Công → combat crimes +success
-            $eduBonus = min(10, ($tp['internal_cultivation'] ?? 0) * 1.5);
-        }
-
-        // Success rate = base + CS bonus + category bonus + education bonus
-        $successRate = min(95, $crime['baseSuccessRate'] + $cs * 0.5 + $categoryBonus + $eduBonus);
-        $roll = mt_rand(1, 100);
-
-        if ($roll <= $successRate) {
-            // SUCCESS
-            $goldMultiplier = 1.0;
-            if ($category === 'fraud') $goldMultiplier = 1.0 + min(0.3, $cs * 0.005); // fraud → gold bonus
-            if ($category === 'trade') $goldMultiplier = 1.0 + min(0.25, $cs * 0.004);
-            
-            $gold = (int)(mt_rand($crime['rewards']['goldMin'], $crime['rewards']['goldMax']) * $goldMultiplier);
-            $this->gold += $gold;
-            $this->crimeExp += $crime['rewards']['ceGain'];
-            $this->crimeSkills[$crime['id']] = min(100, ($this->crimeSkills[$crime['id']] ?? 0) + $crime['rewards']['csGain']);
-            $this->maxNerve = 15 + (int)floor($this->crimeExp / 50) * 5;
-
-            $result = [
-                'outcome' => 'success',
-                'message' => "✅ Thành công! +{$gold} linh thạch",
-                'gold' => $gold,
-                'ceGain' => $crime['rewards']['ceGain'],
-                'csGain' => $crime['rewards']['csGain'],
-            ];
-
-            // Handle special effects on success
-            $specials = $crime['special'] ?? [];
-            if (in_array('rare_material_drop', $specials)) {
-                $rareMats = ['mat_tinh_hoa', 'mat_loi_tinh', 'mat_huyet_tinh', 'mat_noi_dan_trung'];
-                if (mt_rand(1, 100) <= 25) {
-                    $matId = $rareMats[array_rand($rareMats)];
-                    $this->materials[$matId] = ($this->materials[$matId] ?? 0) + 1;
-                    $result['bonusDrop'] = $matId;
-                    $result['message'] .= " + Nguyên liệu hiếm!";
-                }
-            }
-            if (in_array('random_buff', $specials)) {
-                $buffs = [
-                    ['stat' => 'strength', 'value' => 5, 'name' => 'Tà Lực (+5 STR)'],
-                    ['stat' => 'speed', 'value' => 5, 'name' => 'Quỷ Tốc (+5 SPD)'],
-                    ['stat' => 'dexterity', 'value' => 5, 'name' => 'Huyền Thủ (+5 DEX)'],
-                ];
-                $buff = $buffs[array_rand($buffs)];
-                $this->combatBuffs[] = [
-                    'name' => $buff['name'],
-                    'stat' => $buff['stat'],
-                    'value' => $buff['value'],
-                    'expiresAt' => time() + 300,
-                ];
-                $result['buff'] = $buff['name'];
-                $result['message'] .= " + Buff: {$buff['name']}!";
-            }
-            if (in_array('legendary_drop', $specials) && mt_rand(1, 100) <= 5) {
-                $legendaryMats = ['mat_ba_vuong_nanh', 'mat_moc_hoang_tinh', 'mat_hoa_diem_tinh', 'mat_loi_de_vu', 'mat_huyet_ma_ban_giap'];
-                $matId = $legendaryMats[array_rand($legendaryMats)];
-                $this->materials[$matId] = ($this->materials[$matId] ?? 0) + 1;
-                $result['legendaryDrop'] = $matId;
-                $result['message'] .= " + 🌟 Cổ vật truyền thuyết!";
-            }
-            if (in_array('epic_loot', $specials) && mt_rand(1, 100) <= 15) {
-                $epicMats = ['mat_noi_dan_lon', 'mat_thien_thach', 'mat_hac_tinh'];
-                $matId = $epicMats[array_rand($epicMats)];
-                $this->materials[$matId] = ($this->materials[$matId] ?? 0) + mt_rand(1, 3);
-                $result['epicDrop'] = $matId;
-                $result['message'] .= " + Bảo vật hiếm!";
-            }
-
-            return $result;
-        }
-
-        // Check critical failure
-        $critRoll = mt_rand(1, 100);
-        if ($critRoll <= ($crime['critFailChance'] ?? 5)) {
-            // CRITICAL FAILURE → Jail
-            $this->crimeExp = max(0, $this->crimeExp - $crime['critFailPenalty']['ceLoss']);
-            $this->crimeSkills[$crime['id']] = max(0, ($this->crimeSkills[$crime['id']] ?? 0) - $crime['critFailPenalty']['csLoss']);
-            $jailTime = $crime['critFailPenalty']['jailSeconds'];
-
-            // random_debuff on critical fail from ritual
-            $specials = $crime['special'] ?? [];
-            if (in_array('random_debuff', $specials)) {
-                $jailTime = (int)($jailTime * 1.5);
-            }
-
-            $this->jail($jailTime);
-
-            return [
-                'outcome' => 'critical_fail',
-                'message' => "❌ Thảm bại! Bị bắt giam {$jailTime}s!",
-                'jailSeconds' => $jailTime,
-                'ceLoss' => $crime['critFailPenalty']['ceLoss'],
-                'csLoss' => $crime['critFailPenalty']['csLoss'],
-            ];
-        }
-
-        // NORMAL FAILURE
-        $this->crimeExp = max(0, $this->crimeExp - ($crime['failPenalty']['ceLoss'] ?? 0));
-        $this->crimeSkills[$crime['id']] = max(0, ($this->crimeSkills[$crime['id']] ?? 0) - ($crime['failPenalty']['csLoss'] ?? 0));
-
-        return [
-            'outcome' => 'fail',
-            'message' => '⚠️ Thất bại! Không thu được gì.',
-            'ceLoss' => $crime['failPenalty']['ceLoss'] ?? 0,
-            'csLoss' => $crime['failPenalty']['csLoss'] ?? 0,
-        ];
-    }
-
-    /**
-     * Attempt jail escape. Costs nerve, DEX-based success.
-     */
-    public function escapeJail(): array
-    {
-        if (!$this->isJailed()) return ['success' => false, 'message' => 'Không bị giam!'];
-        if ($this->currentStamina < 10) return ['success' => false, 'message' => 'Cần 10 Thể Lực để vượt ngục!'];
-
-        $this->currentStamina -= 10;
-        $dex = $this->getFinalStats()['dexterity'] ?? 10;
-        $escapeChance = min(60, 20 + $dex * 0.5);
-
-        if (mt_rand(1, 100) <= $escapeChance) {
-            $this->jailUntil = 0;
-            return ['success' => true, 'message' => '🏃 Vượt ngục thành công!'];
-        }
-
-        // Failed escape: +50% time
-        $remaining = $this->jailRemaining();
-        $this->jailUntil += (int)($remaining * 0.5);
-        return ['success' => false, 'message' => "❌ Thất bại! Thời gian giam tăng thêm {$remaining}s!"];
-    }
-
-    /**
-     * Bail out of jail. Costs gold.
-     */
-    public function bailOut(): array
-    {
-        if (!$this->isJailed()) return ['success' => false, 'message' => 'Không bị giam!'];
-        $remaining = (int)ceil($this->jailRemaining() / 60);
-        $cost = max(10, 100 * $remaining * $this->level);
-
-        if ($this->gold < $cost) return ['success' => false, 'message' => "Cần {$cost} lính thạch để bảo lãnh!"];
-
-        $this->gold -= $cost;
-        $this->jailUntil = 0;
-        return ['success' => true, 'message' => "💰 Bảo lãnh thành công! -{$cost} lính thạch", 'cost' => $cost];
-    }
-
     /**
      * Enroll in an education node.
      */
     public function enrollNode(array $node, string $treeId): ?string
     {
-        if ($this->isJailed()) return 'Đang bị giam!';
         if ($this->studyingNode !== '') return 'Đang tu luyện môn khác!';
 
         // Check prerequisites

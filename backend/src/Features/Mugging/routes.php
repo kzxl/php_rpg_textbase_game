@@ -43,7 +43,6 @@ return function ($app) {
 
         // --- Validation ---
         if ($attacker->isHospitalized()) return jsonResponse($response, ['error' => 'Đang bị thương!'], 400);
-        if ($attacker->jailUntil > $now) return jsonResponse($response, ['error' => 'Đang ngồi tù!'], 400);
         if ($attacker->isTraveling()) return jsonResponse($response, ['error' => 'Đang di chuyển!'], 400);
 
         $mugCooldown = $attacker->mugCooldownUntil ?? 0;
@@ -81,8 +80,7 @@ return function ($app) {
         $result = $engine->simulatePvP($attacker, $victim);
         $won = ($result['winner'] === 'attacker');
 
-        // Crime XP for attacking
-        $attacker->crimeExp = ($attacker->crimeExp ?? 0) + 3;
+        // Combat cooldown
         $attacker->mugCooldownUntil = $now + 120;
 
         $pdo = Database::pdo();
@@ -200,9 +198,6 @@ return function ($app) {
             $victimHospital = mt_rand(60, 120);
             $victim->hospitalUntil = $now + $victimHospital;
 
-            // Crime XP for robbing
-            $attacker->crimeExp = ($attacker->crimeExp ?? 0) + 5;
-
             // === Chance to unlock/level up Cướp Bóc skill ===
             if ($robberySkillLevel === 0) {
                 // 10% chance to learn Cướp Bóc
@@ -223,9 +218,6 @@ return function ($app) {
             $victimHospital = mt_rand(300, 600);
             $victim->hospitalUntil = $now + $victimHospital;
             $victim->currentHp = 1; // Nearly dead
-
-            // Heavy crime XP
-            $attacker->crimeExp = ($attacker->crimeExp ?? 0) + 10;
 
             $message = "🩸 Đánh trọng thương {$victim->name}! Họ phải tịnh dưỡng {$victimHospital}s!";
         }

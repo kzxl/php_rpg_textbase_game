@@ -96,9 +96,6 @@ return function ($app) {
         if ($player->hospitalRemaining() > 0) {
             return jsonResponse($response, ['error' => 'Đang trọng thương, không thể khám phá!'], 400);
         }
-        if ($player->jailUntil > time()) {
-            return jsonResponse($response, ['error' => 'Đang ngồi tù...'], 400);
-        }
         if ($player->isTraveling()) {
             return jsonResponse($response, ['error' => 'Đang di chuyển, không thể khám phá.'], 400);
         }

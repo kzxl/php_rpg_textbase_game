@@ -122,9 +122,8 @@ return function ($app) {
             return jsonResponse($response, ['error' => 'Cảnh giới chưa đủ để vào Bí Cảnh này!'], 400);
         }
 
-        // Check hospital/jail/travel
+        // Check hospital/travel
         if ($player->isHospitalized()) return jsonResponse($response, ['error' => 'Đang tịnh dưỡng!'], 400);
-        if ($player->isJailed()) return jsonResponse($response, ['error' => 'Đang ngồi tù!'], 400);
         if ($player->isTraveling()) return jsonResponse($response, ['error' => 'Đang di chuyển!'], 400);
 
         // Consume Ngọc Giản

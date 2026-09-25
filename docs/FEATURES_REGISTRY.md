@@ -34,7 +34,7 @@ Database (MySQL 8.0 / MariaDB)
 | `EXP-05` | **Bát Hoang Tiên Cảnh (TienCanh)** | `Features/TienCanh` | `pages/tiencanh.js` | `GET/POST /api/player/{id}/tiencanh` | Dynamic exploration atlas grid. |
 | `EXP-06` | **Thiên Cơ Nhiệm Vụ (Quests)** | `Features/Quests`, `Features/NPC` | `pages/quests.js` | `GET/POST /api/player/{id}/quests` | Kill and collect quest tracking from area NPCs. |
 | `EXP-07` | **Nhiệm Vụ Hằng Ngày (Daily)** | `Features/DailyQuest` | `pages/dailyquest.js` | `GET/POST /api/daily-quests` | Daily rotating quests and rewards. |
-| `EXP-08` | **Thí Luyện Ác Nghiệp (Crime)** | `Features/Crime` | `pages/crimes.js` | `POST /api/player/{id}/crime` | Costs stamina. Increases crimeExp or sends player to jail. |
+| ~~`EXP-08`~~ | **[DECOMMISSIONED] Nghịch Thiên (Crime)** | *Removed* | *Removed* | *N/A* | *Decommissioned per player progression alignment (Nghịch Khí removed).* |
 
 ---
 
