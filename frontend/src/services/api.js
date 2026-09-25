@@ -153,6 +153,12 @@ class GameAPI {
       method: 'POST', body: JSON.stringify({ recipeId })
     })
   }
+  getCraftingMastery(id) {
+    return this.request(`/player/${id}/crafting-mastery`)
+  }
+  getMonsterMastery(id) {
+    return this.request(`/player/${id}/monster-mastery`)
+  }
   getCurrencies() { return this.request('/crafting/currencies') }
   applyCurrency(id, currencyId, itemId, lockAffixIndex = -1) {
     return this.request(`/player/${id}/crafting/apply`, {

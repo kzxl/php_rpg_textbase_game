@@ -43,11 +43,13 @@ Database (MySQL 8.0 / MariaDB)
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `CUL-01` | **Tu Luyện & Cảnh Giới (Realm)** | `Features/Realm` | `pages/stats.js`, `pages/realm.js` | `GET/POST /api/player/{id}/realm`, `/breakthrough` | 19 canonical realms + unlimited procedural realms. Breakthrough trial combat. |
 | `CUL-02` | **Rèn Luyện Thể Chất (Gym)** | `Features/Gym` | `pages/stats.js` | `POST /api/player/{id}/train` | Multiplies stat gain by talent aptitude. Spends stamina. |
-| `CUL-03` | **Chiêu Thức (Skills)** | `Features/Skill` | `pages/skills.js` | `POST /api/player/{id}/skills/equip` | Active and passive skills. Usage-based mastery XP. |
-| `CUL-04` | **Tâm Pháp (Education Trees)** | `Features/Education` | `pages/skills.js` (tab `gongfa`) | `POST /api/player/{id}/study` | Timed node study (Nội Công, Thiên Cơ, Đan Dược). Permanent stat boost. |
-| `CUL-05` | **Tàng Kinh Các (Library)** | `Core/GameDataRepository` | `pages/skills.js` (tab `library`) | `GET /api/data/skills` | Catalog of skills. Filtered by player Nhãn Thuật perception level. |
-| `CUL-06` | **Thiên Đạo Dị Biến (Glitch)** | `Features/Glitch` | `pages/skills.js` (tab `glitch`) | `GET/POST /api/player/{id}/glitches` | Feature Fog of War. 3 Stances + 10 Hidden Imprints with riddles. |
+| `CUL-03` | **Chiêu Thức & Tâm Pháp (Skills - Pillar 1)** | `Features/Skill` | `pages/skills.js` (tab `combat`) | `POST /api/player/{id}/skills/equip` | Active combat skills & passive mind methods. Realm-scaled equip loadout slots. Usage-based mastery XP. |
+| ~~`CUL-04`~~ | **[RETIRED] Công Pháp Cũ (Education Trees)** | *Deprecated* | *Decommissioned* | *N/A* | *Replaced by action-driven Monster Mastery (`CUL-08`) and Crafting Mastery (`CUL-09`).* |
+| `CUL-05` | **Tàng Kinh Các (Library)** | `Core/GameDataRepository` | `pages/skills.js`, `pages/library.js` | `GET /api/data/skills` | Catalog of skills. Filtered by player Nhãn Thuật perception level. |
+| `CUL-06` | **Thiên Đạo Dị Biến (Glitch - Pillar 4)** | `Features/Glitch`, `Systems/GlitchSystem` | `pages/skills.js` (tab `glitch`) | `GET/POST /api/player/{id}/glitches` | Feature Fog of War. 3 Stances + 10 Hidden Imprints with riddles. |
 | `CUL-07` | **Càn Khôn Túi (Inventory)** | `Features/Inventory` | `pages/inventory.js` | `POST /api/player/{id}/equip`, `/use-item` | Equipment slots + storage capacity from rings/pouches. |
+| `CUL-08` | **Thông Thạo Quái Vật (Monster Mastery - Pillar 2)** | `Features/MonsterMastery`, `Systems/MonsterMasterySystem` | `pages/skills.js` (tab `monsters`) | `GET /api/player/{id}/monster-mastery` | 5★ Bestiary kill progression. Tier 0 Fog of War, Tier 1 stats reveal, Tier 2 +10% DMG, Tier 3 -10% DEF & +15% drop, Tier 4 +20% DMG & x2 weakpoint, Tier 5 +25% DMG & 10% execute. |
+| `CUL-09` | **Thông Thạo Chế Tạo (Crafting Mastery - Pillar 3)** | `Features/Crafting`, `Features/MonsterMastery` | `pages/skills.js` (tab `crafting`) | `GET /api/player/{id}/crafting-mastery` | Level 1-100+ progression, Dao title ranks (Dược Đồng -> Thần Nông), success bonuses, critical quality (Tinh/Cực/Thiên Phẩm), material salvage refunds. |
 
 ---
 

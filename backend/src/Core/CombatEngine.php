@@ -30,6 +30,9 @@ class CombatEngine
     /** @var float Giảm sát thương của quái vật do bị Glitch Shock */
     public float $monsterGlitchDebuff = 0.0;
 
+    /** @var array Hiệu ứng bổ trợ từ Thông Thạo Quái Vật (Monster Mastery) */
+    public array $monsterMasteryBonus = [];
+
     /** Max turns before stalemate */
     private const MAX_TURNS = 25;
 
@@ -199,6 +202,13 @@ class CombatEngine
             $partMul = $bodyPart['mul'];
             $isWeakpointHit = ($bodyPart['name'] === $this->activeWeakpoint);
 
+            // Monster Mastery Tier 4 (Khắc Chế): 25% redirect hit into weakpoint
+            if (!$isWeakpointHit && ($this->monsterMasteryBonus['weakpointMul'] ?? 1.0) >= 2.0 && $this->roll(100) <= 25) {
+                $isWeakpointHit = true;
+                $bodyPart['name'] = $this->activeWeakpoint;
+                $this->log("👁️ [Khắc Chế ★★★★☆] Thấu hiểu sơ hở, đòn đánh tự chuyển hướng trúng Vết Nứt!");
+            }
+
             if ($isWeakpointHit) {
                 $weakpointMul = 2.5;
                 if (in_array('weakpoint_striker', $attacker->unlockedImprints ?? [], true)) {
@@ -232,6 +242,17 @@ class CombatEngine
             }
             $reduction = StatEngine::calcDamageReduction($def);
             $finalDamage = max(0, (int) round($currentDamage * (1 - $reduction / 100)));
+
+            // Monster Mastery Tier 2/4/5: Sát thương tăng thêm
+            if (($this->monsterMasteryBonus['damageBonusPct'] ?? 0) > 0) {
+                $finalDamage = (int)round($finalDamage * (1 + $this->monsterMasteryBonus['damageBonusPct'] / 100));
+            }
+
+            // Monster Mastery Tier 5 (Tuyệt Diệt): 10% Trảm Sát trực tiếp khi quái vật <= 15% HP
+            if (!empty($this->monsterMasteryBonus['canExecute']) && ($defender->currentHp / max(1, $defender->maxHp)) <= 0.15 && $this->roll(100) <= 10) {
+                $finalDamage = $defender->currentHp;
+                $this->log("⚔️ [Tuyệt Diệt ★★★★★] Nhìn thấu điểm tử huyệt, Trảm Sát trực tiếp {$defender->name}!");
+            }
 
             // 6. Elemental Resistance (Phase 7)
             if ($damageType !== 'physical' && $damageType !== 'magical') {
@@ -367,6 +388,12 @@ class CombatEngine
         $reduction = StatEngine::calcDamageReduction($dStats['defense']);
         $finalDamage = max(0, (int) round($baseDamage * (1 - $reduction / 100)));
 
+        // Monster Mastery Tier 3+ (Đại Thành): Giảm sát thương nhận vào từ quái vật này
+        if (($this->monsterMasteryBonus['damageReductionPct'] ?? 0) > 0 && $finalDamage > 0) {
+            $dmgRed = (int)round($finalDamage * ($this->monsterMasteryBonus['damageReductionPct'] / 100));
+            $finalDamage = max(1, $finalDamage - $dmgRed);
+        }
+
         // Dấu ấn Kim Thân Bất Diệt (undying_flesh): HP < 20% giảm 30% sát thương
         $hasUndying = in_array('undying_flesh', $defender->unlockedImprints ?? [], true);
         if ($hasUndying && ($defender->currentHp / max(1, $defender->maxHp)) < 0.20) {
@@ -437,6 +464,15 @@ class CombatEngine
 
         // Auto-discover monster for Sương Mù wiki
         $player->discoverMonster($monster->id);
+
+        // Load Monster Mastery Combat Bonuses
+        $this->monsterMasteryBonus = \App\Systems\MonsterMasterySystem::getCombatBonuses($player->id, $monster->id);
+        if ($this->monsterMasteryBonus['tier'] >= 1) {
+            $allLogs[] = "🐺 [Thông Thạo Quái: {$this->monsterMasteryBonus['tierName']}] {$this->monsterMasteryBonus['stars']} (Đã trảm {$this->monsterMasteryBonus['kills']} con)";
+            if (($this->monsterMasteryBonus['damageBonusPct'] ?? 0) > 0) {
+                $allLogs[] = "✨ Khắc chế tập tính: +{$this->monsterMasteryBonus['damageBonusPct']}% Sát thương lên loài này";
+            }
+        }
 
         $maxTurns = self::MAX_TURNS;
         $attackCost = self::ATTACK_COST;
@@ -561,13 +597,24 @@ class CombatEngine
                 $allLogs[] = "🏆 Chiến thắng!";
                 $allLogs[] = "💰 +{$goldReward} Linh Thạch";
 
-                // Phase 9: Boss / Monster Drops (Items & Manuals)
+                // Monster Mastery: Ghi nhận trảm sát và kiểm tra đột phá tầng
+                $masteryResult = \App\Systems\MonsterMasterySystem::recordKill($player->id, $monster->id);
+                $allLogs[] = "🐺 Ghi nhận trảm sát [{$monster->name}]: Tổng {$masteryResult['mastery']['kills']} con";
+                if ($masteryResult['tierUp']) {
+                    $newTierInfo = $masteryResult['mastery']['tierInfo'];
+                    $allLogs[] = "🌟 THÔNG THẠO QUÁI VẬT ĐỘT PHÁ! [{$monster->name}] đạt Tầng {$masteryResult['newTier']} — {$newTierInfo['name']} ({$newTierInfo['stars']})!";
+                    $allLogs[] = "📜 Kích hoạt: {$newTierInfo['desc']}";
+                    \App\Core\GameDataRepository::addEvent($player->id, 'mastery', "Thông thạo quái vật [{$monster->name}] đạt {$newTierInfo['name']} ({$newTierInfo['stars']})!");
+                }
+
+                // Phase 9: Boss / Monster Drops (Items & Manuals) with Mastery Drop Bonus
                 $dropRarity = null;
+                $dropBonus = $this->monsterMasteryBonus['dropBonusPct'] ?? 0;
                 if (($monster->getRawData()['isBoss'] ?? false) || $monster->level >= 10) {
-                    $dropRoll = mt_rand(1, 100);
+                    $dropRoll = mt_rand(1, 100) - $dropBonus;
                     if ($dropRoll <= 50) $dropRarity = 'epic'; // 50% rớt hàng Epic
                     else if ($dropRoll <= 90) $dropRarity = 'legendary'; // 40%
-                } else if (mt_rand(1, 100) <= 5) {
+                } else if ((mt_rand(1, 100) - $dropBonus) <= 5) {
                     $dropRarity = 'rare'; // 5% quái thường rớt Rare
                 }
 

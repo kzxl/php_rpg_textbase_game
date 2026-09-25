@@ -461,7 +461,7 @@ function renderGame() {
               ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite" title="Có thể đột phá!">!</span>' : ''}
             </li>
             <li class="nav-item ${['skills', 'education', 'library', 'glitch'].includes(state.currentPage) ? 'active' : ''}" data-page="skills">
-              <span class="icon">⚡</span> Công Pháp & Kỹ Năng
+              <span class="icon">⚡</span> Kỹ Năng & Lĩnh Ngộ
               ${(p.glitchInsight || 0) > 0 ? `<span class="badge" style="background: #a855f7;" title="Điểm Thấu Triệt">${p.glitchInsight}</span>` : ''}
             </li>
             <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
@@ -675,7 +675,7 @@ function renderPopupContent() {
 // ===== PAGE DISPATCHER =====
 const pageMap = {
   combat: pageCombat,
-  education: pageEducation,
+  education: pageSkills,
   stats: pageStats,
   skills: pageSkills,
   inventory: pageInventory,
