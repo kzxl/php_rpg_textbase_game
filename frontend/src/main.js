@@ -462,12 +462,9 @@ function renderGame() {
               <span class="icon">🧘</span> Tu Luyện & Cảnh Giới
               ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite" title="Có thể đột phá!">!</span>' : ''}
             </li>
-            <li class="nav-item ${state.currentPage === 'glitch' ? 'active' : ''}" data-page="glitch" style="background: rgba(168, 85, 247, 0.08); border-left: 2px solid #c084fc;">
-              <span class="icon">🌌</span> Dị Biến Thiên Đạo
-              <span class="badge" style="background: #a855f7;" title="Điểm Thấu Triệt">${p.glitchInsight || 0}</span>
-            </li>
-            <li class="nav-item ${['skills', 'education', 'library'].includes(state.currentPage) ? 'active' : ''}" data-page="skills">
+            <li class="nav-item ${['skills', 'education', 'library', 'glitch'].includes(state.currentPage) ? 'active' : ''}" data-page="skills">
               <span class="icon">⚡</span> Công Pháp & Kỹ Năng
+              ${(p.glitchInsight || 0) > 0 ? `<span class="badge" style="background: #a855f7;" title="Điểm Thấu Triệt">${p.glitchInsight}</span>` : ''}
             </li>
             <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
               <span class="icon">🎒</span> Càn Khôn Túi
@@ -708,8 +705,10 @@ const pageMap = {
   gacha: pageGacha,
   leaderboard: pageLeaderboard,
   tiencanh: pageTienCanh,
-  tower: pageTower,
-  glitch: renderGlitchPage,
+  glitch: (el, ctx) => {
+    localStorage.setItem('skillsTab', 'glitch')
+    pageSkills(el, ctx)
+  },
 }
 
 function renderPage() {

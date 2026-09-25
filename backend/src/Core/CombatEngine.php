@@ -594,6 +594,10 @@ class CombatEngine
                 }
                 $rewards = ['xp' => $xp, 'gold' => $goldReward, 'prevLevel' => $prevLevel, 'monsterLevel' => $monster->level ?? 1];
                 $unlocked = \App\Systems\GlitchSystem::trackBehavior($player, 'monster_kills', 1);
+                if ($player->currentHp > 0 && ($player->currentHp / max(1, $player->maxHp)) <= 0.10) {
+                    $unlockedClutch = \App\Systems\GlitchSystem::trackBehavior($player, 'clutch_kills', 1);
+                    $unlocked = array_merge($unlocked, $unlockedClutch);
+                }
                 foreach ($unlocked as $u) {
                     $allLogs[] = "🌌 [PHÁT HIỆN LỖI THIÊN ĐẠO] Mở khóa Dấu Ấn: {$u['name']} ({$u['title']})!";
                 }

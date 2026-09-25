@@ -171,6 +171,9 @@ return function ($app) {
             // Level up realm
             $player->realmTier = $result['newTier'];
 
+            // Track breakthrough streak behavior
+            \App\Systems\GlitchSystem::trackBehavior($player, 'breakthrough_streak', 1);
+
             // Full heal on breakthrough!
             $player->fullHeal();
 

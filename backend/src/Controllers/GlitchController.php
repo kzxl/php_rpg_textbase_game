@@ -49,6 +49,14 @@ class GlitchController
             return ResponseHelper::json($response, ['error' => 'Thế chiến đấu không hợp lệ!'], 400);
         }
 
+        $status = GlitchSystem::getPlayerGlitchStatus($player);
+        $selectedStance = $status['stances'][$stance] ?? null;
+        if (!$selectedStance || empty($selectedStance['isUnlocked'])) {
+            return ResponseHelper::json($response, [
+                'error' => "Thế chiến đấu này đang bị phong ấn! " . ($selectedStance['unlockRequirement'] ?? '')
+            ], 400);
+        }
+
         $player->activeStance = $stance;
         $this->playerService->save($id, $player);
 
