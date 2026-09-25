@@ -1529,4 +1529,51 @@ html, body {
 .lb-stat-value { font-weight: 700; font-size: 14px; }
 .lb-stat-label { font-size: 10px; color: var(--text-dim); }
 
+/* ===== 2D COMBAT & FLOATING DAMAGE ANIMATIONS ===== */
+@keyframes floatUpFade {
+  0% { opacity: 1; transform: translate(-50%, 0) scale(0.85); }
+  30% { transform: translate(-50%, -20px) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -45px) scale(0.95); }
+}
+
+@keyframes damageShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@keyframes glitchPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(192, 132, 252, 0.4); border-color: #c084fc; }
+  50% { box-shadow: 0 0 25px rgba(236, 72, 153, 0.85); border-color: #ec4899; }
+}
+
+.floating-damage {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  pointer-events: none;
+  font-weight: 800;
+  font-size: 22px;
+  animation: floatUpFade 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 999;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.9);
+  white-space: nowrap;
+}
+.floating-damage.damage-normal { color: #f87171; }
+.floating-damage.damage-crit { color: #fbbf24; font-size: 26px; text-shadow: 0 0 12px rgba(251,191,36,0.7); }
+.floating-damage.damage-glitch { color: #e879f9; font-size: 28px; text-shadow: 0 0 16px rgba(232,121,249,0.9); }
+.floating-damage.damage-heal { color: #4ade80; font-size: 20px; }
+
+.fighter-card {
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.fighter-card.shake {
+  animation: damageShake 0.35s ease-in-out;
+}
+
+.glitch-weakpoint-badge {
+  animation: glitchPulse 2s infinite ease-in-out;
+}
+
 

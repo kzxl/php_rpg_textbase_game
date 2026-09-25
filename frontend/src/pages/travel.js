@@ -1,5 +1,5 @@
 /**
- * Ngao Du — Travel + Bí Cảnh (Dungeon) with Tab UI
+ * Ngao Du — Travel + Bí Cảnh (Dungeon) with Pure 2D Map UI (Zero Three.js)
  */
 import { pageDungeon } from './dungeon.js'
 
@@ -14,7 +14,7 @@ export function pageTravel(el, ctx) {
     </div>
     <div class="tab-bar" style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid rgba(255,255,255,0.1)">
       <button class="tab-btn ${activeTab === 'map' ? 'active' : ''}" data-tab="map" style="flex:1;padding:10px;border:none;background:${activeTab === 'map' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'map' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'map' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'map' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
-        🗺️ Bản Đồ
+        🗺️ Bản Đồ Bát Hoang
       </button>
       <button class="tab-btn ${activeTab === 'dungeon' ? 'active' : ''}" data-tab="dungeon" style="flex:1;padding:10px;border:none;background:${activeTab === 'dungeon' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'dungeon' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'dungeon' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'dungeon' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
         ⚡ Bí Cảnh
@@ -40,7 +40,7 @@ export function pageTravel(el, ctx) {
 
 async function loadTravelMap(container, ctx) {
   const { state, api, notify, updateSidebar } = ctx
-  container.innerHTML = '<div class="loading" style="padding:20px; text-align:center">Đang mở địa đồ...</div>'
+  container.innerHTML = '<div class="loading" style="padding:20px; text-align:center">Đang mở địa đồ bát hoang...</div>'
 
   try {
     const [areasData, areaData] = await Promise.all([
@@ -66,6 +66,7 @@ async function loadTravelMap(container, ctx) {
 
     // Environment effects map
     const envMap = {
+      'thanh_lam_tran': '🌾 Tân thủ thôn: Khu vực an toàn',
       'hac_phong_lam': '🌲 Rừng rậm: +5% Tốc Độ',
       'vong_linh_coc': '👻 Âm khí: +10% Nhanh Nhẹn',
       'thiet_huyet_son': '🌋 Nóng bức: +10% ST Hỏa',
@@ -81,129 +82,145 @@ async function loadTravelMap(container, ctx) {
     }
     const envEffect = envMap[player?.currentArea] || ''
 
-    // Sort areas by sort_order/MapY
+    // Sort areas by sort_order or mapY
     const sortedAreas = [...areas].sort((a, b) => (a.sort_order || a.mapY || 0) - (b.sort_order || b.mapY || 0))
-    const sortedMapAreas = [...areas].sort((a, b) => (a.mapY || 0) - (b.mapY || 0))
 
     container.innerHTML = `
       ${traveling ? `
-        <div class="panel glass" style="border-color:var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.1)">
+        <div class="panel glass" style="border-color:var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.15); margin-bottom:16px">
           <div class="panel-body" style="text-align:center; padding: 24px">
-            <div style="font-size:32px; margin-bottom:12px; animation:bounce 1s infinite">🚶</div>
-            <strong style="font-size:16px">Đang tiến về ${travelDestination}</strong>
-            <div id="travelTimer" style="font-size:24px; font-weight:bold; color:var(--gold); margin:12px 0; text-shadow:0 0 10px rgba(255,215,0,0.3)">⏳ ${travelRemaining}s</div>
-            <div class="bar-track" style="margin-top:12px; height:8px">
-              <div class="bar-fill energy" id="travelBar" style="width:100%; background:var(--gold); transition: width 1s linear"></div>
+            <div style="font-size:36px; margin-bottom:10px; animation:bounce 1s infinite">🚶💨</div>
+            <strong style="font-size:16px; color:var(--text-bright)">Đang phi hành tới: <span style="color:var(--gold)">${travelDestination}</span></strong>
+            <div id="travelTimer" style="font-size:26px; font-weight:bold; color:var(--gold); margin:12px 0; text-shadow:0 0 12px rgba(255,215,0,0.4)">⏳ ${travelRemaining}s</div>
+            <div class="bar-track" style="margin-top:12px; height:10px; background:rgba(0,0,0,0.5); border-radius:5px; overflow:hidden">
+              <div class="bar-fill energy" id="travelBar" style="width:100%; height:100%; background:linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 1s linear"></div>
             </div>
+            <div class="text-xs text-dim" style="margin-top:8px">Đang vượt qua kết giới... Xin kiên nhẫn chờ đến nơi.</div>
           </div>
         </div>
       ` : `
-        <div class="panel" style="border-color:rgba(100,200,100,0.3)">
+        <div class="panel" style="border-color:rgba(100,200,100,0.3); margin-bottom:16px">
           <div class="panel-body" style="padding: 14px 16px">
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-xs text-dim mb-xs">📍 Vị trí hiện tại</div>
-                <div class="text-lg text-green bold">${areaName}</div>
+                <div class="text-xs text-dim mb-xs">📍 Cảnh Giới Hiện Tại</div>
+                <div class="text-lg text-green bold" style="display:flex;align-items:center;gap:6px">
+                  ${areaName}
+                  <span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.4);font-size:11px">Tọa Trấn</span>
+                </div>
               </div>
               <div style="text-align:right">
                 <div class="text-xs text-dim">Thể lực khám phá</div>
-                <div class="text-gold bold">-${staminaCost}/lần</div>
+                <div class="text-gold bold">-${staminaCost} TL/lần</div>
               </div>
             </div>
-            ${currentArea?.description ? `<div class="text-sm text-dim" style="margin-top:6px">${currentArea.description}</div>` : ''}
+            ${currentArea?.description ? `<div class="text-sm text-dim" style="margin-top:6px;line-height:1.4">${currentArea.description}</div>` : ''}
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-              <span class="badge" style="background:rgba(255,255,255,0.08);font-size:11px">Lv.${currentArea?.min_level || 1}+</span>
-              ${envEffect ? `<span class="badge" style="background:rgba(255,255,255,0.08);font-size:11px">${envEffect}</span>` : ''}
+              <span class="badge" style="background:rgba(255,255,255,0.08);font-size:11px">Yêu Cầu: Lv.${currentArea?.min_level || 1}+</span>
+              ${envEffect ? `<span class="badge" style="background:rgba(255,215,0,0.1);color:var(--gold);border:1px solid rgba(255,215,0,0.25);font-size:11px">${envEffect}</span>` : ''}
             </div>
           </div>
         </div>
       `}
 
-      <!-- 2D MAP VISUAL -->
-      <div class="panel mt-md">
-        <div class="panel-title">Thiên Địa Giới Đồ</div>
-        <div class="panel-body no-pad" style="position:relative; width:100%; height:300px; background-color: #0f172a; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; overflow:hidden; border-radius:0 0 8px 8px">
-          
-          <svg style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none">
-            <path d="M 50% 85% L 50% 50% L 80% 55% L 85% 30% L 80% 15%" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-            <path d="M 50% 85% L 35% 75% L 15% 45% L 30% 15% L 50% 5%" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-            <path d="M 50% 50% L 30% 40% L 35% 75%" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-            <path d="M 80% 55% L 65% 70% L 50% 85%" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-            <path d="M 50% 50% L 50% 20% L 50% 5%" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-            <path d="M 80% 15% L 70% 25% L 50% 20%" stroke="rgba(255, 255, 255, 0.1)" stroke-width="2" fill="none" stroke-dasharray="4 4" />
-          </svg>
+      <!-- 2D REALM MAP OVERVIEW -->
+      <div class="panel">
+        <div class="panel-title flex items-center justify-between">
+          <span>🗺️ Thiên Địa Giới Đồ (2D Bát Hoang Tinh Đồ)</span>
+          <span class="text-xs text-dim">${sortedAreas.length} Khu vực</span>
+        </div>
+        <div class="panel-body" style="background:linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(10,15,28,0.95) 100%); padding:12px">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px">
+            ${sortedAreas.map((a, idx) => {
+              const exploArea = exploConfig[a.id]
+              const isHere = a.id === player.currentArea && !traveling
+              const tooLow = player.level < (a.min_level || 1)
+              const travelTime = parseInt(a.travel_time) || 0
+              const aStaminaCost = exploArea?.staminaCost || 10
+              const aEnvEffect = envMap[a.id] || ''
 
-          ${sortedMapAreas.map(a => {
-            const exploArea = exploConfig[a.id]
-            const isHere = a.id === player.currentArea && !traveling
-            const tooLow = player.level < (a.min_level || 1)
-            const x = exploArea?.mapX || 50
-            const y = exploArea?.mapY || 50
-            const color = isHere ? 'var(--green)' : (tooLow ? 'var(--red)' : 'var(--blue)')
-            const glow = isHere ? `box-shadow: 0 0 15px ${color}; animation: pulse 2s infinite` : ''
-            const clickable = !isHere && !tooLow && !traveling
-            
-            return `
-              <div class="map-node ${clickable ? 'clickable' : ''}" ${clickable ? `data-travel="${a.id}"` : ''} 
-                   style="position:absolute; left:${x}%; top:${y}%; transform:translate(-50%, -50%); z-index:1; display:flex; flex-direction:column; align-items:center; width:max-content">
-                <div class="node-label" style="font-size:10px; background:rgba(0,0,0,0.6); padding:2px 6px; border-radius:4px; margin-bottom:4px; color:${isHere ? 'var(--green)' : 'var(--text-light)'}; border:1px solid ${isHere ? 'var(--green)' : 'rgba(255,255,255,0.1)'}">
-                  ${a.name} ${tooLow ? `[Lv.${a.min_level}]` : ''}
+              let cardBorder = 'rgba(255,255,255,0.08)'
+              let cardBg = 'rgba(255,255,255,0.03)'
+              if (isHere) {
+                cardBorder = 'rgba(34, 197, 94, 0.6)'
+                cardBg = 'rgba(34, 197, 94, 0.08)'
+              } else if (tooLow) {
+                cardBorder = 'rgba(239, 68, 68, 0.2)'
+                cardBg = 'rgba(15, 23, 42, 0.4)'
+              }
+
+              return `
+                <div class="realm-card ${isHere ? 'current-realm' : ''} ${tooLow ? 'locked-realm' : ''}" 
+                     style="border:1px solid ${cardBorder}; background:${cardBg}; border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease; position:relative; overflow:hidden">
+                  
+                  ${isHere ? '<div style="position:absolute; top:0; right:0; width:0; height:0; border-top:28px solid #22c55e; border-left:28px solid transparent"><span style="position:absolute; top:-26px; right:3px; font-size:10px; color:#000">✓</span></div>' : ''}
+
+                  <div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px">
+                      <div style="font-weight:700; font-size:14px; color:${isHere ? 'var(--green)' : (tooLow ? 'var(--text-dim)' : 'var(--text-bright)')}">
+                        #${idx + 1} ${a.name}
+                      </div>
+                      ${tooLow ? '<span style="color:var(--red); font-size:12px">🔒 Khóa</span>' : ''}
+                    </div>
+
+                    <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; line-height:1.3">
+                      ${a.description || 'Vùng đất hoang sơ chưa rõ lai lịch.'}
+                    </div>
+
+                    <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px">
+                      <span class="badge" style="font-size:10px; padding:2px 6px; background:${tooLow ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)'}; color:${tooLow ? 'var(--red)' : 'var(--text-dim)'}">
+                        Lv.${a.min_level || 1}+
+                      </span>
+                      <span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.06); color:var(--text-dim)">
+                        ${travelTime > 0 ? `⏱ ${travelTime}s` : '⚡ Tức thời'}
+                      </span>
+                      <span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.06); color:var(--text-dim)">
+                        🏃 -${aStaminaCost} TL
+                      </span>
+                    </div>
+
+                    ${aEnvEffect ? `
+                      <div style="font-size:10px; color:var(--gold); background:rgba(255,215,0,0.05); padding:3px 6px; border-radius:4px; margin-bottom:10px; border-left:2px solid var(--gold)">
+                        ${aEnvEffect}
+                      </div>
+                    ` : ''}
+                  </div>
+
+                  <div style="margin-top:auto">
+                    ${isHere ? `
+                      <button class="btn btn--block btn--sm" disabled style="background:rgba(34,197,94,0.2); color:var(--green); border:1px solid rgba(34,197,94,0.4)">
+                        📍 Đang tọa trấn
+                      </button>
+                    ` : tooLow ? `
+                      <button class="btn btn--block btn--sm" disabled style="opacity:0.5; cursor:not-allowed">
+                        Cần Đạt Cấp ${a.min_level}
+                      </button>
+                    ` : `
+                      <button class="btn btn--blue btn--block btn--sm" data-travel="${a.id}" ${traveling ? 'disabled' : ''}>
+                        ${travelTime > 0 ? `🚶 Vi Hành (${travelTime}s)` : '⚡ Độn Thổ Đến'}
+                      </button>
+                    `}
+                  </div>
+
                 </div>
-                <div class="node-dot" style="width:12px; height:12px; background-color:${color}; border-radius:50%; border:2px solid #fff; ${glow}"></div>
-              </div>
-            `
-          }).join('')}
+              `
+            }).join('')}
+          </div>
         </div>
       </div>
+    `
 
-      <div class="panel mt-md">
-        <div class="panel-title">Thiết Lập Lộ Trình</div>
-        <div class="panel-body no-pad" style="max-height: 300px; overflow-y:auto">
-          ${sortedAreas.map(a => {
-            const exploArea = exploConfig[a.id]
-            const isHere = a.id === player.currentArea && !traveling
-            const tooLow = player.level < (a.min_level || 1)
-            const travelTime = parseInt(a.travel_time) || 0
-            const aStaminaCost = exploArea?.staminaCost || '?'
-            const aEnvEffect = envMap[a.id] || ''
-
-            return `
-              <div class="list-item ${isHere ? '' : (tooLow ? '' : 'clickable')}" ${!isHere && !tooLow && !traveling ? `data-travel="${a.id}"` : ''} style="padding: 10px 14px">
-                <div class="item-info" style="flex:1">
-                  <div class="item-name" style="font-size:14px">
-                    ${a.name}
-                    ${isHere ? ' <span style="color:var(--green); font-size:11px">(đang ở đây)</span>' : ''}
-                    ${tooLow ? ` <span style="color:var(--red); font-size:11px">[Lv.${a.min_level}+]</span>` : ''}
-                  </div>
-                  <div class="item-meta" style="margin-top:2px;display:flex;gap:6px;flex-wrap:wrap">
-                    <span>Lv.${a.min_level || 1}+</span>
-                    <span>${travelTime > 0 ? '⏱ ' + travelTime + 's' : '⚡ Tức thời'}</span>
-                    <span>🏃 -${aStaminaCost}</span>
-                    ${aEnvEffect ? `<span style="font-size:10px;opacity:0.6">${aEnvEffect}</span>` : ''}
-                  </div>
-                  ${a.description ? `<div class="text-xs text-dim" style="margin-top:2px">${a.description}</div>` : ''}
-                </div>
-                ${!isHere && !tooLow && !traveling ? `
-                  <button class="btn btn--blue btn--sm" data-travel="${a.id}">
-                    ${travelTime > 0 ? '🚶 Di chuyển' : '⚡ Đi'}
-                  </button>
-                ` : ''}
-              </div>`
-          }).join('')}
-        </div>
-      </div>`
-
-    // Bind events
+    // Event listeners for travel buttons
     container.querySelectorAll('[data-travel]').forEach(el => {
       el.addEventListener('click', async (e) => {
         e.stopPropagation()
         const areaId = el.dataset.travel
-        
+
         container.querySelectorAll('[data-travel]').forEach(b => {
-           if(b.tagName === 'BUTTON') b.disabled = true;
-           b.style.pointerEvents = 'none';
+          if (b.tagName === 'BUTTON') b.disabled = true
+          b.style.pointerEvents = 'none'
         })
-        
+
         try {
           const res = await api.request(`/player/${state.playerId}/travel`, {
             method: 'POST',
@@ -219,16 +236,16 @@ async function loadTravelMap(container, ctx) {
       })
     })
 
-    // Countdown timer logic
+    // Countdown timer logic when traveling
     if (traveling && travelRemaining > 0) {
       let remaining = travelRemaining
       const totalTime = travelRemaining
-      
+
       const timer = setInterval(async () => {
         remaining--
         const timerEl = document.getElementById('travelTimer')
         const barEl = document.getElementById('travelBar')
-        
+
         if (timerEl) timerEl.textContent = `⏳ ${Math.max(0, remaining)}s`
         if (barEl) barEl.style.width = `${Math.max(0, (remaining / totalTime) * 100)}%`
 
