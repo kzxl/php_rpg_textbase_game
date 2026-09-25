@@ -496,6 +496,32 @@ class Player
     }
 
     /**
+     * Get the level of a skill (combat, passive, or life skill).
+     * Returns 0 if player has not learned the skill.
+     */
+    public function getSkillLevel(string $skillId): int
+    {
+        if (isset($this->skills[$skillId]) && is_array($this->skills[$skillId])) {
+            return (int)($this->skills[$skillId]['level'] ?? 1);
+        }
+        foreach ($this->skills as $s) {
+            $sid = is_array($s) ? ($s['id'] ?? '') : $s;
+            if ($sid === $skillId) {
+                return is_array($s) ? (int)($s['level'] ?? 1) : 1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Check if player has learned a specific skill.
+     */
+    public function hasSkill(string $skillId): bool
+    {
+        return $this->getSkillLevel($skillId) > 0;
+    }
+
+    /**
      * Get active skill by ID.
      */
     public function getActiveSkill(string $skillId): ?array
@@ -617,9 +643,11 @@ class Player
     public function gainSkillXp(string $skillId, int $amount = 1): ?array
     {
         $levelUpData = null;
+        $found = false;
         foreach ($this->skills as &$sk) {
             $sid = is_array($sk) ? ($sk['id'] ?? '') : $sk;
             if ($sid === $skillId && is_array($sk)) {
+                $found = true;
                 $sk['currentXp'] = (int)($sk['currentXp'] ?? 0) + $amount;
                 $level = (int)($sk['level'] ?? 1);
                 // Require more XP for higher levels (Lv1->2: 100XP, Lv2->3: 200XP)
@@ -637,6 +665,36 @@ class Player
                 break;
             }
         }
+        unset($sk);
+
+        // If skill wasn't already in skills list, auto-learn at level 1 and apply XP
+        if (!$found) {
+            $skillSys = new \App\Systems\SkillSystem();
+            $baseSkill = $skillSys->getById($skillId);
+            if (!$baseSkill) {
+                $name = $skillId === 'hai_duoc' ? 'Hái Dược' : ($skillId === 'khai_khoang' ? 'Khai Khoáng' : ucfirst(str_replace('_', ' ', $skillId)));
+                $baseSkill = [
+                    'id' => $skillId,
+                    'name' => $name,
+                    'type' => 'passive',
+                    'category' => 'life',
+                ];
+            }
+            $baseSkill['level'] = 1;
+            $baseSkill['currentXp'] = $amount;
+            $baseSkill['isEquipped'] = false;
+            if ($baseSkill['currentXp'] >= 100) {
+                $baseSkill['level'] = 2;
+                $baseSkill['currentXp'] -= 100;
+                $levelUpData = [
+                    'skillId' => $skillId,
+                    'name' => $baseSkill['name'] ?? $skillId,
+                    'newLevel' => 2
+                ];
+            }
+            $this->skills[] = $baseSkill;
+        }
+
         return $levelUpData;
     }
 

@@ -12,22 +12,38 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 40
+                "weight": 35
             },
             {
-                "type": "material",
+                "type": "herb",
                 "weight": 25,
                 "pools": [
-                    "mat_thit_tho",
-                    "mat_da_tho",
                     "linh_thao",
                     "huyet_thao",
                     "doc_thao"
                 ]
             },
             {
-                "type": "item",
+                "type": "mineral",
                 "weight": 10,
+                "pools": [
+                    "mat_khong_gian_manh",
+                    "mat_kim_loai_linh",
+                    "mat_tinh_thach"
+                ]
+            },
+            {
+                "type": "material",
+                "weight": 10,
+                "pools": [
+                    "mat_thit_tho",
+                    "mat_da_tho",
+                    "mat_xuong_vun"
+                ]
+            },
+            {
+                "type": "item",
+                "weight": 5,
                 "rarities": [
                     "common"
                 ]
@@ -47,7 +63,7 @@
             },
             {
                 "type": "nothing",
-                "weight": 19
+                "weight": 9
             }
         ],
         "id": "thanh_lam_tran",
@@ -68,23 +84,38 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 50
+                "weight": 35
             },
             {
-                "type": "material",
-                "weight": 20,
+                "type": "herb",
+                "weight": 25,
                 "pools": [
-                    "mat_go_linh",
-                    "mat_nhua_cay",
-                    "mat_da_ran",
                     "thanh_linh_thao",
                     "hoa_linh_chi",
                     "bang_linh_thao"
                 ]
             },
             {
-                "type": "item",
+                "type": "mineral",
                 "weight": 10,
+                "pools": [
+                    "mat_kim_loai_linh",
+                    "mat_tinh_thach"
+                ]
+            },
+            {
+                "type": "material",
+                "weight": 10,
+                "pools": [
+                    "mat_go_linh",
+                    "mat_nhua_cay",
+                    "mat_da_ran",
+                    "mat_noc_xa"
+                ]
+            },
+            {
+                "type": "item",
+                "weight": 5,
                 "rarities": [
                     "common",
                     "uncommon"
@@ -94,8 +125,9 @@
                 "type": "npc",
                 "weight": 5,
                 "events": [
-                    "trap_damage",
-                    "hidden_chest"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
@@ -104,7 +136,7 @@
             },
             {
                 "type": "nothing",
-                "weight": 14
+                "weight": 9
             }
         ],
         "id": "hac_phong_lam",
@@ -125,22 +157,39 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 55
+                "weight": 35
+            },
+            {
+                "type": "herb",
+                "weight": 15,
+                "pools": [
+                    "doc_thao",
+                    "kim_linh_thao",
+                    "mat_am_hon_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 20,
+                "pools": [
+                    "mat_tinh_thach",
+                    "mat_kim_loai_linh",
+                    "mat_khong_gian_thach"
+                ]
             },
             {
                 "type": "material",
-                "weight": 15,
+                "weight": 10,
                 "pools": [
                     "mat_hon_tan",
                     "mat_manh_ky_uc",
                     "mat_xuong_vun",
-                    "kim_linh_thao",
                     "mat_noi_dan_nho"
                 ]
             },
             {
                 "type": "item",
-                "weight": 15,
+                "weight": 5,
                 "rarities": [
                     "uncommon",
                     "rare"
@@ -150,13 +199,18 @@
                 "type": "npc",
                 "weight": 5,
                 "events": [
-                    "ghost_encounter",
-                    "ancient_shrine"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 10
+                "weight": 9
             }
         ],
         "id": "vong_linh_coc",
@@ -177,21 +231,36 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 55
+                "weight": 35
             },
             {
-                "type": "material",
-                "weight": 20,
+                "type": "herb",
+                "weight": 25,
                 "pools": [
                     "bang_linh_thao",
                     "mat_huyen_bang_hoa",
-                    "mat_xuong_vun",
-                    "mat_noi_dan_trung"
+                    "thanh_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 12,
+                "pools": [
+                    "mat_tinh_thach",
+                    "mat_kim_loai_linh"
+                ]
+            },
+            {
+                "type": "material",
+                "weight": 8,
+                "pools": [
+                    "mat_noi_dan_nho",
+                    "mat_xuong_vun"
                 ]
             },
             {
                 "type": "item",
-                "weight": 10,
+                "weight": 5,
                 "rarities": [
                     "common",
                     "uncommon",
@@ -202,13 +271,18 @@
                 "type": "npc",
                 "weight": 5,
                 "events": [
-                    "freeze_slow",
-                    "lost_traveler"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 10
+                "weight": 9
             }
         ],
         "id": "bac_suong_canh",
@@ -229,21 +303,39 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 50
+                "weight": 25
+            },
+            {
+                "type": "herb",
+                "weight": 35,
+                "pools": [
+                    "linh_thao",
+                    "thanh_linh_thao",
+                    "hoa_linh_chi",
+                    "mat_huyen_thien_hoa",
+                    "kim_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 10,
+                "pools": [
+                    "mat_tinh_thach",
+                    "mat_khong_gian_thach"
+                ]
             },
             {
                 "type": "material",
-                "weight": 25,
+                "weight": 10,
                 "pools": [
                     "mat_go_linh",
                     "mat_nhua_cay",
-                    "thanh_linh_thao",
-                    "mat_huyen_thien_hoa"
+                    "mat_hat_moc"
                 ]
             },
             {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "uncommon",
                     "rare"
@@ -251,15 +343,20 @@
             },
             {
                 "type": "npc",
-                "weight": 8,
+                "weight": 5,
                 "events": [
-                    "forest_spirit_buff",
-                    "ancient_tree"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 5
+                "weight": 9
             }
         ],
         "id": "co_moc_linh_vien",
@@ -280,21 +377,36 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 60
+                "weight": 35
+            },
+            {
+                "type": "herb",
+                "weight": 10,
+                "pools": [
+                    "doc_thao",
+                    "mat_am_hon_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_tinh_thach",
+                    "mat_kim_loai_linh",
+                    "mat_huyet_tinh"
+                ]
             },
             {
                 "type": "material",
-                "weight": 15,
+                "weight": 10,
                 "pools": [
-                    "doc_thao",
-                    "mat_am_hon_thao",
-                    "mat_huyet_tinh",
-                    "mat_noi_dan_trung"
+                    "mat_noi_dan_trung",
+                    "mat_vo_cung"
                 ]
             },
             {
                 "type": "item",
-                "weight": 15,
+                "weight": 5,
                 "rarities": [
                     "uncommon",
                     "rare"
@@ -304,13 +416,18 @@
                 "type": "npc",
                 "weight": 5,
                 "events": [
-                    "assassin_attack",
-                    "hidden_poison_cache"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 5
+                "weight": 9
             }
         ],
         "id": "am_sat_hoang",
@@ -331,22 +448,36 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 60
+                "weight": 30
+            },
+            {
+                "type": "herb",
+                "weight": 10,
+                "pools": [
+                    "kim_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 30,
+                "pools": [
+                    "mat_kim_loai_linh",
+                    "mat_tinh_thach",
+                    "mat_tinh_hoa",
+                    "mat_loi_tinh"
+                ]
             },
             {
                 "type": "material",
-                "weight": 15,
+                "weight": 10,
                 "pools": [
-                    "mat_tinh_thach",
-                    "mat_tinh_hoa",
-                    "mat_loi_tinh",
-                    "kim_linh_thao",
-                    "mat_huyet_tinh"
+                    "mat_huyet_tinh",
+                    "mat_vo_cung"
                 ]
             },
             {
                 "type": "item",
-                "weight": 15,
+                "weight": 5,
                 "rarities": [
                     "rare",
                     "epic"
@@ -356,17 +487,18 @@
                 "type": "npc",
                 "weight": 5,
                 "events": [
-                    "lava_burn",
-                    "volcano_eruption_loot"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
                 "type": "worldBoss",
-                "weight": 2
+                "weight": 1
             },
             {
                 "type": "nothing",
-                "weight": 3
+                "weight": 9
             }
         ],
         "id": "thiet_huyet_son",
@@ -387,22 +519,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 65
+                "weight": 30
+            },
+            {
+                "type": "herb",
+                "weight": 10,
+                "pools": [
+                    "thien_linh_thao",
+                    "kim_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 30,
+                "pools": [
+                    "mat_loi_tinh",
+                    "mat_hac_tinh",
+                    "mat_thien_thach",
+                    "mat_loi_dia"
+                ]
             },
             {
                 "type": "material",
-                "weight": 15,
+                "weight": 10,
                 "pools": [
                     "mat_ma_nhan",
-                    "mat_hac_tinh",
-                    "mat_thien_thach",
-                    "thien_linh_thao",
                     "mat_linh_hon_di_bien"
                 ]
             },
             {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "rare",
                     "epic"
@@ -412,17 +559,18 @@
                 "type": "npc",
                 "weight": 5,
                 "events": [
-                    "lightning_strike",
-                    "demonic_whisper"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
                 "type": "worldBoss",
-                "weight": 2
+                "weight": 1
             },
             {
                 "type": "nothing",
-                "weight": 1
+                "weight": 9
             }
         ],
         "id": "thien_kiep_uyen",
@@ -443,21 +591,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 65
+                "weight": 35
+            },
+            {
+                "type": "herb",
+                "weight": 10,
+                "pools": [
+                    "kim_linh_thao",
+                    "mat_am_hon_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_huyet_tinh",
+                    "mat_loi_tinh",
+                    "mat_tinh_thach"
+                ]
             },
             {
                 "type": "material",
-                "weight": 15,
+                "weight": 10,
                 "pools": [
-                    "mat_huyet_tinh",
                     "mat_am_khi",
-                    "mat_loi_tinh",
+                    "mat_noi_dan_trung",
                     "mat_noi_dan_lon"
                 ]
             },
             {
                 "type": "item",
-                "weight": 15,
+                "weight": 5,
                 "rarities": [
                     "rare",
                     "epic"
@@ -465,19 +629,20 @@
             },
             {
                 "type": "npc",
-                "weight": 3,
+                "weight": 5,
                 "events": [
-                    "blood_rage",
-                    "fallen_general_loot"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
                 "type": "worldBoss",
-                "weight": 2
+                "weight": 1
             },
             {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "huyet_ma_chien_truong",
@@ -498,21 +663,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 65
+                "weight": 30
+            },
+            {
+                "type": "herb",
+                "weight": 20,
+                "pools": [
+                    "hoa_linh_chi",
+                    "mat_huyen_thien_hoa",
+                    "kim_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_tinh_hoa",
+                    "mat_loi_tinh",
+                    "mat_tinh_thach"
+                ]
             },
             {
                 "type": "material",
-                "weight": 18,
+                "weight": 5,
                 "pools": [
-                    "hoa_linh_chi",
-                    "mat_tinh_hoa",
-                    "mat_huyen_thien_hoa",
-                    "mat_loi_tinh"
+                    "mat_long_hoa",
+                    "mat_noi_dan_trung"
                 ]
             },
             {
                 "type": "item",
-                "weight": 15,
+                "weight": 5,
                 "rarities": [
                     "rare",
                     "epic"
@@ -520,15 +701,20 @@
             },
             {
                 "type": "npc",
-                "weight": 2,
+                "weight": 5,
                 "events": [
-                    "fire_burn_zone",
-                    "phoenix_remnant"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "thien_hoa_linh_dia",
@@ -549,21 +735,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 70
+                "weight": 35
+            },
+            {
+                "type": "herb",
+                "weight": 10,
+                "pools": [
+                    "doc_thao",
+                    "mat_am_hon_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_hac_tinh",
+                    "mat_loi_dia",
+                    "mat_hu_khong_tinh"
+                ]
             },
             {
                 "type": "material",
-                "weight": 15,
+                "weight": 10,
                 "pools": [
                     "mat_ma_nhan",
                     "mat_linh_hon_di_bien",
-                    "mat_tan_phach",
-                    "mat_noi_dan_cuc"
+                    "mat_tan_phach"
                 ]
             },
             {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "rare",
                     "epic"
@@ -571,15 +773,20 @@
             },
             {
                 "type": "npc",
-                "weight": 3,
+                "weight": 5,
                 "events": [
-                    "ghost_possession",
-                    "soul_exchange"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "u_minh_quy_vuc",
@@ -600,21 +807,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 70
+                "weight": 30
             },
             {
-                "type": "material",
+                "type": "herb",
                 "weight": 15,
                 "pools": [
                     "thien_linh_thao",
-                    "ban_nguyen_tinh",
+                    "kim_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_thien_thach",
                     "mat_hac_tinh",
-                    "mat_thien_thach"
+                    "mat_tinh_thach_lon",
+                    "ban_nguyen_tinh"
+                ]
+            },
+            {
+                "type": "material",
+                "weight": 10,
+                "pools": [
+                    "mat_tan_hon",
+                    "mat_linh_hon_di_bien"
                 ]
             },
             {
                 "type": "item",
-                "weight": 13,
+                "weight": 5,
                 "rarities": [
                     "epic",
                     "legendary"
@@ -622,15 +845,20 @@
             },
             {
                 "type": "npc",
-                "weight": 2,
+                "weight": 5,
                 "events": [
-                    "law_distortion",
-                    "hidden_trial"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "thien_dao_tan_tich",
@@ -651,20 +879,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 75
+                "weight": 30
+            },
+            {
+                "type": "herb",
+                "weight": 5,
+                "pools": [
+                    "thien_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 35,
+                "pools": [
+                    "mat_khong_gian_thach",
+                    "mat_hu_khong_tinh",
+                    "mat_hu_khong",
+                    "mat_gioi_tu_thach",
+                    "mat_tinh_thach_lon"
+                ]
             },
             {
                 "type": "material",
-                "weight": 12,
+                "weight": 10,
                 "pools": [
-                    "mat_hu_khong",
-                    "ban_nguyen_tinh",
-                    "mat_linh_hon_di_bien"
+                    "mat_linh_hon_di_bien",
+                    "mat_tan_phach"
                 ]
             },
             {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "epic",
                     "legendary"
@@ -672,15 +917,20 @@
             },
             {
                 "type": "npc",
-                "weight": 1,
+                "weight": 5,
                 "events": [
-                    "void_collapse",
-                    "ancient_entity"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "vo_tan_hu_khong",
@@ -701,21 +951,38 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 75
+                "weight": 35
             },
             {
-                "type": "material",
-                "weight": 12,
+                "type": "herb",
+                "weight": 5,
                 "pools": [
-                    "mat_tan_phach",
-                    "mat_noi_dan_cuc",
+                    "thien_linh_thao",
+                    "mat_am_hon_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 30,
+                "pools": [
+                    "mat_loi_dia",
+                    "mat_hac_tinh",
                     "mat_hu_khong",
                     "ban_nguyen_tinh"
                 ]
             },
             {
+                "type": "material",
+                "weight": 10,
+                "pools": [
+                    "mat_tan_phach",
+                    "mat_noi_dan_lon",
+                    "mat_noi_dan_cuc"
+                ]
+            },
+            {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "epic",
                     "legendary"
@@ -723,15 +990,20 @@
             },
             {
                 "type": "npc",
-                "weight": 1,
+                "weight": 5,
                 "events": [
-                    "demon_god_whisper",
-                    "abyssal_blessing"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "cuu_u_than_uyen",
@@ -752,21 +1024,38 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 75
+                "weight": 35
+            },
+            {
+                "type": "herb",
+                "weight": 15,
+                "pools": [
+                    "thien_linh_thao",
+                    "kim_linh_thao",
+                    "mat_huyen_thien_hoa"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_thien_thach",
+                    "mat_moc_hoang_tinh",
+                    "mat_loi_dia",
+                    "ban_nguyen_tinh"
+                ]
             },
             {
                 "type": "material",
-                "weight": 12,
+                "weight": 5,
                 "pools": [
                     "mat_ba_vuong_nanh",
-                    "mat_moc_hoang_tinh",
-                    "ban_nguyen_tinh",
-                    "mat_thien_thach"
+                    "mat_noi_dan_lon"
                 ]
             },
             {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "epic",
                     "legendary"
@@ -774,15 +1063,20 @@
             },
             {
                 "type": "npc",
-                "weight": 1,
+                "weight": 5,
                 "events": [
-                    "primordial_aura",
-                    "ancient_relic_found"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "thai_co_hong_hoang",
@@ -803,21 +1097,37 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 75
+                "weight": 30
             },
             {
-                "type": "material",
-                "weight": 12,
+                "type": "herb",
+                "weight": 10,
                 "pools": [
-                    "mat_loi_de_vu",
-                    "mat_tinh_hoa",
+                    "thien_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 30,
+                "pools": [
                     "mat_thien_thach",
+                    "mat_gioi_tu_thach",
+                    "mat_tinh_hoa",
+                    "mat_hu_khong_tinh",
                     "ban_nguyen_tinh"
                 ]
             },
             {
+                "type": "material",
+                "weight": 10,
+                "pools": [
+                    "mat_loi_de_vu",
+                    "mat_linh_hon_di_bien"
+                ]
+            },
+            {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "epic",
                     "legendary"
@@ -825,15 +1135,20 @@
             },
             {
                 "type": "npc",
-                "weight": 1,
+                "weight": 5,
                 "events": [
-                    "starlight_infusion",
-                    "cosmic_resonance"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "chu_thien_tinh_hai",
@@ -854,35 +1169,57 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 75
+                "weight": 30
+            },
+            {
+                "type": "herb",
+                "weight": 15,
+                "pools": [
+                    "thien_linh_thao",
+                    "kim_linh_thao"
+                ]
+            },
+            {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "mat_gioi_tu_thach",
+                    "mat_hu_khong_tinh",
+                    "mat_tinh_thach_lon",
+                    "ban_nguyen_tinh"
+                ]
             },
             {
                 "type": "material",
-                "weight": 12,
+                "weight": 10,
                 "pools": [
                     "mat_huyet_ma_ban_giap",
-                    "ban_nguyen_tinh",
-                    "mat_hu_khong"
+                    "mat_noi_dan_cuc"
                 ]
             },
             {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "legendary"
                 ]
             },
             {
                 "type": "npc",
-                "weight": 1,
+                "weight": 5,
                 "events": [
-                    "chaos_breakthrough",
-                    "immortal_enlightenment"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "hon_don_tien_vuc",
@@ -903,36 +1240,57 @@
         "rates": [
             {
                 "type": "monster",
-                "weight": 75
+                "weight": 30
             },
             {
-                "type": "material",
-                "weight": 12,
+                "type": "herb",
+                "weight": 15,
                 "pools": [
-                    "ban_nguyen_tinh",
-                    "mat_hu_khong",
-                    "mat_thien_thach",
                     "thien_linh_thao"
                 ]
             },
             {
+                "type": "mineral",
+                "weight": 25,
+                "pools": [
+                    "ban_nguyen_tinh",
+                    "mat_hu_khong",
+                    "mat_thien_thach",
+                    "mat_loi_dia",
+                    "mat_gioi_tu_thach"
+                ]
+            },
+            {
+                "type": "material",
+                "weight": 10,
+                "pools": [
+                    "mat_huyet_ma_ban_giap",
+                    "mat_noi_dan_cuc"
+                ]
+            },
+            {
                 "type": "item",
-                "weight": 12,
+                "weight": 5,
                 "rarities": [
                     "legendary"
                 ]
             },
             {
                 "type": "npc",
-                "weight": 1,
+                "weight": 5,
                 "events": [
-                    "dao_sovereign_vision",
-                    "reality_transcendence"
+                    "old_man_buff",
+                    "merchant",
+                    "found_gold"
                 ]
             },
             {
+                "type": "worldBoss",
+                "weight": 1
+            },
+            {
                 "type": "nothing",
-                "weight": 0
+                "weight": 9
             }
         ],
         "id": "hon_nguyen_dao_canh",

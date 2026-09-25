@@ -75,6 +75,17 @@ This document presents a comprehensive technical audit of the recent system adva
   - Explicit user login or registration removes the `isLoggedOut` flag, allowing seamless future sessions.
 * **Runtime Verification**: Logging out returns cleanly to Login/Register screen; page refresh stays on Login screen without bouncing back to `admin`.
 
+### 2.5 Exploration Differentiated Resource System (Herb Gathering & Mineral Mining)
+* **Context**: Disentangling monolithic `material` events into distinct 🌿 Herb Gathering (`hai_duoc`) and ⛏️ Mineral Mining (`khai_khoang`) branches.
+* **Audit Resolution**:
+  - Upgraded all 18 realms in `exploration.json` and `game_areas` table with explicit `herb` (10-35%), `mineral` (10-35%), and `material` (5-10%) rates.
+  - Implemented dynamic life skill auto-learning and yield scaling ($\text{Yield} = 1 + \lfloor (\text{SkillLevel}-1)/3 \rfloor$).
+  - Implemented Critical Harvest & Deep Vein procs ($\text{CritChance} = \min(50\%, 10\% + \text{SkillLevel} \times 3\%)$) yielding $2\times$ resources and bonus Spirit Stones.
+  - Solved persistent skill XP tracking by syncing `PlayerRepository::saveSkills($id, $player)` inside `PlayerService::save()`.
+  - Fixed legacy parser bug in `Features/Exploration/routes.php` where NPC encounters were improperly nested inside the item generation block.
+  - Added dedicated UI cards in `pages/combat.js` displaying icons, yield multipliers, critical badges, and life skill progression.
+* **Runtime Verification**: 20-round CLI simulation verified distinct `[herb]`, `[mineral]`, and `[material]` events; database query verified `hai_duoc` (+90 XP) and `khai_khoang` (+60 XP) persistence in `player_skills`.
+
 ---
 
 ## 3. Invariant Verification Matrix
@@ -88,6 +99,8 @@ This document presents a comprehensive technical audit of the recent system adva
 | **INV-05** | Mana reservation must never exceed 85% cap | `Features/Skill` | **PASSED** | Verified via `Player::getReservedEnergy()` |
 | **INV-06** | Logout state must survive browser page reloads | `Frontend (main.js)` | **PASSED** | Verified via `isLoggedOut` flag verification |
 | **INV-07** | Infinite level progression schema must use `BIGINT UNSIGNED` | `Database (players)` | **PASSED** | Confirmed via `run_035_unlimited_level_schema.php` |
+| **INV-08** | Life skill XP from exploration must persist to `player_skills` table | `PlayerService`, `Features/Exploration` | **PASSED** | Confirmed via `player_skills` query showing XP for `hai_duoc` & `khai_khoang` |
+| **INV-09** | Area encounter pools must cleanly separate herbs from minerals | `Features/Exploration`, `Data` | **PASSED** | Confirmed via `run_039_herb_and_mineral_exploration.php` |
 
 ---
 
@@ -99,3 +112,4 @@ This document presents a comprehensive technical audit of the recent system adva
    - Expose active element combo badges (`Ngũ Hành Tương Sinh/Tương Khắc`) on the 2D Combat Arena interface.
 3. **PVP Asynchronous Replays**:
    - Save full turn logs for Arena encounters in `pvp_history.combat_log` for player review.
+

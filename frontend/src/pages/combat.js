@@ -10,6 +10,11 @@ export function pageCombat(el, ctx) {
   const areaName = currentAreaData ? currentAreaData.name : 'Vùng Đất Vô Danh'
   const exploreCost = currentAreaData ? (currentAreaData.staminaCost || currentAreaData.stamina_cost || 10) : 10
 
+  const areaRates = currentAreaData?.rates || []
+  const herbRate = areaRates.find(r => r.type === 'herb')?.weight || 0
+  const mineralRate = areaRates.find(r => r.type === 'mineral')?.weight || 0
+  const monsterRate = areaRates.find(r => r.type === 'monster')?.weight || 0
+
   el.innerHTML = `
     <div class="page-header">
       <h1>🗺️ Khu Vực: ${areaName}</h1>
@@ -32,7 +37,12 @@ export function pageCombat(el, ctx) {
     <div class="panel" id="panelKhamPha" style="border-color: rgba(208, 165, 48, 0.4); box-shadow: 0 4px 15px rgba(208, 165, 48, 0.1);">
       <div class="panel-body text-center" style="padding: 24px 16px;">
         <h2 class="text-lg text-gold mb-sm">Dò Thám Xung Quanh</h2>
-        <p class="text-dim mb-md">Tiêu hao thể lực để tìm kiếm tài nguyên, kỳ ngộ hoặc yêu thú.</p>
+        <p class="text-dim mb-xs">Tiêu hao thể lực để tìm kiếm tài nguyên, kỳ ngộ hoặc yêu thú.</p>
+        <div class="flex gap-2 justify-center flex-wrap mb-md text-xs">
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">🌿 Thảo Dược: ~${herbRate}%</span>
+          <span class="badge" style="background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3);">⛏️ Mạch Khoáng: ~${mineralRate}%</span>
+          <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">👾 Yêu Thú: ~${monsterRate}%</span>
+        </div>
         <div class="flex justify-center gap-2 flex-wrap">
           <button class="btn btn--gold btn--lg" id="btnExplore" style="min-width: 150px; display: flex; justify-content: center; align-items: center; gap: 8px;">
             <span>🔍 Tìm Kiếm</span>
@@ -372,6 +382,67 @@ async function doExplore(ctx) {
           <button class="btn btn--green flex-1" id="btnInteractGift" data-pid="${tp.id}">🎁 Tặng Linh Thạch (+100)</button>
           <button class="btn btn--red flex-1" id="btnInteractMug" data-pid="${tp.id}">⚔️ Cướp Bóc</button>
           <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>🔍 Dò Tiếp</button>
+        </div>
+      `;
+    } else if (ev.type === 'herb') {
+      const isCrit = ev.isCritical;
+      html += `
+        <div style="font-size: 44px; margin-bottom: 6px;">🌿</div>
+        <div class="badge ${isCrit ? 'badge--gold' : 'badge--green'} mb-xs" style="font-size: 11px; padding: 3px 10px; text-transform: uppercase;">
+          ${isCrit ? '🌟 BỘI THU DƯỢC LIỆU (BẠO KÍCH)' : '🌿 DƯỢC THẢO THIÊN NHIÊN'}
+        </div>
+        <div class="text-lg ${isCrit ? 'text-gold' : 'text-bright'} bold mb-sm">${ev.message}</div>
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 400px;">
+          <div class="text-md bold" style="color: #34d399;">+${ev.quantity} ${ev.itemName || 'Linh Thảo'}</div>
+          ${ev.bonusGold ? `<div class="text-sm text-gold mt-xs">+${ev.bonusGold} 💎 Linh Thạch thô (Thưởng bạo kích)</div>` : ''}
+          <div class="text-xs text-dim mt-sm" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
+            🌿 Kỹ năng <strong>Hái Dược</strong>: Cấp ${ev.skillLevel} <span style="color:#6ee7b7">(+${ev.skillXpGained} XP)</span>
+          </div>
+          ${ev.levelUp ? `<div class="badge badge--gold mt-xs animate-bounce" style="font-size:11px;">🎉 Chúc mừng! Hái Dược thăng cấp ${ev.levelUp.newLevel}!</div>` : ''}
+        </div>
+        <div class="flex gap-2 justify-center mt-md">
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>
+            ${hasEnoughStamina ? `🔍 Dò Thám Tiếp (-${cost} TL)` : `❌ Hết Thể Lực (${curStamina}/${cost})`}
+          </button>
+          <button class="btn btn--blue" id="btnExploreContinue">Tiếp tục</button>
+        </div>
+      `;
+    } else if (ev.type === 'mineral') {
+      const isCrit = ev.isCritical;
+      html += `
+        <div style="font-size: 44px; margin-bottom: 6px;">⛏️</div>
+        <div class="badge ${isCrit ? 'badge--gold' : 'badge--cyan'} mb-xs" style="font-size: 11px; padding: 3px 10px; background: ${isCrit ? 'rgba(234, 179, 8, 0.2)' : 'rgba(6, 182, 212, 0.2)'}; color: ${isCrit ? '#facc15' : '#22d3ee'}; border: 1px solid ${isCrit ? 'rgba(234, 179, 8, 0.5)' : 'rgba(6, 182, 212, 0.4)'}; text-transform: uppercase;">
+          ${isCrit ? '💎 MẠCH KHOÁNG ĐẠI PHÁT (BẠO KÍCH)' : '⛏️ MẠCH KHOÁNG THIÊN ĐỊA'}
+        </div>
+        <div class="text-lg ${isCrit ? 'text-gold' : 'text-bright'} bold mb-sm">${ev.message}</div>
+        <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 400px;">
+          <div class="text-md bold" style="color: #38bdf8;">+${ev.quantity} ${ev.itemName || 'Khoáng Thạch'}</div>
+          ${ev.bonusGold ? `<div class="text-sm text-gold mt-xs">+${ev.bonusGold} 💎 Tinh Thạch vụn (Thưởng bạo kích)</div>` : ''}
+          <div class="text-xs text-dim mt-sm" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
+            ⛏️ Kỹ năng <strong>Khai Khoáng</strong>: Cấp ${ev.skillLevel} <span style="color:#7dd3fc">(+${ev.skillXpGained} XP)</span>
+          </div>
+          ${ev.levelUp ? `<div class="badge badge--gold mt-xs animate-bounce" style="font-size:11px;">🎉 Chúc mừng! Khai Khoáng thăng cấp ${ev.levelUp.newLevel}!</div>` : ''}
+        </div>
+        <div class="flex gap-2 justify-center mt-md">
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>
+            ${hasEnoughStamina ? `🔍 Dò Thám Tiếp (-${cost} TL)` : `❌ Hết Thể Lực (${curStamina}/${cost})`}
+          </button>
+          <button class="btn btn--blue" id="btnExploreContinue">Tiếp tục</button>
+        </div>
+      `;
+    } else if (ev.type === 'material') {
+      html += `
+        <div style="font-size: 36px; margin-bottom: 6px;">📦</div>
+        <div class="badge badge--dark mb-xs" style="font-size: 11px; padding: 3px 8px;">DÃ NGOẠI THU THẬP</div>
+        <div class="text-lg text-bright bold mb-sm">${ev.message}</div>
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; margin: 10px auto; max-width: 350px;">
+          <div class="text-md bold text-green">+${ev.quantity || 1} ${ev.itemName || ev.itemId}</div>
+        </div>
+        <div class="flex gap-2 justify-center mt-md">
+          <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''}>
+            ${hasEnoughStamina ? `🔍 Dò Thám Tiếp (-${cost} TL)` : `❌ Hết Thể Lực (${curStamina}/${cost})`}
+          </button>
+          <button class="btn btn--blue" id="btnExploreContinue">Tiếp tục</button>
         </div>
       `;
     } else {

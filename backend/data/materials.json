@@ -56,7 +56,19 @@
         { "id": "mat_khong_gian_manh", "name": "Mảnh Vỡ Không Gian", "tier": 1, "category": "rare", "description": "Mảnh vụn không gian, chứa năng lượng trữ vật.", "stackable": true, "sellPrice": 80 },
         { "id": "mat_khong_gian_thach", "name": "Không Gian Thạch", "tier": 2, "category": "rare", "description": "Đá không gian hoàn chỉnh, dùng luyện nhẫn.", "stackable": true, "sellPrice": 250 },
         { "id": "mat_hu_khong_tinh", "name": "Hư Không Tinh", "tier": 3, "category": "rare", "description": "Tinh thể hư không, chứa khoảng không lớn.", "stackable": true, "sellPrice": 800 },
-        { "id": "mat_gioi_tu_thach", "name": "Giới Tử Thạch", "tier": 4, "category": "rare", "description": "Hòn đá có thể chứa cả thế giới bên trong.", "stackable": true, "sellPrice": 3000 }
+        { "id": "mat_gioi_tu_thach", "name": "Giới Tử Thạch", "tier": 4, "category": "rare", "description": "Hòn đá có thể chứa cả thế giới bên trong.", "stackable": true, "sellPrice": 3000 },
+
+        { "id": "mat_am_hon_thao", "name": "Ám Hồn Thảo", "tier": 3, "category": "herb", "description": "Thảo dược sinh trưởng nơi âm u tích tụ hồn khí.", "stackable": true, "sellPrice": 65 },
+        { "id": "mat_huyen_bang_hoa", "name": "Huyền Băng Hoa", "tier": 3, "category": "herb", "description": "Bông hoa kết tinh từ hàn băng vạn năm.", "stackable": true, "sellPrice": 75 },
+        { "id": "mat_huyen_thien_hoa", "name": "Huyền Thiên Hoa", "tier": 3, "category": "herb", "description": "Đóa hoa hấp thụ linh khí huyền thiên.", "stackable": true, "sellPrice": 85 },
+        { "id": "ban_nguyen_tinh", "name": "Bản Nguyên Tinh", "tier": 5, "category": "spirit", "description": "Tinh hoa bản nguyên vũ trụ ngưng tụ, chí bảo khoáng thạch.", "stackable": true, "sellPrice": 2000 },
+        { "id": "mat_hu_khong", "name": "Hư Không Thạch", "tier": 4, "category": "rare", "description": "Khoáng thạch trôi nổi từ khe nứt hư không viễn cổ.", "stackable": true, "sellPrice": 600 },
+        { "id": "mat_moc_hoang_tinh", "name": "Mộc Hoang Tinh", "tier": 4, "category": "elemental", "description": "Khoáng tinh mộc hệ thời hồng hoang viễn cổ.", "stackable": true, "sellPrice": 500 },
+        { "id": "mat_ba_vuong_nanh", "name": "Nanh Bá Vương", "tier": 4, "category": "basic", "description": "Răng nanh cự thú hồng hoang vô cùng kiên cố.", "stackable": true, "sellPrice": 250 },
+        { "id": "mat_loi_de_vu", "name": "Lôi Đế Vũ", "tier": 4, "category": "elemental", "description": "Lông vũ tích điện của Thần Điểu Lôi Đế.", "stackable": true, "sellPrice": 400 },
+        { "id": "mat_huyet_ma_ban_giap", "name": "Huyết Ma Bản Giáp", "tier": 5, "category": "rare", "description": "Mảnh giáp xương của Huyết Ma Thượng Cổ bất hoại.", "stackable": true, "sellPrice": 1500 },
+        { "id": "mat_noi_dan_lon", "name": "Nội Đan Lớn", "tier": 4, "category": "spirit", "description": "Nội đan quái vật cao cấp, năng lượng bàng bạc.", "stackable": true, "sellPrice": 300 },
+        { "id": "mat_noi_dan_cuc", "name": "Cực Phẩm Nội Đan", "tier": 5, "category": "spirit", "description": "Nội đan cửu phẩm yêu hoàng vạn năm.", "stackable": true, "sellPrice": 1200 }
     ],
     "categories": {
         "basic": { "name": "Cơ bản", "color": "#8e8e8e" },

@@ -34,5 +34,6 @@ class PlayerService
     {
         PlayerRepository::save($id, $player);
         PlayerRepository::saveItems($id, $player);
+        PlayerRepository::saveSkills($id, $player);
     }
 }
