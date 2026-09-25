@@ -109,22 +109,37 @@ frontend/src/pages/
     └── index.js                <-- Clean barrel export
 ```
 
-### 4.3 Backward Compatibility Guarantee
-Existing code importing from `frontend/src/pages/inventory.js` or `frontend/src/pages/alchemy.js` continues to work with zero modification:
+### 4.3 Quyết Đấu & Khám Phá: Combat Package (`frontend/src/pages/combat/`)
+The heaviest monolithic file `frontend/src/pages/combat.js` (834 lines) was partitioned into a dedicated package:
+```
+frontend/src/pages/
+├── combat.js                   <-- Backward-compatible bridge entry point
+└── combat/
+    ├── constants.js            <-- Stances (breaker, flow, glitch), outcome maps, log line colorizers
+    ├── CombatLogView.js        <-- Color-coded scrollable battle log
+    ├── CombatArenaView.js      <-- 2D Fighter Cards Arena, animated HP meters, glitch weakpoint badge & categorized loot panel
+    ├── AutoBattleRunner.js     <-- Automated combat scanner with stamina and <20% HP safety cut-offs
+    ├── AreaExplorePanel.js     <-- Exploration card, drop rate chips, tracked monsters & encounters
+    ├── CombatPage.js           <-- Coordinator tying exploration, auto-battle, and combat execution
+    └── index.js                <-- Clean barrel export
+```
+
+### 4.4 Backward Compatibility Guarantee
+Existing code importing from `frontend/src/pages/inventory.js`, `frontend/src/pages/alchemy.js`, or `frontend/src/pages/combat.js` continues to work with zero modification:
 ```javascript
-// frontend/src/pages/alchemy.js
-import { AlchemyPage } from './alchemy/index.js'
-export * from './alchemy/index.js'
+// frontend/src/pages/combat.js
+import { CombatPage } from './combat/index.js'
+export * from './combat/index.js'
 
-let _activeAlchemyInstance = null
+let _activeCombatInstance = null
 
-export async function pageAlchemy(el, ctx) {
-  if (_activeAlchemyInstance) {
-    _activeAlchemyInstance.unmount()
-    _activeAlchemyInstance = null
+export function pageCombat(el, ctx) {
+  if (_activeCombatInstance) {
+    _activeCombatInstance.unmount()
+    _activeCombatInstance = null
   }
-  _activeAlchemyInstance = new AlchemyPage({ ctx })
-  _activeAlchemyInstance.mount(el)
+  _activeCombatInstance = new CombatPage({ ctx })
+  _activeCombatInstance.mount(el)
 }
 ```
 
@@ -132,7 +147,7 @@ export async function pageAlchemy(el, ctx) {
 
 ## 5. Quality Assurance & Verification Metrics
 
-- **Vite Compilation**: `npm run build` completed in **854ms** with **54 modules transformed, 0 errors and 0 warnings**.
+- **Vite Compilation**: `npm run build` completed in **783ms** with **61 modules transformed, 0 errors and 0 warnings**.
 - **E2E Independent Test Suite**: **130/130 tests passing (100%)** across 4 tiers (Feature coverage, boundaries, pairwise combinations, real-world workflows).
 - **Adversarial Stress Suite**: **116/116 checks passing (100%)** (55 Stat Comparison deltas + 61 Unequip & Capacity invariant checks).
 - **Total Test Coverage**: **246 test assertions verified**.
@@ -141,15 +156,16 @@ export async function pageAlchemy(el, ctx) {
 
 ## 6. Migration Roadmap for Remaining Monoliths
 
-With the `LiteUI` framework established and verified in both `inventory` and `alchemy`, the remaining god files will follow the identical partition pattern:
+With the `LiteUI` framework established and verified in `inventory`, `alchemy`, and `combat`, the remaining god files will follow the identical partition pattern:
 
-1. **`combat.js` -> `frontend/src/pages/combat/`**:
-   - `CombatArenaView.js`: 2D battlefield layout and HP/MP meters.
-   - `CombatLogView.js`: Scrollable, color-coded combat round logs.
-   - `CombatActionPanel.js`: Attack, skill shortcuts, medicine usage.
-   - `CombatCoordinator.js`: Turn resolution and state machine.
-2. **`skills.js` -> `frontend/src/pages/skills/`**:
+1. **`skills.js` -> `frontend/src/pages/skills/`**:
    - `SkillTreeView.js`: Martial arts progression.
    - `BreakthroughView.js`: Realm advancement and tribulation readiness.
    - `SpiritualRootsView.js`: Elemental root affinities and talent modifiers.
+   - `SkillsPage.js`: Coordinator.
+2. **`wiki.js` -> `frontend/src/pages/wiki/`**:
+   - `MonsterIndex.js`: Monster encyclopedia.
+   - `HerbMineralCompendium.js`: Resource compendium.
+   - `RealmsGuide.js`: Cultivation realms roadmap.
+
 
