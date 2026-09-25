@@ -59,9 +59,11 @@ const ctx = {
 
 // ===== RENDER =====
 async function render() {
+  const isLoggedOut = localStorage.getItem('isLoggedOut') === 'true'
+
   // Auto-login from localStorage
   const savedId = localStorage.getItem('playerId')
-  if (savedId && !state.playerId) {
+  if (!isLoggedOut && savedId && !state.playerId) {
     try {
       const data = await api.getPlayer(savedId)
       state.playerId = savedId
@@ -74,8 +76,8 @@ async function render() {
     }
   }
 
-  // --- DEV BYPASS: Auto login as 'admin' ---
-  if (!state.playerId) {
+  // --- DEV BYPASS: Auto login as 'admin' if not explicitly logged out ---
+  if (!isLoggedOut && !state.playerId) {
     try {
       const data = await api.login('admin', 'admin');
       state.playerId = data.id;
@@ -168,6 +170,7 @@ Không ai có thể vượt qua.
       const data = await api.login(username, password)
       state.playerId = data.id
       state.player = data.player
+      localStorage.removeItem('isLoggedOut')
       localStorage.setItem('playerId', data.id)
       notify(data.message, 'success')
       await loadGameData()
@@ -188,6 +191,7 @@ Không ai có thể vượt qua.
       const data = await api.register(username, password, name, gender)
       state.playerId = data.id
       state.player = data.player
+      localStorage.removeItem('isLoggedOut')
       localStorage.setItem('playerId', data.id)
       notify(data.message, 'success')
       await loadGameData()
@@ -427,6 +431,9 @@ function renderGame() {
             <button class="btn btn--dark nav-item ${state.currentPage === 'social' ? 'active' : ''}" data-page="social" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xã Hội">
               💬
             </button>
+            <button class="btn btn--dark btn-open-settings" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Cài Đặt Hệ Thống">
+              ⚙️
+            </button>
           </div>
           <div style="font-size:10px;color:var(--text-dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border)">
             📍 ${areaName} ${p.hospitalRemaining > 0 ? '<span style="color:var(--red)">🏥 Tịnh dưỡng</span>' : (p.travelRemaining > 0 ? '<span style="color:var(--blue)">🚶 Di chuyển...</span>' : '')}
@@ -538,6 +545,15 @@ function renderGame() {
             </li>
           </div>` : ''}
         </ul>
+
+        <div class="sidebar-footer">
+          <button class="btn btn--sm btn--outline btn-open-settings" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px;" title="Cài Đặt Hệ Thống">
+            ⚙️ Cài Đặt
+          </button>
+          <button class="btn btn--sm btn--red" id="btnSidebarLogout" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; padding: 6px 12px;" title="Đăng Xuất Tài Khoản">
+            🚪 Thoát
+          </button>
+        </div>
       </aside>
 
       <!-- CONTENT -->
@@ -609,6 +625,19 @@ function renderGame() {
   })
   document.querySelectorAll('.popup-tab[data-popup]').forEach(btn => {
     btn.addEventListener('click', () => openPopup(btn.dataset.popup))
+  })
+
+  // Settings & Logout bindings
+  document.querySelectorAll('.btn-open-settings').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation()
+      showSettingsModal(p)
+    })
+  })
+
+  document.getElementById('btnSidebarLogout')?.addEventListener('click', (e) => {
+    e.stopPropagation()
+    handleLogout()
   })
 
   renderPage()
@@ -818,6 +847,131 @@ function notify(msg, type = 'info') {
   el.textContent = msg
   document.body.appendChild(el)
   setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300) }, 3000)
+}
+
+// ===== SETTINGS & AUTH LOGOUT =====
+function handleLogout() {
+  if (confirm('Đạo hữu có chắc chắn muốn đăng xuất tài khoản?')) {
+    if (_statusInterval) clearInterval(_statusInterval)
+    localStorage.removeItem('playerId')
+    localStorage.setItem('isLoggedOut', 'true')
+    state.playerId = null
+    state.player = null
+    state.popupOpen = false
+    notify('Đã đăng xuất tài khoản thành công.', 'info')
+    renderIntro()
+  }
+}
+
+function showSettingsModal(p) {
+  let overlay = document.getElementById('settings-modal-overlay')
+  if (overlay) overlay.remove()
+
+  overlay = document.createElement('div')
+  overlay.id = 'settings-modal-overlay'
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px); z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; animation: fadeIn 0.2s ease;
+  `
+
+  const soundVal = localStorage.getItem('rpg_sound_enabled') !== 'false'
+  const shakeVal = localStorage.getItem('rpg_shake_enabled') !== 'false'
+  const toastVal = localStorage.getItem('rpg_toast_enabled') !== 'false'
+
+  overlay.innerHTML = `
+    <div style="background: #111422; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; max-width: 480px; width: 100%; box-shadow: 0 16px 40px rgba(0,0,0,0.9), 0 0 25px rgba(255,215,0,0.1); color: #fff; overflow: hidden; animation: scaleUp 0.2s ease;">
+      <!-- Header -->
+      <div style="padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
+        <div style="font-weight: 700; font-size: 15px; color: var(--gold); display: flex; align-items: center; gap: 8px;">
+          <span>⚙️</span> Cài Đặt Hệ Thống
+        </div>
+        <button id="btnCloseSettingsModal" style="background: none; border: none; color: var(--text-dim); font-size: 18px; cursor: pointer; padding: 2px 6px;">✕</button>
+      </div>
+
+      <!-- Body -->
+      <div style="padding: 18px; display: flex; flex-direction: column; gap: 16px; font-size: 13px;">
+        <!-- Account Info Box -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px 14px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">👤 Thông Tin Đạo Hữu</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+            <div><span style="color: var(--text-dim);">Đạo danh:</span> <strong>${p.name || 'Vô Danh'}</strong></div>
+            <div><span style="color: var(--text-dim);">Cấp độ:</span> <strong style="color: var(--blue);">Lv.${p.level || 1}</strong></div>
+            <div><span style="color: var(--text-dim);">Cảnh giới:</span> <strong style="color: var(--gold);">${p.realmInfo?.fullName || 'Phàm Nhân'}</strong></div>
+            <div><span style="color: var(--text-dim);">Vai trò:</span> <span>${p.role === 'admin' ? '👑 Thiên Đạo' : 'Tu Sĩ'}</span></div>
+            <div><span style="color: var(--text-dim);">ID Tài khoản:</span> <span style="font-family: monospace; color: var(--text-dim);">#${p.id || 1}</span></div>
+            <div><span style="color: var(--text-dim);">Linh Thạch:</span> <span style="color: var(--gold);">💎 ${(p.gold || 0).toLocaleString()}</span></div>
+          </div>
+        </div>
+
+        <!-- System Preferences -->
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px 14px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">🎮 Tùy Chọn Trải Nghiệm</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;">
+              <span>🔊 Hiệu ứng âm thanh & BGM</span>
+              <input type="checkbox" id="chkSettingSound" ${soundVal ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--gold);" />
+            </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;">
+              <span>⚡ Rung màn hình khi chấn động & Lôi Kiếp</span>
+              <input type="checkbox" id="chkSettingShake" ${shakeVal ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--gold);" />
+            </label>
+            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;">
+              <span>🔔 Bật thông báo nổi (Toasts)</span>
+              <input type="checkbox" id="chkSettingToast" ${toastVal ? 'checked' : ''} style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--gold);" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Danger Zone / Logout -->
+        <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.5px;">🚪 Phiên Đăng Nhập</div>
+          <div style="font-size: 12px; color: var(--text-dim);">
+            Đăng xuất sẽ kết thúc phiên tu luyện hiện tại trên trình duyệt này và quay về cổng kết giới đăng nhập.
+          </div>
+          <button class="btn btn--red" id="btnModalLogout" style="margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; font-weight: 700;">
+            🚪 Đăng Xuất Tài Khoản
+          </button>
+        </div>
+      </div>
+    </div>
+  `
+
+  document.body.appendChild(overlay)
+
+  // Event handlers
+  const close = () => overlay.remove()
+  overlay.querySelector('#btnCloseSettingsModal')?.addEventListener('click', close)
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close()
+  })
+
+  // ESC to close
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      close()
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }
+  window.addEventListener('keydown', onKeyDown)
+
+  overlay.querySelector('#chkSettingSound')?.addEventListener('change', (e) => {
+    localStorage.setItem('rpg_sound_enabled', e.target.checked)
+    notify(e.target.checked ? 'Đã bật hiệu ứng âm thanh' : 'Đã tắt hiệu ứng âm thanh', 'info')
+  })
+  overlay.querySelector('#chkSettingShake')?.addEventListener('change', (e) => {
+    localStorage.setItem('rpg_shake_enabled', e.target.checked)
+    notify(e.target.checked ? 'Đã bật rung màn hình' : 'Đã tắt rung màn hình', 'info')
+  })
+  overlay.querySelector('#chkSettingToast')?.addEventListener('change', (e) => {
+    localStorage.setItem('rpg_toast_enabled', e.target.checked)
+  })
+
+  overlay.querySelector('#btnModalLogout')?.addEventListener('click', () => {
+    close()
+    handleLogout()
+  })
 }
 
 // ===== INIT =====
