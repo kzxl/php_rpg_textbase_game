@@ -68,7 +68,7 @@ Database (MySQL 8.0 / MariaDB)
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `DWL-01` | **Động Phủ (Housing)** | `Features/Housing` | `pages/housing.js` | `GET/POST /api/housing` | Tiered dwellings with HP regen, garden, training room facilities. |
 | `DWL-02` | **Tông Môn Bang Hội (Guild)** | `Features/Guild` | `pages/guild.js` | `GET/POST /api/guilds` | Guild ranks, treasury, wars, and member roster. |
-| `DWL-03` | **Luyện Đan & Đúc Khí (Craft)** | `Features/Crafting`, `Features/CurrencyCrafting` | `pages/alchemy.js` | `POST /api/crafting/craft` | Recipe crafting, leveling crafting mastery up to 100. |
+| `DWL-03` | **Luyện Đan, Đúc Khí & Cường Hóa (Crafting & Forging)** | `Features/Crafting`, `Features/CurrencyCrafting`, `Services/ForgingService`, `Services/EnhancementService` | `pages/alchemy.js` | `GET /api/forging/recipes`, `POST /api/player/{id}/forge`, `GET/POST /api/player/{id}/enhance*`, `POST /api/player/{id}/craft` | 4 Pillars of Crafting: (1) Luyện Đan (Medicine recipes); (2) Đúc Khí (16 Tier 1-5 equipment recipes forging weapons, armors, shields, rings from minerals & mob drops with quality tiers); (3) Cường Hóa (+1 to +12 equipment enhancement using `da_cuong_hoa` with down-rank risk); (4) Phù Văn (Currency affix reroll). See `docs/FORGING_AND_ENHANCEMENT_SPEC.md`. |
 
 ---
 

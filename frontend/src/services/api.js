@@ -173,6 +173,26 @@ class GameAPI {
     })
   }
 
+  // Equipment Forging (Đúc Khí)
+  getForgingRecipes() {
+    return this.request('/forging/recipes')
+  }
+  forgeItem(id, recipeId) {
+    return this.request(`/player/${id}/forge`, {
+      method: 'POST', body: JSON.stringify({ recipeId })
+    })
+  }
+
+  // Equipment Enhancement (Cường Hóa Trang Bị)
+  getEnhancePreview(id, itemId) {
+    return this.request(`/player/${id}/enhance-preview?itemId=${encodeURIComponent(itemId)}`)
+  }
+  enhanceItem(id, itemId) {
+    return this.request(`/player/${id}/enhance`, {
+      method: 'POST', body: JSON.stringify({ itemId })
+    })
+  }
+
   // Education
   enrollNode(id, nodeId, treeId) {
     return this.request(`/player/${id}/enroll`, {
