@@ -8,6 +8,7 @@ use App\Core\Database;
 use App\Core\ResponseHelper;
 use App\Services\BazaarService;
 use App\Services\EscrowService;
+use App\Services\FactionService;
 use App\Services\PlayerStateService;
 use App\Services\PvPCombatService;
 use App\Services\TradeService;
@@ -17,7 +18,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Throwable;
 
 /**
- * MultiplayerController: Endpoints for persistent player FSM, healing, bail, escrow, PvP combat, Bazaar, and P2P Trading.
+ * MultiplayerController: Endpoints for persistent player FSM, healing, bail, escrow, PvP combat, Bazaar, P2P Trading, Factions & Territories.
  */
 class MultiplayerController
 {
@@ -26,19 +27,22 @@ class MultiplayerController
     private PvPCombatService $pvpService;
     private BazaarService $bazaarService;
     private TradeService $tradeService;
+    private FactionService $factionService;
 
     public function __construct(
         ?PlayerStateService $stateService = null,
         ?EscrowService $escrowService = null,
         ?PvPCombatService $pvpService = null,
         ?BazaarService $bazaarService = null,
-        ?TradeService $tradeService = null
+        ?TradeService $tradeService = null,
+        ?FactionService $factionService = null
     ) {
         $this->stateService = $stateService ?? new PlayerStateService();
         $this->escrowService = $escrowService ?? new EscrowService();
         $this->pvpService = $pvpService ?? new PvPCombatService();
         $this->bazaarService = $bazaarService ?? new BazaarService();
         $this->tradeService = $tradeService ?? new TradeService();
+        $this->factionService = $factionService ?? new FactionService();
     }
 
     public function getState(Request $request, Response $response, array $args): Response
@@ -312,6 +316,216 @@ class MultiplayerController
             return ResponseHelper::json($response, ['success' => true, 'trade' => $result]);
         } catch (Throwable $e) {
             return ResponseHelper::json($response, ['error' => $e->getMessage()], 404);
+        }
+    }
+
+    // ==========================================
+    // SPRINT 4: TÔNG MÔN (FACTIONS) ENDPOINTS
+    // ==========================================
+
+    public function factionList(Request $request, Response $response): Response
+    {
+        try {
+            $result = $this->factionService->listFactions();
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionGet(Request $request, Response $response, array $args): Response
+    {
+        $factionId = (int)($args['factionId'] ?? 0);
+        try {
+            $result = $this->factionService->getFaction($factionId);
+            return ResponseHelper::json($response, ['success' => true, 'faction' => $result]);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 404);
+        }
+    }
+
+    public function factionCreate(Request $request, Response $response, array $args): Response
+    {
+        $leaderId = $args['id'] ?? '';
+        $body = (array)$request->getParsedBody();
+        $name = (string)($body['name'] ?? '');
+        $tag = (string)($body['tag'] ?? '');
+        $description = isset($body['description']) ? (string)$body['description'] : null;
+
+        try {
+            $result = $this->factionService->createFaction($leaderId, $name, $tag, $description);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionJoin(Request $request, Response $response, array $args): Response
+    {
+        $playerId = $args['id'] ?? '';
+        $factionId = (int)($args['factionId'] ?? 0);
+
+        try {
+            $result = $this->factionService->joinFaction($playerId, $factionId);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionLeave(Request $request, Response $response, array $args): Response
+    {
+        $playerId = $args['id'] ?? '';
+        try {
+            $result = $this->factionService->leaveFaction($playerId);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionKick(Request $request, Response $response, array $args): Response
+    {
+        $actorId = $args['id'] ?? '';
+        $body = (array)$request->getParsedBody();
+        $targetId = (string)($body['target_id'] ?? '');
+
+        try {
+            $result = $this->factionService->kickMember($actorId, $targetId);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionSetRole(Request $request, Response $response, array $args): Response
+    {
+        $actorId = $args['id'] ?? '';
+        $body = (array)$request->getParsedBody();
+        $targetId = (string)($body['target_id'] ?? '');
+        $newRole = (string)($body['role'] ?? '');
+
+        try {
+            $result = $this->factionService->setMemberRole($actorId, $targetId, $newRole);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionDeposit(Request $request, Response $response, array $args): Response
+    {
+        $playerId = $args['id'] ?? '';
+        $body = (array)$request->getParsedBody();
+        $amount = (int)($body['amount'] ?? 0);
+
+        try {
+            $result = $this->factionService->depositTreasury($playerId, $amount);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionProposalCreate(Request $request, Response $response, array $args): Response
+    {
+        $proposerId = $args['id'] ?? '';
+        $body = (array)$request->getParsedBody();
+        $targetId = (string)($body['target_id'] ?? '');
+        $amount = (int)($body['amount'] ?? 0);
+        $purpose = (string)($body['purpose'] ?? 'Trích xuất quỹ Tông Môn');
+
+        try {
+            $result = $this->factionService->createWithdrawProposal($proposerId, $targetId, $amount, $purpose);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionProposalApprove(Request $request, Response $response, array $args): Response
+    {
+        $approverId = $args['id'] ?? '';
+        $proposalId = (int)($args['proposalId'] ?? 0);
+
+        try {
+            $result = $this->factionService->approveWithdrawProposal($approverId, $proposalId);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function factionChainGet(Request $request, Response $response, array $args): Response
+    {
+        $factionId = (int)($args['factionId'] ?? 0);
+        try {
+            $chain = $this->factionService->getActiveChain($factionId);
+            return ResponseHelper::json($response, ['success' => true, 'chain' => $chain]);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    // ==========================================
+    // SPRINT 4: TERRITORY WARFARE (LINH MẠCH)
+    // ==========================================
+
+    public function territoryList(Request $request, Response $response): Response
+    {
+        try {
+            $result = $this->factionService->getTerritories();
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function territoryDeclareWar(Request $request, Response $response, array $args): Response
+    {
+        $actorId = $args['id'] ?? '';
+        $territoryId = (string)($args['territoryId'] ?? '');
+
+        try {
+            $result = $this->factionService->declareTerritoryWar($actorId, $territoryId);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function territoryAttack(Request $request, Response $response, array $args): Response
+    {
+        $actorId = $args['id'] ?? '';
+        $territoryId = (string)($args['territoryId'] ?? '');
+        $body = (array)$request->getParsedBody();
+        $damage = (int)($body['damage'] ?? 1000);
+
+        try {
+            $result = $this->factionService->attackTerritoryWard($actorId, $territoryId, $damage);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function territoryHarvest(Request $request, Response $response, array $args): Response
+    {
+        $playerId = $args['id'] ?? '';
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare("SELECT faction_id FROM faction_members WHERE player_id = ?");
+        $stmt->execute([$playerId]);
+        $factionId = (int)$stmt->fetchColumn();
+
+        if (!$factionId) {
+            return ResponseHelper::json($response, ['error' => 'Bạn không thuộc Tông Môn nào!'], 400);
+        }
+
+        try {
+            $result = $this->factionService->harvestTerritories($factionId);
+            return ResponseHelper::json($response, $result);
+        } catch (Throwable $e) {
+            return ResponseHelper::json($response, ['error' => $e->getMessage()], 400);
         }
     }
 }

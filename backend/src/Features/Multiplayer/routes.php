@@ -49,5 +49,29 @@ return function (App $app) {
     $app->post('/api/player/{id}/trade/{tradeId}/confirm', [MultiplayerController::class, 'tradeConfirm']);
     $app->post('/api/player/{id}/trade/{tradeId}/cancel', [MultiplayerController::class, 'tradeCancel']);
     $app->get('/api/trade/{tradeId}', [MultiplayerController::class, 'tradeGet']);
+
+    // ==========================================
+    // SPRINT 4: TÔNG MÔN (FACTIONS) & RBAC ROUTES
+    // ==========================================
+    $app->get('/api/factions', [MultiplayerController::class, 'factionList']);
+    $app->get('/api/factions/{factionId}', [MultiplayerController::class, 'factionGet']);
+    $app->post('/api/player/{id}/factions/create', [MultiplayerController::class, 'factionCreate']);
+    $app->post('/api/player/{id}/factions/{factionId}/join', [MultiplayerController::class, 'factionJoin']);
+    $app->post('/api/player/{id}/factions/leave', [MultiplayerController::class, 'factionLeave']);
+    $app->post('/api/player/{id}/factions/kick', [MultiplayerController::class, 'factionKick']);
+    $app->post('/api/player/{id}/factions/set-role', [MultiplayerController::class, 'factionSetRole']);
+    $app->post('/api/player/{id}/factions/deposit', [MultiplayerController::class, 'factionDeposit']);
+    $app->post('/api/player/{id}/factions/propose-withdraw', [MultiplayerController::class, 'factionProposalCreate']);
+    $app->post('/api/player/{id}/factions/proposals/{proposalId}/approve', [MultiplayerController::class, 'factionProposalApprove']);
+    $app->get('/api/factions/{factionId}/chain', [MultiplayerController::class, 'factionChainGet']);
+
+    // ==========================================
+    // SPRINT 4: TERRITORY WARFARE (LINH MẠCH)
+    // ==========================================
+    $app->get('/api/territories', [MultiplayerController::class, 'territoryList']);
+    $app->post('/api/player/{id}/territories/{territoryId}/declare-war', [MultiplayerController::class, 'territoryDeclareWar']);
+    $app->post('/api/player/{id}/territories/{territoryId}/attack', [MultiplayerController::class, 'territoryAttack']);
+    $app->post('/api/player/{id}/factions/harvest-territories', [MultiplayerController::class, 'territoryHarvest']);
 };
+
 
