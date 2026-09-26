@@ -2,6 +2,8 @@
  * Player Profile — Search & View Other Players
  * Actions: Attack (Mugging), Add Friend, View Stats
  */
+import { showPvPActionModal } from '../game/PvPActionModal.js'
+
 export function pageProfile(el, ctx) {
   const { state, api, notify, updateSidebar } = ctx
   const pid = state.playerId
@@ -140,8 +142,22 @@ export function pageProfile(el, ctx) {
       if (!confirm(`Tấn công ${pr.viewing.name}?`)) return
       try {
         const data = await api.mugPlayer(pid, tid)
-        notify(data.message, data.won ? 'success' : 'error')
-        if (data.player) { state.player = data.player; updateSidebar() }
+        if (data.outcome === 'pending_action' || data.actions) {
+          showPvPActionModal({
+            data,
+            pid,
+            state,
+            api,
+            notify,
+            updateSidebar,
+            onComplete: () => {
+              render()
+            }
+          })
+        } else {
+          notify(data.message, data.won ? 'success' : 'error')
+          if (data.player) { state.player = data.player; updateSidebar() }
+        }
       } catch (e) { notify(e.message, 'error') }
     })
 

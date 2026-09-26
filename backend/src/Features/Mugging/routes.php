@@ -23,233 +23,75 @@ use App\Core\CombatEngine;
 
 return function ($app) {
 
-    // === PHASE 1: ATTACK A PLAYER ===
+    // === PHASE 1: ATTACK A PLAYER (PvP Combat FSM) ===
     $app->post('/api/player/{id}/mug', function (Request $request, Response $response, array $args) {
         $attackerId = $args['id'];
-        $body = $request->getParsedBody();
-        $victimId = $body['victimId'] ?? '';
+        $body = (array)$request->getParsedBody();
+        $victimId = $body['victimId'] ?? $body['target_id'] ?? '';
 
         if (!$victimId || $attackerId === $victimId) {
             return jsonResponse($response, ['error' => 'Mục tiêu không hợp lệ!'], 400);
         }
 
-        $attacker = loadPlayer($attackerId);
-        if (!$attacker) return jsonResponse($response, ['error' => 'Kẻ tấn công không tồn tại'], 404);
+        $pvp = new \App\Services\PvPCombatService();
+        try {
+            $res = $pvp->initiateCombat($attackerId, $victimId);
+            $attacker = loadPlayer($attackerId);
+            $won = ($res['winner'] === 'attacker');
 
-        $victim = loadPlayer($victimId);
-        if (!$victim) return jsonResponse($response, ['error' => 'Mục tiêu không tồn tại'], 404);
-
-        $now = time();
-
-        // --- Validation ---
-        if ($attacker->isHospitalized()) return jsonResponse($response, ['error' => 'Đang bị thương!'], 400);
-        if ($attacker->isTraveling()) return jsonResponse($response, ['error' => 'Đang di chuyển!'], 400);
-
-        $mugCooldown = $attacker->mugCooldownUntil ?? 0;
-        if ($mugCooldown > $now) {
-            $remaining = $mugCooldown - $now;
-            return jsonResponse($response, ['error' => "Hồi sức! Chờ {$remaining}s."], 400);
+            return jsonResponse($response, array_merge($res, [
+                'success' => $won,
+                'won' => $won,
+                'outcome' => $res['outcome'] ?? ($won ? 'pending_action' : 'fail'),
+                'sessionId' => $res['session_id'],
+                'victimId' => $res['defender_id'] ?? $victimId,
+                'victimName' => $res['defender_name'] ?? '',
+                'victimGold' => $res['defender_gold'] ?? 0,
+                'combatLog' => $res['combat_log'] ?? [],
+                'message' => $won 
+                    ? "⚔️ Đã hạ gục {$res['defender_name']}! Hãy chọn kết cục:"
+                    : "💀 Thua trận! Đối thủ phản đòn trọng thương {$res['lockout_applied_seconds']}s.",
+                'player' => $attacker ? $attacker->toArray() : null,
+            ]));
+        } catch (\Throwable $e) {
+            return jsonResponse($response, ['error' => $e->getMessage()], 400);
         }
-
-        if ($attacker->currentArea !== $victim->currentArea) {
-            return jsonResponse($response, ['error' => 'Mục tiêu không ở cùng khu vực!'], 400);
-        }
-
-        // Newbie protection for victim
-        $victimAge = $now - ($victim->createdAt ?? 0);
-        if ($victimAge < 7 * 86400) {
-            return jsonResponse($response, ['error' => 'Mục tiêu đang được bảo hộ tân thủ!'], 400);
-        }
-
-        // === PROTECTION LOSS: Attacker loses their own protection if they attack ===
-        $attackerAge = $now - ($attacker->createdAt ?? 0);
-        $lostProtection = false;
-        if ($attackerAge < 7 * 86400) {
-            // Force set createdAt to >7 days ago to remove protection
-            $attacker->createdAt = $now - (8 * 86400);
-            $lostProtection = true;
-        }
-
-        // Victim is dead/hospital?
-        if ($victim->isHospitalized()) {
-            return jsonResponse($response, ['error' => 'Mục tiêu đang tịnh dưỡng, không thể tấn công!'], 400);
-        }
-
-        // === COMBAT (CombatEngine PvP) ===
-        $engine = new CombatEngine();
-        $result = $engine->simulatePvP($attacker, $victim);
-        $won = ($result['winner'] === 'attacker');
-
-        // Combat cooldown
-        $attacker->mugCooldownUntil = $now + 120;
-
-        $pdo = Database::pdo();
-
-        if (!$won) {
-            // Attacker lost — hospitalized
-            $hospitalTime = mt_rand(60, 180);
-            $attacker->hospitalUntil = $now + $hospitalTime;
-
-            savePlayer($attackerId, $attacker);
-
-            if (function_exists('addPlayerEvent')) {
-                addPlayerEvent($pdo, $victimId, 'mug_defend', "🛡️ {$attacker->name} (Lv.{$attacker->level}) cố tấn công bạn nhưng thất bại!");
-                addPlayerEvent($pdo, $attackerId, 'mug_fail', "💀 Tấn công {$victim->name} thất bại! Bị thương {$hospitalTime}s.");
-            }
-
-            // Log
-            $pdo->prepare("INSERT INTO mugging_log (attacker_id, attacker_name, victim_id, victim_name, gold_stolen, outcome) VALUES (?, ?, ?, ?, 0, 'fail')")
-                ->execute([$attackerId, $attacker->name, $victimId, $victim->name]);
-
-            return jsonResponse($response, [
-                'success' => false,
-                'outcome' => 'fail',
-                'message' => "💀 Thua! {$victim->name} phản đòn mạnh mẽ! Trọng thương {$hospitalTime}s.",
-                'combatLog' => $result['log'] ?? [],
-                'lostProtection' => $lostProtection,
-                'player' => $attacker->toArray(),
-            ]);
-        }
-
-        // === WON — Store pending action, wait for phase 2 ===
-        $attacker->pendingMugVictim = $victimId;
-        $attacker->pendingMugExpiry = $now + 60; // 60s to decide
-
-        savePlayer($attackerId, $attacker);
-        savePlayer($victimId, $victim);
-
-        return jsonResponse($response, [
-            'success' => true,
-            'outcome' => 'pending_action',
-            'message' => "⚔️ Đã hạ gục {$victim->name}! Chọn hành động:",
-            'victimId' => $victimId,
-            'victimName' => $victim->name,
-            'victimGold' => $victim->gold,
-            'combatLog' => $result['log'] ?? [],
-            'lostProtection' => $lostProtection,
-            'actions' => [
-                ['id' => 'leave', 'name' => '🚶 Bỏ Mặc', 'desc' => 'Bỏ đi. Victim nghỉ ngơi 30-60s.'],
-                ['id' => 'rob', 'name' => '💰 Cướp Linh Thạch', 'desc' => 'Lấy 5-15% gold. Victim nghỉ 60-120s.'],
-                ['id' => 'wound', 'name' => '🩸 Đánh Trọng Thương', 'desc' => 'Không cướp. Victim nghỉ 300-600s.'],
-            ],
-            'player' => $attacker->toArray(),
-        ]);
     });
 
-    // === PHASE 2: POST-WIN ACTION ===
+    // === PHASE 2: POST-WIN ACTION (Trifecta: leave, rob, wound) ===
     $app->post('/api/player/{id}/mug-action', function (Request $request, Response $response, array $args) {
         $attackerId = $args['id'];
-        $body = $request->getParsedBody();
+        $body = (array)$request->getParsedBody();
         $action = $body['action'] ?? '';
+        $sessionId = $body['sessionId'] ?? $body['session_id'] ?? '';
 
-        if (!in_array($action, ['leave', 'rob', 'wound'])) {
+        if (!in_array($action, ['leave', 'rob', 'wound'], true)) {
             return jsonResponse($response, ['error' => 'Hành động không hợp lệ!'], 400);
         }
 
-        $attacker = loadPlayer($attackerId);
-        if (!$attacker) return jsonResponse($response, ['error' => 'Player not found'], 404);
-
-        $victimId = $attacker->pendingMugVictim ?? '';
-        $expiry = $attacker->pendingMugExpiry ?? 0;
-
-        if (!$victimId || time() > $expiry) {
-            $attacker->pendingMugVictim = null;
-            $attacker->pendingMugExpiry = null;
-            savePlayer($attackerId, $attacker);
-            return jsonResponse($response, ['error' => 'Hết thời gian ra quyết định!'], 400);
+        // If sessionId not supplied directly, find from player_states
+        if (!$sessionId) {
+            $pdo = Database::pdo();
+            $st = $pdo->prepare("SELECT active_combat_session_id FROM player_states WHERE player_id = ?");
+            $st->execute([$attackerId]);
+            $sessionId = (string)$st->fetchColumn();
         }
 
-        $victim = loadPlayer($victimId);
-        if (!$victim) return jsonResponse($response, ['error' => 'Victim not found'], 404);
-
-        $pdo = Database::pdo();
-        $now = time();
-        $goldStolen = 0;
-        $message = '';
-        $outcome = $action;
-
-        // === Robbery Skill: "cuop_boc" proficiency ===
-        $robberySkillLevel = 0;
-        foreach ($attacker->skills as $s) {
-            $sid = is_array($s) ? ($s['id'] ?? '') : $s;
-            if ($sid === 'cuop_boc') {
-                $robberySkillLevel = is_array($s) ? ($s['level'] ?? 1) : 1;
-                break;
-            }
-        }
-        $stealBonusPct = $robberySkillLevel * 2; // +2% per skill level
-
-        if ($action === 'leave') {
-            // Victim: brief hospital (30-60s)
-            $victimHospital = mt_rand(30, 60);
-            $victim->hospitalUntil = $now + $victimHospital;
-            $message = "🚶 Bỏ mặc {$victim->name}. Họ tỉnh dậy sau {$victimHospital}s.";
-
-        } elseif ($action === 'rob') {
-            // Steal 5-15% + skill bonus, cap at 25%
-            $stealPercent = mt_rand(5, 15) + $stealBonusPct;
-            $stealPercent = min($stealPercent, 25); // Cap at 25%
-            $goldStolen = max(1, (int)floor($victim->gold * $stealPercent / 100));
-
-            $victim->gold -= $goldStolen;
-            $attacker->gold += $goldStolen;
-
-            // Victim: medium hospital (60-120s)
-            $victimHospital = mt_rand(60, 120);
-            $victim->hospitalUntil = $now + $victimHospital;
-
-            // === Chance to unlock/level up Cướp Bóc skill ===
-            if ($robberySkillLevel === 0) {
-                // 10% chance to learn Cướp Bóc
-                if (mt_rand(1, 100) <= 10) {
-                    $attacker->skills[] = ['id' => 'cuop_boc', 'level' => 1, 'xp' => 0];
-                    $message = "💰 Cướp {$goldStolen} 💎 ({$stealPercent}%) từ {$victim->name}! 🎓 Học được kỹ năng [Cướp Bóc]!";
-                } else {
-                    $message = "💰 Cướp {$goldStolen} 💎 ({$stealPercent}%) từ {$victim->name}!";
-                }
-            } else {
-                // Level up Cướp Bóc XP
-                $attacker->gainSkillXp('cuop_boc', 15);
-                $message = "💰 Cướp {$goldStolen} 💎 ({$stealPercent}%) từ {$victim->name}! (Cướp Bóc +15 XP)";
-            }
-
-        } elseif ($action === 'wound') {
-            // Victim: severe hospital (300-600s = 5-10 min)
-            $victimHospital = mt_rand(300, 600);
-            $victim->hospitalUntil = $now + $victimHospital;
-            $victim->currentHp = 1; // Nearly dead
-
-            $message = "🩸 Đánh trọng thương {$victim->name}! Họ phải tịnh dưỡng {$victimHospital}s!";
+        if (!$sessionId) {
+            return jsonResponse($response, ['error' => 'Không tìm thấy phiên giao chiến đang chờ xử lý!'], 400);
         }
 
-        // Events for both
-        if (function_exists('addPlayerEvent')) {
-            if ($action === 'rob') {
-                addPlayerEvent($pdo, $victimId, 'mugged', "💀 {$attacker->name} cướp {$goldStolen} 💎 của bạn!");
-            } elseif ($action === 'wound') {
-                addPlayerEvent($pdo, $victimId, 'wounded', "🩸 {$attacker->name} đánh trọng thương bạn! Tịnh dưỡng {$victimHospital}s!");
-            } else {
-                addPlayerEvent($pdo, $victimId, 'attacked', "⚔️ {$attacker->name} tấn công rồi bỏ đi.");
-            }
+        $pvp = new \App\Services\PvPCombatService();
+        try {
+            $res = $pvp->resolveAction($sessionId, $attackerId, $action);
+            return jsonResponse($response, array_merge($res, [
+                'outcome' => $res['action_chosen'],
+                'goldStolen' => $res['loot_stolen'],
+                'hospitalSeconds' => $res['hospital_seconds'],
+            ]));
+        } catch (\Throwable $e) {
+            return jsonResponse($response, ['error' => $e->getMessage()], 400);
         }
-
-        // Log to mugging_log
-        $pdo->prepare("INSERT INTO mugging_log (attacker_id, attacker_name, victim_id, victim_name, gold_stolen, outcome) VALUES (?, ?, ?, ?, ?, ?)")
-            ->execute([$attackerId, $attacker->name, $victimId, $victim->name, $goldStolen, $outcome]);
-
-        // Clear pending
-        $attacker->pendingMugVictim = null;
-        $attacker->pendingMugExpiry = null;
-
-        savePlayer($attackerId, $attacker);
-        savePlayer($victimId, $victim);
-
-        return jsonResponse($response, [
-            'outcome' => $outcome,
-            'goldStolen' => $goldStolen,
-            'message' => $message,
-            'player' => $attacker->toArray(),
-        ]);
     });
 
     // === MUGGING HISTORY ===

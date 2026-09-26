@@ -4,6 +4,7 @@
  * Torn-style accordion, search/filter, and PVP gold theft
  */
 import { pageAuction } from './auction.js'
+import { showPvPActionModal } from '../game/PvPActionModal.js'
 
 export function pageMarket(el, ctx) {
   const { state, api, notify, updateSidebar } = ctx
@@ -376,10 +377,26 @@ export function pageMarket(el, ctx) {
         btn.textContent = '⏳...'
         try {
           const data = await api.mugPlayer(pid, victimId)
-          notify(data.message, data.success ? 'success' : 'error')
-          state.player = data.player
-          updateSidebar()
-          await loadMugging()
+          if (data.outcome === 'pending_action' || data.actions) {
+            showPvPActionModal({
+              data,
+              pid,
+              state,
+              api,
+              notify,
+              updateSidebar,
+              onComplete: async () => {
+                await loadMugging()
+              }
+            })
+          } else {
+            notify(data.message, data.success ? 'success' : 'error')
+            if (data.player) {
+              state.player = data.player
+              updateSidebar()
+            }
+            await loadMugging()
+          }
         } catch (e) {
           notify(e.message, 'error')
           btn.disabled = false

@@ -21,4 +21,13 @@ return function (App $app) {
 
     // 4. Pay bail to exit disciplinary jail immediately
     $app->post('/api/player/{id}/bail', [MultiplayerController::class, 'bail']);
+
+    // 5. Phase 1: Initiate PvP Combat Duel (Stateful Mutex FSM)
+    $app->post('/api/player/{id}/pvp/attack', [MultiplayerController::class, 'attack']);
+
+    // 6. Phase 2: Resolve Post-Combat Action (Chỉ Điểm, Trọng Thương, Đoạt Bảo)
+    $app->post('/api/player/{id}/pvp/action', [MultiplayerController::class, 'resolveAction']);
+
+    // 7. Inspect PvP Combat Session & Turn Logs
+    $app->get('/api/pvp/session/{sessionId}', [MultiplayerController::class, 'getSession']);
 };

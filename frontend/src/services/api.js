@@ -338,12 +338,30 @@ class GameAPI {
   }
   getAllRealms() { return this.request('/data/realms') }
 
-  // Mugging (Cướp Đoạt)
+  // Mugging & PvP (Cướp Đoạt / Luận Kiếm)
   getMugTargets(id) { return this.request(`/player/${id}/mug-targets`) }
   mugPlayer(id, victimId) {
     return this.request(`/player/${id}/mug`, {
       method: 'POST', body: JSON.stringify({ victimId }),
     })
+  }
+  resolveMugAction(id, action, sessionId = null) {
+    return this.request(`/player/${id}/mug-action`, {
+      method: 'POST', body: JSON.stringify({ action, sessionId }),
+    })
+  }
+  initiatePvP(id, targetId) {
+    return this.request(`/player/${id}/pvp/attack`, {
+      method: 'POST', body: JSON.stringify({ target_id: targetId }),
+    })
+  }
+  resolvePvPAction(id, sessionId, action) {
+    return this.request(`/player/${id}/pvp/action`, {
+      method: 'POST', body: JSON.stringify({ session_id: sessionId, action }),
+    })
+  }
+  getPvPSession(sessionId) {
+    return this.request(`/pvp/session/${sessionId}`)
   }
   getMugLog(id) { return this.request(`/player/${id}/mug-log`) }
 
