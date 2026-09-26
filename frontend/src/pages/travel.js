@@ -69,18 +69,18 @@ export function pageTravel(el, ctx) {
 
   el.innerHTML = `
     <div class="page-header">
-      <h1>🗺️ Ngao Du Bát Hoang</h1>
+      <h1>Ngao Du Bát Hoang</h1>
       <div class="text-sm text-dim">Khám phá thế giới tu tiên, chinh phục bí cảnh và tầm bảo tiên cảnh.</div>
     </div>
     <div class="tab-bar" style="display:flex;gap:0;margin-bottom:12px;border-bottom:2px solid rgba(255,255,255,0.1)">
       <button class="tab-btn ${activeTab === 'map' ? 'active' : ''}" data-tab="map" style="flex:1;padding:10px;border:none;background:${activeTab === 'map' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'map' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'map' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'map' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
-        🗺️ Bản Đồ Bát Hoang
+        Bản Đồ Bát Hoang
       </button>
       <button class="tab-btn ${activeTab === 'dungeon' ? 'active' : ''}" data-tab="dungeon" style="flex:1;padding:10px;border:none;background:${activeTab === 'dungeon' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'dungeon' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'dungeon' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'dungeon' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
-        ⚡ Bí Cảnh
+        Bí Cảnh
       </button>
       <button class="tab-btn ${activeTab === 'tiencanh' ? 'active' : ''}" data-tab="tiencanh" style="flex:1;padding:10px;border:none;background:${activeTab === 'tiencanh' ? 'rgba(255,255,255,0.08)' : 'transparent'};color:${activeTab === 'tiencanh' ? 'var(--gold)' : 'var(--text-dim)'};cursor:pointer;font-size:14px;font-weight:${activeTab === 'tiencanh' ? '700' : '400'};border-bottom:2px solid ${activeTab === 'tiencanh' ? 'var(--gold)' : 'transparent'};transition:all 0.2s">
-        🌌 Tiên Cảnh (Atlas)
+        Tiên Cảnh (Atlas)
       </button>
     </div>
     <div id="travelTabContent"></div>
@@ -169,14 +169,14 @@ async function loadTravelMap(container, ctx) {
           </div>
         </div>
       ` : `
-        <div class="panel" style="border-color:rgba(100,200,100,0.3); margin-bottom:16px">
+        <div class="panel" style="border-color:rgba(79, 140, 98, 0.3); margin-bottom:16px">
           <div class="panel-body" style="padding: 14px 16px">
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-xs text-dim mb-xs">📍 Cảnh Giới Hiện Tại</div>
+                <div class="text-xs text-dim mb-xs">Vùng Đất Hiện Tại</div>
                 <div class="text-lg text-green bold" style="display:flex;align-items:center;gap:6px">
                   ${areaName}
-                  <span class="badge" style="background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.4);font-size:11px">Tọa Trấn</span>
+                  <span class="badge" style="background:rgba(79, 140, 98, 0.15);color:#7cb387;border:1px solid rgba(79, 140, 98, 0.35);font-size:11px">Tọa Trấn</span>
                 </div>
               </div>
               <div style="text-align:right">
@@ -193,7 +193,7 @@ async function loadTravelMap(container, ctx) {
             </div>
             ${currentConfig?.specialtyNames?.length ? `
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px">
-                <span style="font-size:11px;color:var(--text-dim)">💎 Đặc Sản:</span>
+                <span style="font-size:11px;color:var(--text-dim)">Đặc Sản:</span>
                 ${currentConfig.specialtyNames.map(s => getSpecialtyBadge(s)).join(' ')}
               </div>
             ` : ''}
@@ -204,7 +204,7 @@ async function loadTravelMap(container, ctx) {
       <!-- 2D REALM MAP OVERVIEW -->
       <div class="panel">
         <div class="panel-title flex items-center justify-between">
-          <span>🗺️ Thiên Địa Giới Đồ (2D Bát Hoang Tinh Đồ)</span>
+          <span>Thiên Địa Giới Đồ (2D Bát Hoang)</span>
           <span class="text-xs text-dim">${sortedAreas.length} Khu vực</span>
         </div>
         <div class="panel-body" style="background:rgba(0,0,0,0.2); padding:12px">
@@ -225,8 +225,8 @@ async function loadTravelMap(container, ctx) {
               let cardBorder = 'rgba(255,255,255,0.08)'
               let cardBg = 'rgba(255,255,255,0.03)'
               if (isHere) {
-                cardBorder = 'rgba(34, 197, 94, 0.6)'
-                cardBg = 'rgba(34, 197, 94, 0.08)'
+                cardBorder = 'rgba(79, 140, 98, 0.45)'
+                cardBg = 'rgba(79, 140, 98, 0.05)'
               } else if (tooLow) {
                 cardBorder = 'rgba(239, 68, 68, 0.2)'
                 cardBg = 'rgba(15, 23, 42, 0.4)'
@@ -236,18 +236,18 @@ async function loadTravelMap(container, ctx) {
                 <div class="realm-card ${isHere ? 'current-realm' : ''} ${tooLow ? 'locked-realm' : ''}" 
                      style="border:1px solid ${cardBorder}; background:${cardBg}; border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease; position:relative; overflow:hidden">
                   
-                  ${isHere ? '<div style="position:absolute; top:0; right:0; width:0; height:0; border-top:28px solid #22c55e; border-left:28px solid transparent"><span style="position:absolute; top:-26px; right:3px; font-size:10px; color:#000">✓</span></div>' : ''}
+                  ${isHere ? '<div style="position:absolute; top:0; right:0; width:0; height:0; border-top:24px solid #4f8c62; border-left:24px solid transparent"><span style="position:absolute; top:-22px; right:3px; font-size:9px; color:#fff">✓</span></div>' : ''}
 
                   <div>
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px">
-                      <div style="font-weight:700; font-size:14px; color:${isHere ? 'var(--green)' : (tooLow ? 'var(--text-dim)' : 'var(--text-bright)')}">
+                      <div style="font-weight:700; font-size:14px; color:${isHere ? '#7cb387' : (tooLow ? 'var(--text-dim)' : 'var(--text-bright)')}">
                         #${idx + 1} ${a.name}
                       </div>
-                      ${tooLow ? '<span style="color:var(--red); font-size:12px">🔒 Khóa</span>' : ''}
+                      ${tooLow ? '<span style="color:var(--red); font-size:11px">[Khóa]</span>' : ''}
                     </div>
 
                     <div style="display:inline-block; font-size:10px; color:var(--gold); opacity:0.85; margin-bottom:6px; font-weight:600">
-                      🏛️ ${aTier}
+                      ${aTier}
                     </div>
 
                     <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; line-height:1.3">
@@ -259,10 +259,10 @@ async function loadTravelMap(container, ctx) {
                         Lv.${a.min_level || 1}+ · ${realmTitle} Cảnh
                       </span>
                       <span class="badge" style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.06); color:var(--text-dim)">
-                        ${travelTime > 0 ? `⏱ ${travelTime}s` : '⚡ Tức thời'}
+                        ${travelTime > 0 ? `${travelTime}s` : 'Tức thời'}
                       </span>
                       <span class="badge" style="font-size:10px; padding:2px 6px; background:${stamBg}; color:${stamColor}; border:1px solid ${stamBg}">
-                        🏃 -${aStaminaCost} TL (Dò thám)
+                        -${aStaminaCost} TL (Dò thám)
                       </span>
                     </div>
 
@@ -277,11 +277,11 @@ async function loadTravelMap(container, ctx) {
 
                     ${exploArea?.rates ? `
                       <div style="display:flex; gap:6px; font-size:10px; margin-bottom:8px; opacity:0.85">
-                        <span style="color:#34d399">🌿 ~${exploArea.rates.find(r => r.type === 'herb')?.weight || 0}%</span>
+                        <span style="color:#7cb387">Thảo ~${exploArea.rates.find(r => r.type === 'herb')?.weight || 0}%</span>
                         <span style="color:rgba(255,255,255,0.2)">·</span>
-                        <span style="color:#38bdf8">⛏️ ~${exploArea.rates.find(r => r.type === 'mineral')?.weight || 0}%</span>
+                        <span style="color:#82a4d4">Khoáng ~${exploArea.rates.find(r => r.type === 'mineral')?.weight || 0}%</span>
                         <span style="color:rgba(255,255,255,0.2)">·</span>
-                        <span style="color:#f87171">👾 ~${exploArea.rates.find(r => r.type === 'monster')?.weight || 0}%</span>
+                        <span style="color:#d67a7a">Yêu thú ~${exploArea.rates.find(r => r.type === 'monster')?.weight || 0}%</span>
                       </div>
                     ` : ''}
 
@@ -296,16 +296,16 @@ async function loadTravelMap(container, ctx) {
 
                   <div style="margin-top:auto">
                     ${isHere ? `
-                      <button class="btn btn--block btn--sm" disabled style="background:rgba(34,197,94,0.2); color:var(--green); border:1px solid rgba(34,197,94,0.4)">
-                        📍 Đang tọa trấn
+                      <button class="btn btn--block btn--sm" disabled style="background:rgba(79, 140, 98, 0.15); color:#7cb387; border:1px solid rgba(79, 140, 98, 0.35)">
+                        Đang Tọa Trấn
                       </button>
                     ` : tooLow ? `
                       <button class="btn btn--block btn--sm" disabled style="opacity:0.5; cursor:not-allowed">
-                        Cần Đạt Cấp ${a.min_level} (${realmTitle})
+                        Cần Cấp ${a.min_level} (${realmTitle})
                       </button>
                     ` : `
                       <button class="btn btn--blue btn--block btn--sm" data-travel="${a.id}" ${traveling ? 'disabled' : ''}>
-                        ${travelTime > 0 ? `🚶 Vi Hành (${travelTime}s)` : '⚡ Độn Thổ Đến'}
+                        ${travelTime > 0 ? `Vi Hành (${travelTime}s)` : 'Độn Thổ Đến'}
                       </button>
                     `}
                   </div>

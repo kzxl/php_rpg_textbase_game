@@ -119,8 +119,8 @@ export function itemRow(item, showEquip, options = {}) {
     if (totalDmg === 0) totalDmg = item.itemLevel * 2 + 5;
     if (totalAcc === 0) totalAcc = item.itemLevel + 10;
     if (enh > 0) totalDmg += Math.max(4 * enh, Math.round(enh * 4 * Math.floor((item.itemLevel || 1) / 3)));
-    mainStat = `⚔️ ${totalDmg}`;
-    subStat = `🎯 ${totalAcc}`;
+    mainStat = `Công ${totalDmg}`;
+    subStat = `Chính xác ${totalAcc}`;
   } else if (item.slot === 'body' || item.slot === 'shield' || item.slot === 'feet') {
     let totalDef = 0;
     (item.affixes || []).forEach(a => {
@@ -128,13 +128,13 @@ export function itemRow(item, showEquip, options = {}) {
     });
     if (totalDef === 0) totalDef = item.itemLevel * 3;
     if (enh > 0) totalDef += Math.max(3 * enh, Math.round(enh * 3 * Math.floor((item.itemLevel || 1) / 3)));
-    mainStat = `🛡️ ${totalDef}`;
+    mainStat = `Thủ ${totalDef}`;
   } else if (item.slot === 'ring' || item.slot === 'ring1' || item.slot === 'ring2') {
     let cap = 0;
     (item.affixes || []).forEach(a => {
       if (a.stat === 'capacity') cap += a.value;
     });
-    mainStat = cap > 0 ? `🎒 +${cap}` : '';
+    mainStat = cap > 0 ? `Trữ vật +${cap}` : '';
   }
 
   // Stat comparison with currently equipped slot
@@ -189,7 +189,7 @@ export function itemRow(item, showEquip, options = {}) {
 
   const affixStr = (item.affixes || []).map(a => fmtAffix(a)).map(a => `<span class="badge badge-dim">${a}</span>`).join(' ');
   const desc = item.description || `Một vật phẩm loại ${item.slot} cấp ${item.itemLevel} thuộc phẩm chất ${item.rarity}. Khí tức tỏa ra không tồi.`;
-  const crafted = item.craftedBy ? `<div class="text-gold mt-xs" style="font-size:12px">⚒️ Đúc bởi: <strong>${item.craftedBy}</strong></div>` : '';
+  const crafted = item.craftedBy ? `<div class="text-gold mt-xs" style="font-size:12px">Đúc bởi: <strong>${item.craftedBy}</strong></div>` : '';
 
   // Action buttons
   const buttons = [];
@@ -206,7 +206,7 @@ export function itemRow(item, showEquip, options = {}) {
 
   // Quick navigation shortcut to Lò Tạo Hóa for equipment
   if (isEquipment) {
-    buttons.push(`<button class="btn btn--sm btn-forge-shortcut" data-forge-jump="${item.id}" title="Chuyển đến Lò Tạo Hóa để cường hóa">⚒️ Cường Hóa</button>`);
+    buttons.push(`<button class="btn btn--sm btn-forge-shortcut" data-forge-jump="${item.id}" title="Chuyển đến Lò Tạo Hóa để cường hóa">Cường Hóa</button>`);
   }
 
   const btnHtml = buttons.join(' ');

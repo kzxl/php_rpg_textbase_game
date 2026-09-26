@@ -35,20 +35,20 @@ function calcEloWinOdds(myRating, oppRating) {
   const probability = 1 / (1 + Math.pow(10, exponent))
   const winProbability = Math.round(probability * 1000) / 10
 
-  let tierLabel = '⚖️ Cân Tài'
+  let tierLabel = 'Cân Tài'
   let labelShort = 'Cân Tài'
-  let badgeColor = '#f59e0b'
+  let badgeColor = '#c29f55'
   let badgeClass = 'odds-even'
 
   if (winProbability >= 60.0) {
-    tierLabel = '🟢 Kèo Trên'
-    labelShort = 'Kèo Trên'
-    badgeColor = '#10b981'
+    tierLabel = 'Ưu Thế'
+    labelShort = 'Ưu Thế'
+    badgeColor = '#4f8c62'
     badgeClass = 'odds-advantage'
   } else if (winProbability < 40.0) {
-    tierLabel = '⚠️ Kèo Dưới'
-    labelShort = 'Kèo Dưới'
-    badgeColor = '#ef4444'
+    tierLabel = 'Hạ Phong'
+    labelShort = 'Hạ Phong'
+    badgeColor = '#b84a4a'
     badgeClass = 'odds-underdog'
   }
 
@@ -63,51 +63,42 @@ function calcEloWinOdds(myRating, oppRating) {
 }
 
 /**
- * Tiered Streak Fire Badges
- * - 1-2 wins: 🔥 Chuỗi xN (Subtle)
- * - 3-4 wins: ⚡ Chuỗi xN (Lightning)
- * - 5-9 wins: 🔥 Chuỗi xN (Fiery flame with pulsing glow)
- * - 10+ wins: 👑 Bất Bại xN (Crown)
+ * Tiered Streak Badges
  */
 function getStreakBadge(streakCount) {
   const s = parseInt(streakCount) || 0
   if (s >= 10) {
     return {
-      text: `👑 Bất Bại x${s}`,
+      text: `Bất Bại x${s}`,
       cssClass: 'badge-streak streak-apex streak-fire-apex',
-      icon: '👑',
       count: s
     }
   }
   if (s >= 5) {
     return {
-      text: `🔥 Chuỗi x${s}`,
+      text: `Liên Thắng x${s}`,
       cssClass: 'badge-streak streak-flame streak-fire-high',
-      icon: '🔥',
       count: s
     }
   }
   if (s >= 3) {
     return {
-      text: `⚡ Chuỗi x${s}`,
+      text: `Chuỗi x${s}`,
       cssClass: 'badge-streak streak-lightning',
-      icon: '⚡',
       count: s
     }
   }
   if (s >= 1) {
     return {
-      text: `🔥 Chuỗi x${s}`,
+      text: `Chuỗi x${s}`,
       cssClass: 'badge-streak streak-subtle streak-basic',
-      icon: '🔥',
       count: s
     }
   }
   if (s < 0) {
     return {
-      text: `💀 Bại x${Math.abs(s)}`,
+      text: `Bại x${Math.abs(s)}`,
       cssClass: 'badge-streak streak-loss',
-      icon: '💀',
       count: s
     }
   }
@@ -236,23 +227,23 @@ export function pageArena(el, ctx) {
 
     el.innerHTML = `
       <div class="page-header">
-        <h2>⚔️ Luận Đạo Đấu Trường</h2>
-        <p class="page-sub">Tranh đoạt bảng phong thần, so tài cùng đạo hữu thiên hạ. Chinh phục bậc thang Thiên Đạo!</p>
+        <h2>Luận Đạo Đấu Trường</h2>
+        <p class="page-sub">Tranh đoạt bảng phong thần, so tài cùng đạo hữu thiên hạ. Chinh phục bậc thang Thiên Đạo.</p>
       </div>
 
       <!-- RANK CARD -->
       <div class="panel glass" style="margin-bottom:14px; border-left:4px solid ${myRank.color || '#666'}">
         <div class="panel-body" style="display:flex; align-items:center; gap:16px; padding:16px">
-          <div style="font-size:38px">${myRank.icon || '🛡️'}</div>
+          <div style="font-size:32px">${myRank.icon || ''}</div>
           <div style="flex:1">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:6px">
               <div>
                 <div style="font-size:11px; opacity:0.5; text-transform:uppercase; letter-spacing:1px">Cấp Bậc Hiện Tại</div>
-                <div style="font-weight:800; font-size:19px; color:${myRank.color || '#fff'}">${myRank.name || 'Chưa xếp hạng'}</div>
+                <div style="font-weight:800; font-size:18px; color:${myRank.color || '#fff'}">${myRank.name || 'Chưa xếp hạng'}</div>
               </div>
               ${playerStreakBadge ? `<div><span class="${playerStreakBadge.cssClass}">${playerStreakBadge.text}</span></div>` : ''}
             </div>
-            <div style="font-size:13px; opacity:0.75; margin-top:4px">
+            <div style="font-size:12.5px; opacity:0.75; margin-top:4px">
               ELO: <strong>${myRating}</strong> · Thắng: <strong>${a.wins || 0}</strong> / Bại: <strong>${a.losses || 0}</strong>
             </div>
             ${myRank.nextThreshold ? `
@@ -261,20 +252,20 @@ export function pageArena(el, ctx) {
                   <span>Tiến trình đến ${myRank.nextThreshold} ELO</span>
                   <span>${myRank.progress || 0}%</span>
                 </div>
-                <div style="background:rgba(255,255,255,0.1); border-radius:4px; height:6px; margin-top:3px; overflow:hidden">
+                <div style="background:rgba(255,255,255,0.1); border-radius:4px; height:5px; margin-top:3px; overflow:hidden">
                   <div style="background:${myRank.color || '#666'}; height:100%; width:${myRank.progress || 0}%; border-radius:4px; transition:width 0.5s ease"></div>
                 </div>
               </div>
-            ` : '<div style="font-size:11px; color:var(--gold); margin-top:6px">👑 Đỉnh cao! Thiên Đạo Đệ Nhất Vô Song!</div>'}
+            ` : '<div style="font-size:11px; color:var(--gold); margin-top:6px">Đỉnh cao: Thiên Đạo Đệ Nhất Vô Song!</div>'}
           </div>
         </div>
       </div>
 
       <!-- RANK-UP CELEBRATION -->
       ${ar.lastResult?.rankUp ? `
-      <div class="panel" style="margin-bottom:14px; border:2px solid var(--gold); animation:pulse 1.5s infinite; text-align:center; padding:16px">
-        <div style="font-size:40px">${ar.lastResult.newRank?.icon}</div>
-        <div style="font-size:18px; font-weight:800; color:var(--gold); margin-top:6px">🎉 THĂNG CẤP! BẠN ĐÃ ĐẠT HẠNG ${ar.lastResult.newRank?.name}!</div>
+      <div class="panel" style="margin-bottom:14px; border:1px solid var(--gold); text-align:center; padding:16px">
+        <div style="font-size:32px">${ar.lastResult.newRank?.icon || ''}</div>
+        <div style="font-size:16px; font-weight:800; color:var(--gold); margin-top:6px">THĂNG CẤP! BẠN ĐÃ ĐẠT HẠNG ${ar.lastResult.newRank?.name}!</div>
       </div>
       ` : ''}
 
@@ -283,22 +274,21 @@ export function pageArena(el, ctx) {
       <div class="panel" style="margin-bottom:14px; border-left:4px solid ${ar.lastResult.won ? 'var(--green)' : 'var(--red)'}">
         <div class="panel-body" style="padding:14px 16px">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px">
-            <div style="font-weight:800; font-size:16px; color:${ar.lastResult.won ? 'var(--green)' : 'var(--red)'}">
-              ${ar.lastResult.won ? '🏆 CHIẾN THẮNG!' : '💀 THẤT BẠI!'}
+            <div style="font-weight:800; font-size:15px; color:${ar.lastResult.won ? 'var(--green)' : 'var(--red)'}">
+              ${ar.lastResult.won ? 'CHIẾN THẮNG' : 'THẤT BẠI'}
             </div>
             <div style="font-size:12px; font-weight:700">
               ELO: <span style="color:${ar.lastResult.ratingChange >= 0 ? 'var(--green)' : 'var(--red)'}">${ar.lastResult.ratingChange > 0 ? '+' : ''}${ar.lastResult.ratingChange}</span>
-              ${ar.lastResult.goldEarned > 0 ? ` · <span style="color:var(--gold)">+${ar.lastResult.goldEarned} 💎</span>` : ''}
+              ${ar.lastResult.goldEarned > 0 ? ` · <span style="color:var(--gold)">+${ar.lastResult.goldEarned} Linh Thạch</span>` : ''}
             </div>
           </div>
-          <div style="font-size:13px; margin-top:6px">
+          <div style="font-size:12.5px; margin-top:6px">
             Đối thủ: <strong>${ar.lastResult.opponent?.name}</strong> 
-            ${ar.lastResult.opponent?.rank ? ar.lastResult.opponent.rank.icon : ''} 
             (ELO ${ar.lastResult.opponent?.rating})
           </div>
           ${ar.lastResult.combatLog?.length ? `
             <div style="margin-top:10px">
-              <button class="btn-toggle-log" data-log-id="last-result-log">📜 Xem Diễn Biến Trận Đấu</button>
+              <button class="btn-toggle-log" data-log-id="last-result-log">Xem Diễn Biến Trận Đấu</button>
               <div class="combat-log-collapse" id="last-result-log" style="display:none; margin-top:8px">
                 ${renderFightLog(ar.lastResult.combatLog, ar.lastResult.won, 'Bạn', ar.lastResult.opponent?.name)}
               </div>
@@ -311,8 +301,8 @@ export function pageArena(el, ctx) {
       <!-- OPPONENTS -->
       <div class="panel" style="margin-bottom:14px">
         <div class="panel-title flex justify-between items-center">
-          <span>🎯 Danh Sách Đối Thủ (Khiêu Chiến)</span>
-          <span class="text-xs text-dim">Phí: ${d.entryFee || 50} 💎 · Thắng: ${d.winGold || 200} 💎 + ELO</span>
+          <span>Danh Sách Đối Thủ (Khiêu Chiến)</span>
+          <span class="text-xs text-dim">Phí: ${d.entryFee || 50} LT · Thắng: +${d.winGold || 200} LT + ELO</span>
         </div>
         <div class="panel-body no-pad">
           ${(d.opponents || []).length > 0 ? `
@@ -331,7 +321,6 @@ export function pageArena(el, ctx) {
                   <div class="arena-card rank-tier-${oRank.tier || 1}" style="--rank-color: ${oRank.color || '#666'}">
                     <div class="arena-card-header">
                       <div class="rank-insignia" style="background: ${oRank.color || '#666'}22; border-color: ${oRank.color || '#666'}55;">
-                        <span class="rank-icon">${oRank.icon}</span>
                         <span class="rank-name" style="color: ${oRank.color || '#fff'}">${oRank.name}</span>
                       </div>
                       <div class="level-indicator">
@@ -367,7 +356,7 @@ export function pageArena(el, ctx) {
 
                     <div class="arena-card-footer">
                       <button class="btn btn--red btn--sm btn-block btn-fight-opp" data-oid="${o.player_id}" ${ar.fighting ? 'disabled' : ''}>
-                        ⚔️ Khiêu Chiến (${d.entryFee || 50} 💎)
+                        Khiêu Chiến (${d.entryFee || 50} LT)
                       </button>
                     </div>
                   </div>
@@ -378,7 +367,7 @@ export function pageArena(el, ctx) {
 
           <div style="padding:12px 14px; text-align:center; border-top:1px solid rgba(255,255,255,0.06)">
             <button class="btn btn--blue" id="btnRandomFight" ${ar.fighting ? 'disabled' : ''}>
-              🎲 Đấu Ngẫu Nhiên (${d.entryFee || 50} 💎)
+              Đấu Ngẫu Nhiên (${d.entryFee || 50} LT)
             </button>
           </div>
         </div>

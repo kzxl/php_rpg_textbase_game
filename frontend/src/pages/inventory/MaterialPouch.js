@@ -47,16 +47,16 @@ export class MaterialPouch extends Component {
       <div class="material-pouch">
         <div class="material-filter-bar" style="display:flex; gap:6px; flex-wrap:wrap; padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.05); align-items:center">
           <button class="mat-filter-btn ${filter === 'all' ? 'active' : ''}" data-mat-filter="all">Tất Cả (${items.length})</button>
-          <button class="mat-filter-btn ${filter === 'mineral' ? 'active' : ''}" data-mat-filter="mineral">⛏️ Khoáng Thạch</button>
-          <button class="mat-filter-btn ${filter === 'beast' ? 'active' : ''}" data-mat-filter="beast">🐺 Yêu Thú</button>
-          <button class="mat-filter-btn ${filter === 'herb' ? 'active' : ''}" data-mat-filter="herb">🌿 Linh Dược</button>
-          <button class="mat-filter-btn ${filter === 'catalyst' ? 'active' : ''}" data-mat-filter="catalyst">💎 Linh Tinh</button>
-          <button class="mat-filter-btn ${filter === 'enhance' ? 'active' : ''}" data-mat-filter="enhance">✨ Đá Cường Hóa</button>
+          <button class="mat-filter-btn ${filter === 'mineral' ? 'active' : ''}" data-mat-filter="mineral">Khoáng Thạch</button>
+          <button class="mat-filter-btn ${filter === 'beast' ? 'active' : ''}" data-mat-filter="beast">Yêu Thú</button>
+          <button class="mat-filter-btn ${filter === 'herb' ? 'active' : ''}" data-mat-filter="herb">Linh Dược</button>
+          <button class="mat-filter-btn ${filter === 'catalyst' ? 'active' : ''}" data-mat-filter="catalyst">Linh Tinh</button>
+          <button class="mat-filter-btn ${filter === 'enhance' ? 'active' : ''}" data-mat-filter="enhance">Đá Cường Hóa</button>
         </div>
 
         ${items.length === 0 ? `
           <div style="padding:40px 20px;text-align:center" class="text-dim">
-            📦 Kho nguyên liệu trống không. Hãy ngao du bát hoang, thám hiểm bí cảnh hoặc trảm yêu để thu thập khoáng thạch, linh dược!
+            Kho nguyên liệu trống không. Hãy ngao du bát hoang, thám hiểm bí cảnh hoặc trảm yêu để thu thập khoáng thạch, linh dược!
           </div>
         ` : (filtered.length === 0 ? `
           <div style="padding:30px 20px;text-align:center" class="text-dim">
@@ -77,7 +77,7 @@ export class MaterialPouch extends Component {
                       <div class="mat-card-name rarity-${rClass}" title="${m.name}">${m.name}</div>
                       <div class="mat-card-meta">
                         <span class="mat-badge-tier t${t}">T${t} ${tierNames[t] || ''}</span>
-                        ${m.sellPrice ? `<span>💰 ${m.sellPrice}</span>` : ''}
+                        ${m.sellPrice ? `<span>${m.sellPrice} L.Thạch</span>` : ''}
                       </div>
                     </div>
                   </div>

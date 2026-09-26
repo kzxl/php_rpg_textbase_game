@@ -13,14 +13,14 @@ export class PillFurnace extends Component {
 
     const getMedName = (id) => {
       const m = medicines.find(x => x.id === id)
-      return m ? `${m.icon || '💊'} ${m.name}` : id
+      return m ? m.name : id
     }
 
     return `
       <div class="pill-furnace">
         <!-- HERB STORAGE PANEL -->
         <div class="panel" style="margin-bottom:12px; background:var(--bg-surface, #151922); border-radius:8px; border:1px solid rgba(255,255,255,0.08)">
-          <div class="panel-title" style="padding:10px 14px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.05)">🌿 Khí Hải Tàng Trữ (Dược Liệu)</div>
+          <div class="panel-title" style="padding:10px 14px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.05)">Kho Dược Liệu Tàng Trữ</div>
           <div class="panel-body flex gap-2" style="overflow-x:auto; padding:10px 14px; white-space:nowrap; display:flex">
             ${(!p.materials || Object.keys(p.materials).length === 0) ? `
               <div style="color:var(--text-dim); font-size:13px; padding:6px 0">Nguyên liệu trống không...</div>
@@ -34,7 +34,7 @@ export class PillFurnace extends Component {
 
         <!-- MEDICINE RECIPES LIST -->
         <div class="panel" style="background:var(--bg-surface, #151922); border-radius:8px; border:1px solid rgba(255,255,255,0.08); overflow:hidden">
-          <div class="panel-title" style="padding:10px 14px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.05)">🔥 Đan Phương Truyền Thừa</div>
+          <div class="panel-title" style="padding:10px 14px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.05)">Đan Phương Truyền Thừa</div>
           <div class="panel-body no-pad">
             ${medicineRecipes.length === 0 ? `
               <div style="padding:16px" class="text-dim">Chưa có công thức đan dược...</div>
@@ -62,7 +62,7 @@ export class PillFurnace extends Component {
                       <div class="text-xs text-dim flex gap-3" style="display:flex; gap:8px">
                         <span class="badge" style="padding:2px 6px">Tier ${r.tier}</span>
                         <span>Tỉ lệ: <span style="color:${finalRate >= 80 ? 'var(--green, #4ade80)' : 'var(--blue, #60a5fa)'}; font-weight:bold">${finalRate}%</span></span>
-                        <span>🔥 Phí: ${r.cost} L.Thạch</span>
+                        <span>Phí: ${r.cost} Linh Thạch</span>
                       </div>
                     </div>
                     <div class="accordion-arrow text-dim" style="font-size:12px">▼</div>
@@ -77,7 +77,7 @@ export class PillFurnace extends Component {
                       <strong>Công Dụng:</strong> ${targetMed.description || 'Chưa rõ.'}
                     </div>
                     <button class="btn btn--gold btn-craft" style="width:100%; justify-content:center" data-recipe="${r.id}">
-                      🔥 Khởi Lò Luyện Đan
+                      Khởi Lò Luyện Đan
                     </button>
                   </div>
                 </div>

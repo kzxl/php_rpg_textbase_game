@@ -16,10 +16,10 @@ export function pageStats(el, ctx) {
   const canTrain = curStamina >= staminaCost && !p.hospitalRemaining
 
   const stats = [
-    ['strength', '💪', 'Sức mạnh', 'Tăng sát thương mỗi đòn'],
-    ['speed', '🏃', 'Tốc độ', 'Tăng hit chance, giảm escape'],
-    ['dexterity', '🎯', 'Khéo léo', 'Tăng dodge, escape, stealth'],
-    ['defense', '🛡', 'Phòng thủ', 'Giảm sát thương nhận vào'],
+    ['strength', '', 'Sức Mạnh', 'Tăng sát thương mỗi đòn'],
+    ['speed', '', 'Tốc Độ', 'Tăng hit chance, giảm escape'],
+    ['dexterity', '', 'Khéo Léo', 'Tăng dodge, escape, stealth'],
+    ['defense', '', 'Phòng Ngự', 'Giảm sát thương nhận vào'],
   ]
 
   // R2.2: MDG Defense Mitigation & Evasion Formulations
@@ -80,41 +80,41 @@ export function pageStats(el, ctx) {
   }
 
   const talentTiers = [
-    { name: 'Phàm Cốt', multiplier: '1.0x', class: 'tier-pham', icon: '⚪' },
-    { name: 'Linh Cốt', multiplier: '1.1x', class: 'tier-linh', icon: '🔵' },
-    { name: 'Huyền Cốt', multiplier: '1.25x', class: 'tier-huyen', icon: '🟣' },
-    { name: 'Đạo Cốt', multiplier: '1.5x', class: 'tier-dao', icon: '🟡' },
-    { name: 'Tiên Cốt', multiplier: '2.0x', class: 'tier-tien', icon: '🟠' },
+    { name: 'Phàm Cốt', multiplier: '1.0x', class: 'tier-pham', icon: '' },
+    { name: 'Linh Cốt', multiplier: '1.1x', class: 'tier-linh', icon: '' },
+    { name: 'Huyền Cốt', multiplier: '1.25x', class: 'tier-huyen', icon: '' },
+    { name: 'Đạo Cốt', multiplier: '1.5x', class: 'tier-dao', icon: '' },
+    { name: 'Tiên Cốt', multiplier: '2.0x', class: 'tier-tien', icon: '' },
   ]
 
   const maxTrain = Math.floor(curStamina / staminaCost) || 0
 
   el.innerHTML = `
     <div class="page-header">
-      <h1>🏋 Rèn Luyện & Cảnh Giới</h1>
+      <h1>Tu Luyện & Cảnh Giới</h1>
       <div class="actions">
-        <span class="text-dim">🏃 ${curStamina}/${maxStamina} thể lực · Chi phí: 5 thể lực/lần</span>
+        <span class="text-dim">${curStamina}/${maxStamina} Thể Lực · Tiêu hao: 5 Thể Lực/lần</span>
       </div>
     </div>
 
-    ${p.hospitalRemaining > 0 ? `<div class="panel"><div class="panel-body text-red" style="text-align:center">🏥 Đang tịnh dưỡng! Còn ${p.hospitalRemaining}s</div></div>` : ''}
+    ${p.hospitalRemaining > 0 ? `<div class="panel"><div class="panel-body text-red" style="text-align:center">[Tịnh dưỡng] Còn ${p.hospitalRemaining}s</div></div>` : ''}
 
     <!-- R2.3: TIẾN TRÌNH CẢNH GIỚI & ĐỘT PHÁ -->
     <div class="panel glass breakthrough-module">
       <div class="flex justify-between items-center mb-md" style="flex-wrap:wrap;gap:10px">
         <div>
-          <div class="text-xs text-dim mb-xs">Cảnh Giới Hiện Tại & Đột Phá</div>
+          <div class="text-xs text-dim mb-xs">Cảnh Giới Hiện Tại</div>
           <div class="text-xl text-gold bold">
-            🌟 ${p.realmInfo?.fullName || 'Phàm Nhân'}
+            ${p.realmInfo?.fullName || 'Phàm Nhân'}
           </div>
         </div>
         <div class="flex items-center gap-2">
           <span class="badge ${canBreakthrough ? 'badge-enhance tier-1' : 'badge-enhance tier-3'}">
-            ${canBreakthrough ? '⚡ SẴN SÀNG ĐỘT PHÁ' : '🔒 ĐIỀU KIỆN CHƯA ĐỦ'}
+            ${canBreakthrough ? 'SẴN SÀNG ĐỘT PHÁ' : 'CHƯA ĐỦ ĐIỀU KIỆN'}
           </span>
           ${canBreakthrough 
-            ? `<button class="btn btn--gold btn--md btn-breakthrough">⚡ Đột Phá Cảnh Giới!</button>` 
-            : `<button class="btn btn--dark btn--md btn-breakthrough" disabled title="Chưa đủ điều kiện đột phá">⚡ Đột Phá</button>`}
+            ? `<button class="btn btn--gold btn--md btn-breakthrough">Đột Phá Cảnh Giới</button>` 
+            : `<button class="btn btn--dark btn--md btn-breakthrough" disabled title="Chưa đủ điều kiện đột phá">Đột Phá Cảnh Giới</button>`}
         </div>
       </div>
 
@@ -125,50 +125,50 @@ export function pageStats(el, ctx) {
             <div class="text-xs text-dim">Yêu Cầu Tu Vi</div>
             <strong>Lv.${curLevel} / ${reqLevel}</strong>
           </div>
-          <span>${levelSatisfied ? '✅ Đạt Cấp' : '⏳ Cần thêm cấp'}</span>
+          <span>${levelSatisfied ? 'Đạt' : 'Chưa đạt'}</span>
         </div>
         <div class="checklist-item ${goldSatisfied ? 'satisfied' : 'missing'}">
           <div>
             <div class="text-xs text-dim">Linh Thạch Tiêu Hao</div>
-            <strong>${curGold} / ${goldCost} 💎</strong>
+            <strong>${curGold} / ${goldCost}</strong>
           </div>
-          <span>${goldSatisfied ? '✅ Đủ Ngân Sách' : '❌ Thiếu Linh Thạch'}</span>
+          <span>${goldSatisfied ? 'Đủ' : 'Thiếu'}</span>
         </div>
         <div class="checklist-item ${energySatisfied ? 'satisfied' : 'missing'}">
           <div>
             <div class="text-xs text-dim">Linh Lực Dự Trữ</div>
-            <strong>${curEnergy} / ${energyCost} 🔮</strong>
+            <strong>${curEnergy} / ${energyCost}</strong>
           </div>
-          <span>${energySatisfied ? '✅ Đủ Dự Trữ' : '❌ Thiếu Linh Lực'}</span>
+          <span>${energySatisfied ? 'Đủ' : 'Thiếu'}</span>
         </div>
       </div>
 
       <!-- Tribulation Readiness -->
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
         <div class="text-xs text-dim mb-xs flex justify-between">
-          <span>⚡ Độ Kiếp Sinh Tồn (Tribulation Readiness)</span>
-          <span class="${isWounded ? 'text-red' : 'text-green'}">${isWounded ? '⚠️ Khí huyết bị tổn thương' : '🛡️ Khí huyết viên mãn'}</span>
+          <span>Độ Kiếp Sinh Tồn (Tribulation Readiness)</span>
+          <span class="${isWounded ? 'text-red' : 'text-green'}">${isWounded ? 'Khí huyết bị tổn thương' : 'Khí huyết viên mãn'}</span>
         </div>
         <div class="tribulation-readiness-grid">
           <div class="readiness-card">
-            <div class="readiness-card-title">❤️ Khí Huyết vs Lôi Kiếp</div>
+            <div class="readiness-card-title">Khí Huyết vs Lôi Kiếp</div>
             <div class="readiness-card-val ${isWounded ? 'text-red' : 'text-green'}">${curHp}/${maxHp} HP</div>
             <div class="text-xxs text-dim mt-xs">Ước tính sát thương sét: ~${estimatedLightningDmg} ST</div>
           </div>
           <div class="readiness-card">
-            <div class="readiness-card-title">🔵 Chân Khí Hộ Thể (Qi Shield)</div>
+            <div class="readiness-card-title">Chân Khí Hộ Thể (Hộ Thuẫn)</div>
             <div class="readiness-card-val text-blue">${qiShieldCapacity} HP</div>
             <div class="text-xxs text-dim mt-xs">${usableEnergy} LL × 2.5 hấp thụ sát thương</div>
           </div>
           <div class="readiness-card">
-            <div class="readiness-card-title">🛡️ Tâm Pháp Bảo Hộ</div>
+            <div class="readiness-card-title">Tâm Pháp Bảo Hộ</div>
             <div class="readiness-card-val text-purple" style="font-size:12px">
-              ${hasGoldenBell ? '✅ Kim Chung (-20%)' : '❌ Kim Chung'} · ${hasGaleStride ? '✅ Thần Hành (+10% Né)' : '❌ Thần Hành'}
+              ${hasGoldenBell ? 'Kim Chung (-20%)' : 'Chưa kích hoạt'} ${hasGaleStride ? '· Thần Hành (+10% Né)' : ''}
             </div>
             <div class="text-xxs text-dim mt-xs">Hào quang duy trì giảm sát thương lôi đình</div>
           </div>
           <div class="readiness-card">
-            <div class="readiness-card-title">💊 Đan Dược Hộ Mệnh</div>
+            <div class="readiness-card-title">Đan Dược Hộ Mệnh</div>
             <div class="readiness-card-val text-gold">${emergencyPillCount} viên</div>
             <div class="text-xxs text-dim mt-xs">Tự động kích hoạt cứu mạng khi HP < 20%</div>
           </div>
@@ -179,8 +179,8 @@ export function pageStats(el, ctx) {
     <!-- R2.2: PHÂN TÍCH PHÒNG THỦ & THÂN PHÁP (CHUẨN MDG) -->
     <div class="panel defense-breakdown-panel">
       <div class="panel-title flex justify-between items-center">
-        <span>🛡️ Phân Tích Phòng Thủ Chuyên Sâu (Chuẩn MDG)</span>
-        <span class="badge" style="background:rgba(91,141,217,0.2);color:var(--blue)">Phòng Thủ: ${defVal}</span>
+        <span>Phân Tích Phòng Ngự (Chuẩn MDG)</span>
+        <span class="badge" style="background:rgba(91,141,217,0.15);color:#82a4d4;border:1px solid rgba(91,141,217,0.3)">Phòng Thủ: ${defVal}</span>
       </div>
       <div class="panel-body no-pad" style="margin-top:10px">
         <div class="text-xs text-dim mb-xs flex justify-between">
@@ -191,7 +191,7 @@ export function pageStats(el, ctx) {
           <!-- Low Strike -->
           <div class="defense-card tier-low">
             <div class="mitigation-header">
-              <span class="text-green">🌱 Đòn Nhẹ (Raw 25)</span>
+              <span class="text-green">Đòn Nhẹ (25 ST)</span>
               <span class="mitigation-badge tier-low">${lowMit}%</span>
             </div>
             <div class="mitigation-track">
@@ -203,7 +203,7 @@ export function pageStats(el, ctx) {
           <!-- Medium Strike -->
           <div class="defense-card tier-med">
             <div class="mitigation-header">
-              <span class="text-orange">⚔️ Tiêu Chuẩn (Raw 75)</span>
+              <span class="text-orange">Đòn Tiêu Chuẩn (75 ST)</span>
               <span class="mitigation-badge tier-med">${medMit}%</span>
             </div>
             <div class="mitigation-track">
@@ -215,7 +215,7 @@ export function pageStats(el, ctx) {
           <!-- Boss Strike -->
           <div class="defense-card tier-boss">
             <div class="mitigation-header">
-              <span class="text-red">🐉 Đòn Boss (Raw 250)</span>
+              <span class="text-red">Đòn Boss (250 ST)</span>
               <span class="mitigation-badge tier-boss">${bossMit}%</span>
             </div>
             <div class="mitigation-track">
@@ -233,15 +233,15 @@ export function pageStats(el, ctx) {
           </div>
           <div class="evasion-grid">
             <div class="evasion-card">
-              <span class="text-dim">🐢 Vs Địch Chậm (0.75x):</span>
+              <span class="text-dim">Địch Chậm (0.75x):</span>
               <span class="evasion-val text-cyan">${dodgeSlow}%</span>
             </div>
             <div class="evasion-card">
-              <span class="text-dim">⚖️ Vs Ngang Tốc (1.0x):</span>
+              <span class="text-dim">Ngang Tốc (1.0x):</span>
               <span class="evasion-val text-purple">${dodgeEqual}%</span>
             </div>
             <div class="evasion-card">
-              <span class="text-dim">⚡ Vs Thần Tốc (1.5x):</span>
+              <span class="text-dim">Thần Tốc (1.5x):</span>
               <span class="evasion-val text-orange">${dodgeAgile}%</span>
             </div>
           </div>
@@ -251,17 +251,16 @@ export function pageStats(el, ctx) {
 
     <!-- CĂN CỐT THIÊN PHÚ -->
     <div class="panel" style="margin-bottom:12px">
-      <div class="panel-title">🧬 Căn Cốt Thiên Phú</div>
+      <div class="panel-title">Căn Cốt Thiên Phú</div>
       <div class="panel-body" style="padding:12px 16px">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">
-          ${stats.map(([key, icon, name]) => {
-            const t = td[key] || { value: 1.0, name: 'Phàm Cốt', icon: '⚪', color: '#ccc' }
+          ${stats.map(([key, _, name]) => {
+            const t = td[key] || { value: 1.0, name: 'Phàm Cốt', color: '#ccc' }
             return `
-              <div style="background:rgba(255,255,255,0.03);border:1px solid ${t.color}44;border-radius:8px;padding:10px 8px">
-                <div style="font-size:18px">${icon}</div>
-                <div style="font-size:11px;opacity:0.6;margin-top:2px">${name}</div>
-                <div style="font-size:14px;font-weight:700;color:${t.color};margin-top:4px">${t.icon} ${t.name}</div>
-                <div style="font-size:11px;color:${t.color};opacity:0.8">×${t.value} hệ số</div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid ${t.color}33;border-radius:6px;padding:10px 8px">
+                <div style="font-size:11px;opacity:0.6">${name}</div>
+                <div style="font-size:13px;font-weight:700;color:${t.color};margin-top:4px">${t.name}</div>
+                <div style="font-size:11px;color:${t.color};opacity:0.8;margin-top:2px">×${t.value} hệ số</div>
               </div>
             `
           }).join('')}
@@ -272,7 +271,6 @@ export function pageStats(el, ctx) {
           <div class="text-xs text-dim" style="width:100%;margin-bottom:4px">Hệ Thống Phẩm Cấp Căn Cốt:</div>
           ${talentTiers.map(tier => `
             <div class="talent-pill-badge ${tier.class}">
-              <span>${tier.icon}</span>
               <strong>${tier.name}</strong>
               <span>(${tier.multiplier})</span>
             </div>
@@ -280,44 +278,44 @@ export function pageStats(el, ctx) {
         </div>
 
         <div style="text-align:center;margin-top:10px;font-size:11px;opacity:0.4">
-          Dùng 🧬 Tẩy Tủy Đan để tăng bậc ngẫu nhiên · 🔮 Hoán Cốt Đan để reroll toàn bộ
+          Dùng Tẩy Tủy Đan để tăng bậc ngẫu nhiên · Hoán Cốt Đan để reroll toàn bộ
         </div>
       </div>
     </div>
 
     <!-- R2.1: RÈN LUYỆN CHỈ SỐ TIÊU HAO THỂ LỰC -->
     <div class="panel">
-      <div class="panel-title">⚔️ Rèn Luyện Chỉ Số</div>
+      <div class="panel-title">Rèn Luyện Thuộc Tính</div>
       <div class="panel-body no-pad">
-        ${stats.map(([key, icon, name, desc]) => {
-          const t = td[key] || { value: 1.0, name: 'Phàm Cốt', icon: '⚪', color: '#ccc' }
+        ${stats.map(([key, _, name, desc]) => {
+          const t = td[key] || { value: 1.0, name: 'Phàm Cốt', color: '#ccc' }
           return `
-          <div class="stat-row" style="padding:12px 16px">
+          <div class="stat-row" style="padding:10px 16px">
             <div class="stat-label">
-              <span class="stat-icon">${icon}</span> ${name}
+              <span style="font-weight:600">${name}</span>
               <div style="font-size:10px;opacity:0.45;margin-top:1px;font-weight:400">${desc}</div>
             </div>
             <div class="stat-val flex items-center gap-3">
               <span style="min-width:40px; text-align:right; font-weight:700">${s[key] ?? 0}</span>
               ${a[key] > 0 ? `<span class="text-green" style="font-size:12px; min-width:30px">(+${a[key]})</span>` : `<span style="min-width:30px"></span>`}
-              <span style="font-size:10px;color:${t.color};min-width:50px" title="Căn Cốt: ${t.name} (×${t.value})">${t.icon}×${t.value}</span>
+              <span style="font-size:10px;color:${t.color};min-width:45px" title="Căn Cốt: ${t.name} (×${t.value})">×${t.value}</span>
               <input type="number" class="train-count" data-stat="${key}" min="1" max="${maxTrain}" value="1" style="width:50px;padding:3px 6px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.3);color:#fff;text-align:center;font-size:12px" ${canTrain ? '' : 'disabled'}>
-              <button class="btn btn--sm ${canTrain ? 'btn--blue' : 'btn--dark'} train-btn" data-train="${key}" ${canTrain ? '' : 'disabled'} title="Tốn 5 thể lực/lần · Căn cốt ×${t.value}">Rèn Luyện</button>
+              <button class="btn btn--sm ${canTrain ? 'btn--blue' : 'btn--dark'} train-btn" data-train="${key}" ${canTrain ? '' : 'disabled'} title="Tốn 5 Thể Lực/lần · Căn cốt ×${t.value}">Rèn Luyện</button>
             </div>
           </div>
         `}).join('')}
         <div style="padding:8px 16px;font-size:11px;opacity:0.4;border-top:1px solid rgba(255,255,255,0.05)">
-          💡 Rèn luyện tốn <strong>5 thể lực</strong> / lần. Hiệu quả nhân với hệ số căn cốt. Tối đa <strong>${maxTrain}</strong> lần hiện tại.
+          Rèn luyện tiêu hao <strong>5 Thể Lực</strong> / lần. Hiệu quả nhân với hệ số căn cốt. Tối đa <strong>${maxTrain}</strong> lần hiện tại.
         </div>
         <div class="derived-row mt-3 border-t border-dim pt-3">
           <div class="d-item"><div class="d-val">${s.maxHp ?? 100}</div><div class="d-label">Max HP</div></div>
-          <div class="d-item"><div class="d-val">${s.maxEnergy ?? 50}</div><div class="d-label">🔮 Linh lực</div></div>
+          <div class="d-item"><div class="d-val">${s.maxEnergy ?? 50}</div><div class="d-label">Linh Lực</div></div>
           <div class="d-item"><div class="d-val">+${s.energyRegen ?? 5}/t</div><div class="d-label">Hồi/lượt</div></div>
         </div>
         <div class="derived-row pb-3">
-          <div class="d-item"><div class="d-val">${s.critChance ?? 5}%</div><div class="d-label">Chí mạng</div></div>
-          <div class="d-item"><div class="d-val">×${s.critMultiplier ?? 1.5}</div><div class="d-label">Hệ số CM</div></div>
-          <div class="d-item"><div class="d-val">10</div><div class="d-label">🔵 Khí/đòn</div></div>
+          <div class="d-item"><div class="d-val">${s.critChance ?? 5}%</div><div class="d-label">Chí Mạng</div></div>
+          <div class="d-item"><div class="d-val">×${s.critMultiplier ?? 1.5}</div><div class="d-label">Hệ Số CM</div></div>
+          <div class="d-item"><div class="d-val">10</div><div class="d-label">Khí Tiêu Hao</div></div>
         </div>
       </div>
     </div>`

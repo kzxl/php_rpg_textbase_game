@@ -249,7 +249,7 @@ function renderSidebarGold(p) {
   const pending = p.pendingEscrow ?? 0
   return `
     <div class="sidebar-gold" style="padding:2px 0 4px">
-      <div style="font-size:12.5px; font-weight:700; color:var(--gold); margin-bottom:${pending > 0 ? '4px' : '2px'}">💎 ${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
+      <div style="font-size:12px; font-weight:700; color:var(--gold); margin-bottom:${pending > 0 ? '4px' : '2px'}">${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
       ${pending > 0 ? `
         <div class="escrow-claim-card" style="background:rgba(194, 159, 85, 0.08);border:1px solid rgba(194, 159, 85, 0.25);border-radius:4px;padding:4px 6px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between">
           <div>
@@ -436,7 +436,7 @@ function renderGame() {
           ${renderPlayerBuffs(p)}
           <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label">
-              <span>❤️ Khí Huyết</span>
+              <span>Khí Huyết</span>
               <span>
                 ${currentHp}/${maxHp}
                 ${currentHp < maxHp ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
@@ -446,7 +446,7 @@ function renderGame() {
           </div>
           <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
-              <span>🏃 Thể Lực (Thế Giới)</span>
+              <span>Thể Lực</span>
               <span>
                 ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
                 ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
@@ -456,7 +456,7 @@ function renderGame() {
           </div>
           <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
-              <span>🔵 Linh Lực (Thực Chiến)</span>
+              <span>Linh Lực</span>
               <span>
                 ${p.currentEnergy}/${usableEnergy}
                 ${resPct > 0 ? `<span style="font-size:9px; color:#f59e0b; margin-left:3px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
@@ -466,7 +466,7 @@ function renderGame() {
           </div>
           <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
-              <span>✨ Tu Vi (Cấp ${p.level})</span>
+              <span>Tu Vi (Lv.${p.level})</span>
               <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:9px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
             </div>
             <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
@@ -490,27 +490,27 @@ function renderGame() {
             </button>
           </div>
           <div style="font-size:9.5px;color:var(--text-dim);text-align:center;padding:2px 0 4px;border-bottom:1px solid var(--border)">
-            📍 ${areaName} ${p.hospitalRemaining > 0 ? '<span style="color:var(--red)">🏥 Tịnh dưỡng</span>' : (p.travelRemaining > 0 ? '<span style="color:var(--blue)">🚶 Di chuyển...</span>' : '')}
+            ${areaName} ${p.hospitalRemaining > 0 ? '<span style="color:var(--red)">[Tịnh dưỡng]</span>' : (p.travelRemaining > 0 ? '<span style="color:var(--blue)">[Di chuyển...]</span>' : '')}
           </div>
         </div>
 
         <ul class="nav" style="${(p.travelRemaining || 0) > 0 ? 'pointer-events:none; opacity:0.6;' : ''}">
           <!-- PHÂN HỆ 1: KHÁM PHÁ & HÀNH TRÌNH (Trọng Tâm Gameplay) -->
           <li class="nav-section ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" data-section="hanhtrinh">
-            <span>⚔️ KHÁM PHÁ & HÀNH TRÌNH</span>
+            <span>KHÁM PHÁ & HÀNH TRÌNH</span>
             <span class="section-indicator">▾</span>
           </li>
           <div class="nav-group ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" id="sec-hanhtrinh">
             <li class="nav-item nav-item--hero ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
-              <span class="icon">🔍</span> Khám Phá (${areaName})
+              Khám Phá (${areaName})
               <span class="badge" style="background:rgba(194,159,85,0.15); color:#dfcfb2; border:1px solid rgba(194,159,85,0.3); font-weight:600; font-size:9px; padding:1px 5px;">CHÍNH</span>
             </li>
             <li class="nav-item ${['travel', 'dungeon', 'tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
-              <span class="icon">🗺️</span> Ngao Du Bát Hoang
-              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:rgba(83,123,180,0.15); color:#82a4d4; border:1px solid rgba(83,123,180,0.3)">⏳</span>` : ''}
+              Ngao Du Bát Hoang
+              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:rgba(83,123,180,0.15); color:#82a4d4; border:1px solid rgba(83,123,180,0.3)">[Đi]</span>` : ''}
             </li>
             <li class="nav-item ${['quests', 'dailyquest'].includes(state.currentPage) ? 'active' : ''}" data-page="quests">
-              <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
+              Thiên Cơ Nhiệm Vụ
               ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:rgba(134,104,170,0.15); color:#a992c7; border:1px solid rgba(134,104,170,0.3)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
             </li>
           </div>
@@ -522,16 +522,16 @@ function renderGame() {
           </li>
           <div class="nav-group ${collapsedNav.tuchan ? 'collapsed' : ''}" id="sec-tuchan">
             <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
-              <span class="icon">🧘</span> Tu Luyện & Cảnh Giới
+              Tu Luyện & Cảnh Giới
               ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:rgba(194,159,85,0.2); color:var(--gold); border:1px solid rgba(194,159,85,0.4)" title="Có thể đột phá!">!</span>' : ''}
             </li>
             <li class="nav-item ${['skills', 'education', 'library', 'glitch'].includes(state.currentPage) ? 'active' : ''}" data-page="skills">
-              <span class="icon">⚡</span> Kỹ Năng & Lĩnh Ngộ
+              Kỹ Năng & Lĩnh Ngộ
               ${(p.glitchInsight || 0) > 0 ? `<span class="badge" style="background:rgba(134,104,170,0.15); color:#a992c7; border:1px solid rgba(134,104,170,0.3)" title="Điểm Thấu Triệt">${p.glitchInsight}</span>` : ''}
             </li>
             <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
-              <span class="icon">🎒</span> Càn Khôn Túi
-              ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:rgba(209,159,96,0.15); color:#d19f60; border:1px solid rgba(209,159,96,0.3)" title="Đan độc">⏳</span>` : ''}
+              Càn Khôn Túi
+              ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:rgba(209,159,96,0.15); color:#d19f60; border:1px solid rgba(209,159,96,0.3)" title="Đan độc">Độc</span>` : ''}
             </li>
           </div>
 
@@ -542,13 +542,13 @@ function renderGame() {
           </li>
           <div class="nav-group ${collapsedNav.tranhdau ? 'collapsed' : ''}" id="sec-tranhdau">
             <li class="nav-item ${state.currentPage === 'arena' ? 'active' : ''}" data-page="arena">
-              <span class="icon">⚔️</span> Luận Đạo Đấu Trường
+              Luận Đạo Đấu Trường
             </li>
             <li class="nav-item ${state.currentPage === 'tower' ? 'active' : ''}" data-page="tower">
-              <span class="icon">🗼</span> Thiên Phần Tháp
+              Thiên Phần Tháp
             </li>
             <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
-              <span class="icon">🐉</span> Ma Thú Xâm Lăng
+              Ma Thú Xâm Lăng
               <span class="badge" style="background:rgba(184,74,74,0.15); color:#d67a7a; border:1px solid rgba(184,74,74,0.3); font-size:9px">Boss</span>
             </li>
           </div>
@@ -560,13 +560,13 @@ function renderGame() {
           </li>
           <div class="nav-group ${collapsedNav.tienphu ? 'collapsed' : ''}" id="sec-tienphu">
             <li class="nav-item ${state.currentPage === 'housing' ? 'active' : ''}" data-page="housing">
-              <span class="icon">🏠</span> Động Phủ Tu Tiên
+              Động Phủ Tu Tiên
             </li>
             <li class="nav-item ${state.currentPage === 'guild' ? 'active' : ''}" data-page="guild">
-              <span class="icon">🏯</span> Tông Môn Bang Hội
+              Tông Môn Bang Hội
             </li>
             <li class="nav-item ${state.currentPage === 'alchemy' ? 'active' : ''}" data-page="alchemy">
-              <span class="icon">⚒️</span> Luyện Đan & Đúc Khí
+              Luyện Đan & Đúc Khí
             </li>
           </div>
 
@@ -577,13 +577,13 @@ function renderGame() {
           </li>
           <div class="nav-group ${collapsedNav.thuonghoi ? 'collapsed' : ''}" id="sec-thuonghoi">
             <li class="nav-item ${['market', 'auction'].includes(state.currentPage) ? 'active' : ''}" data-page="market">
-              <span class="icon">🏪</span> Phường Thị & Đấu Giá
+              Phường Thị & Đấu Giá
             </li>
             <li class="nav-item ${state.currentPage === 'npcshop' ? 'active' : ''}" data-page="npcshop">
-              <span class="icon">🧓</span> Tiên Các Thương Nhân
+              Tiên Các Thương Nhân
             </li>
             <li class="nav-item ${state.currentPage === 'gacha' ? 'active' : ''}" data-page="gacha">
-              <span class="icon">🎰</span> Thiên Cơ Đài (Tầm Bảo)
+              Thiên Cơ Đài (Tầm Bảo)
             </li>
           </div>
 
@@ -595,17 +595,17 @@ function renderGame() {
           </li>
           <div class="nav-group ${collapsedNav.vothuong ? 'collapsed' : ''}" id="sec-vothuong">
             <li class="nav-item ${state.currentPage === 'admin' ? 'active' : ''}" data-page="admin">
-              <span class="icon">⚙️</span> Thiên Đạo Quản Trị
+              Thiên Đạo Quản Trị
             </li>
           </div>` : ''}
         </ul>
 
         <div class="sidebar-footer">
           <button class="btn btn--sm btn--outline btn-open-settings" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; padding: 4px 6px;" title="Cài Đặt Hệ Thống">
-            ⚙️ Cài Đặt
+            Cài Đặt
           </button>
           <button class="btn btn--sm btn--red" id="btnSidebarLogout" style="display: flex; align-items: center; justify-content: center; gap: 3px; font-size: 11px; padding: 4px 8px;" title="Đăng Xuất Tài Khoản">
-            🚪 Thoát
+            Thoát
           </button>
         </div>
       </aside>
@@ -819,43 +819,44 @@ function updateSidebar() {
     const xpPct = (p.xpToNext && p.xpToNext > 0) ? Math.min(100, Math.max(0, ((p.xp || 0) / p.xpToNext) * 100)) : 0
     sp.innerHTML = `
       <div class="player-name">${p.name}</div>
+      ${p.activeTitle ? `<div style="font-size:9.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;margin-top:1px">『${p.activeTitle}』</div>` : ''}
       <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
       ${renderStatusEffects(p)}
       ${renderPlayerBuffs(p)}
-      <div class="sidebar-bar" style="margin-top:8px">
+      <div class="sidebar-bar" style="margin-top:4px">
         <div class="bar-label">
-          <span>❤️ Khí Huyết</span>
+          <span>Khí Huyết</span>
           <span>
             ${currentHp}/${maxHp}
-            ${currentHp < maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '(Không tự hồi)'}</span>` : ''}
+            ${currentHp < maxHp ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
       </div>
-      <div class="sidebar-bar" style="margin-top:4px">
+      <div class="sidebar-bar" style="margin-top:2px">
         <div class="bar-label">
-          <span>🏃 Thể Lực (Thế Giới)</span>
+          <span>Thể Lực</span>
           <span>
             ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
-            ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
+            ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
       </div>
-      <div class="sidebar-bar" style="margin-top:4px">
+      <div class="sidebar-bar" style="margin-top:2px">
         <div class="bar-label">
-          <span>🔵 Linh Lực (Thực Chiến)</span>
+          <span>Linh Lực</span>
           <span>
             ${p.currentEnergy}/${usableEnergy}
-            ${resPct > 0 ? `<span style="font-size:10px; color:#f59e0b; margin-left:4px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
+            ${resPct > 0 ? `<span style="font-size:9px; color:#f59e0b; margin-left:3px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
       </div>
-      <div class="sidebar-bar" style="margin-top:4px">
+      <div class="sidebar-bar" style="margin-top:2px">
         <div class="bar-label">
-          <span>✨ Tu Vi (Cấp ${p.level})</span>
-          <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:10px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
+          <span>Tu Vi (Lv.${p.level})</span>
+          <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:9px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
         </div>
         <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
       </div>

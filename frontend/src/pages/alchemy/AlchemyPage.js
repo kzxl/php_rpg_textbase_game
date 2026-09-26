@@ -46,8 +46,8 @@ export class AlchemyPage extends Component {
         <!-- HEADER -->
         <div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:12px">
           <div>
-            <h1 style="display:flex; align-items:center; gap:8px; margin:0; font-size:20px; font-weight:700">
-              ⚒️ Lò Tạo Hóa (Chế Tác)
+            <h1 style="display:flex; align-items:center; gap:8px; margin:0; font-size:18px; font-weight:700">
+              Lò Tạo Hóa (Chế Tác)
             </h1>
             <div class="text-sm text-dim" style="font-size:12px; color:var(--text-dim); margin-top:2px">
               Đúc rèn Thần Binh, Luyện Chế Tiên Đan và Cường Hóa Pháp Khí viễn cổ.
@@ -57,7 +57,7 @@ export class AlchemyPage extends Component {
           <!-- CRAFTING MASTERY HUD -->
           <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px 14px; min-width:220px">
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:4px">
-              <span style="font-weight:700; color:var(--gold, #facc15)">🛠️ Luyện Khí Thuật: Cấp ${craftLvl}</span>
+              <span style="font-weight:700; color:var(--gold, #facc15)">Luyện Khí Thuật: Cấp ${craftLvl}</span>
               <span class="text-dim text-xs" style="font-size:10px; color:var(--text-dim)">${craftXp}/${xpToNext} XP</span>
             </div>
             <div style="background:rgba(0,0,0,0.4); border-radius:4px; height:5px; overflow:hidden">
@@ -71,12 +71,12 @@ export class AlchemyPage extends Component {
 
         <!-- SKILL BUFFS BANNER -->
         ${(craftBonus || costReduction || qualityBonus || doubleChance) ? `
-          <div style="background:rgba(255,215,0,0.05); border:1px solid rgba(255,215,0,0.15); border-radius:6px; padding:6px 12px; margin-bottom:12px; font-size:11px; display:flex; gap:12px; flex-wrap:wrap">
-            <span style="color:var(--gold, #facc15); font-weight:600">✨ Gia Trì Nghề Nghiệp:</span>
-            ${craftBonus ? `<span>🔥 Thành công +${craftBonus}%</span>` : ''}
-            ${costReduction ? `<span>💎 Giảm phí -${costReduction}%</span>` : ''}
-            ${qualityBonus ? `<span>✨ Phẩm chất +${qualityBonus}%</span>` : ''}
-            ${doubleChance ? `<span>⬆️ Nâng đôi ${doubleChance}%</span>` : ''}
+          <div style="background:rgba(194,159,85,0.06); border:1px solid rgba(194,159,85,0.2); border-radius:6px; padding:6px 12px; margin-bottom:12px; font-size:11px; display:flex; gap:12px; flex-wrap:wrap">
+            <span style="color:var(--gold, #facc15); font-weight:600">Gia Trì Nghề Nghiệp:</span>
+            ${craftBonus ? `<span>Thành công +${craftBonus}%</span>` : ''}
+            ${costReduction ? `<span>Giảm phí -${costReduction}%</span>` : ''}
+            ${qualityBonus ? `<span>Phẩm chất +${qualityBonus}%</span>` : ''}
+            ${doubleChance ? `<span>Nâng đôi ${doubleChance}%</span>` : ''}
           </div>
         ` : ''}
 
@@ -150,10 +150,10 @@ export class AlchemyPage extends Component {
     const forgingRecipes = ctx?.state?._forgingRecipes || []
 
     const tabDefinitions = [
-      { id: 'recipes', label: 'Luyện Đan', icon: '🔥', badge: medicineRecipes.length || null },
-      { id: 'forging', label: 'Đúc Khí', icon: '⚔️', badge: forgingRecipes.length || null },
-      { id: 'enhancement', label: 'Cường Hóa (+1..+12)', icon: '✨' },
-      { id: 'currency', label: 'Phù Văn', icon: '🔮' },
+      { id: 'recipes', label: 'Luyện Đan', badge: medicineRecipes.length || null },
+      { id: 'forging', label: 'Đúc Khí', badge: forgingRecipes.length || null },
+      { id: 'enhancement', label: 'Cường Hóa (+1..+12)' },
+      { id: 'currency', label: 'Phù Văn' },
     ]
 
     if (this._tabsComponent) {

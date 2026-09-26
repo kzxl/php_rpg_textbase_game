@@ -39,7 +39,7 @@ export class EnhancementAltar extends Component {
       <div class="enhancement-altar">
         <!-- ITEM SELECTION PANEL -->
         <div class="panel" style="margin-bottom:12px; background:var(--bg-surface, #151922); border-radius:8px; border:1px solid rgba(255,255,255,0.08)">
-          <div class="panel-title" style="padding:10px 14px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.05)">⚔️ Chọn Trang Bị Cần Cường Hóa</div>
+          <div class="panel-title" style="padding:10px 14px; font-weight:600; border-bottom:1px solid rgba(255,255,255,0.05)">Chọn Trang Bị Cường Hóa</div>
           <div class="panel-body" style="padding:10px 14px">
             ${allItems.length === 0 ? `
               <div style="opacity:0.4; padding:8px 0">Không có trang bị nào trên người hoặc trong túi.</div>
@@ -49,7 +49,7 @@ export class EnhancementAltar extends Component {
                   const enh = it.enhanceLevel > 0 ? `+${it.enhanceLevel}` : ''
                   return `
                     <option value="${it.id}" ${it.id === selectedItem?.id ? 'selected' : ''}>
-                      ${it.loc === 'eq' ? '🔸 [Đang Mặc]' : '📦 [Túi]'} ${it.displayName || it.name} (${it.rarity || 'common'}) ${enh}
+                      ${it.loc === 'eq' ? '[Đang Mặc]' : '[Túi]'} ${it.displayName || it.name} (${it.rarity || 'common'}) ${enh}
                     </option>`
                 }).join('')}
               </select>
@@ -76,9 +76,9 @@ export class EnhancementAltar extends Component {
     const canEnhance = !isMax && hasEnoughStones && hasEnoughGold
 
     const riskLabels = {
-      safe: '<span style="color:#10b981; font-weight:700">✅ 100% Tuyệt Đối Thành Công</span>',
-      safe_fail: '<span style="color:#38bdf8; font-weight:700">🛡️ Thất Bại Giữ Nguyên Cấp</span>',
-      downgrade: '<span style="color:#f87171; font-weight:700">⚠️ Rủi Ro: Thất Bại Bị Rớt 1 Cấp (-1)</span>'
+      safe: '<span style="color:#7cb387; font-weight:700">100% Tuyệt Đối Thành Công</span>',
+      safe_fail: '<span style="color:#82a4d4; font-weight:700">Thất Bại Giữ Nguyên Cấp</span>',
+      downgrade: '<span style="color:#d67a7a; font-weight:700">Rủi ro: Rớt 1 cấp khi thất bại</span>'
     }
 
     const curTierStyle = getEnhanceStyle(curLvl)
@@ -91,7 +91,6 @@ export class EnhancementAltar extends Component {
         <div class="panel-body text-center" style="padding:20px 16px; text-align:center">
           
           <!-- ITEM HEADER -->
-          <div style="font-size:36px; margin-bottom:8px">✨</div>
           <h2 style="color:${RARITY_COLORS[selectedItem.rarity] || '#fff'}; margin-bottom:4px; font-size:18px; font-weight:700">
             ${selectedItem.displayName || selectedItem.name}
           </h2>
@@ -130,7 +129,7 @@ export class EnhancementAltar extends Component {
               </div>
               <div style="font-size:11px">${riskLabels[riskType]}</div>
             ` : `
-              <div style="color:var(--gold, #facc15); font-weight:700">🌟 TRANG BỊ ĐÃ ĐẠT CƯỜNG HÓA TỐI ĐA CỬU THIÊN (+12)!</div>
+              <div style="color:var(--gold, #facc15); font-weight:700">TRANG BỊ ĐÃ ĐẠT CƯỜNG HÓA TỐI ĐA CỬU THIÊN (+12)!</div>
             `}
           </div>
 
@@ -138,7 +137,6 @@ export class EnhancementAltar extends Component {
           ${!isMax ? `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px">
               <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px">
-                <div style="font-size:18px">💎</div>
                 <div class="text-xs text-dim" style="font-size:11px; color:var(--text-dim)">Đá Cường Hóa</div>
                 <div style="font-size:14px; font-weight:700; color:${hasEnoughStones ? 'var(--green, #4ade80)' : 'var(--red, #f87171)'}">
                   ${playerStones} / ${stonesReq} viên
@@ -146,17 +144,16 @@ export class EnhancementAltar extends Component {
               </div>
 
               <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px">
-                <div style="font-size:18px">💰</div>
                 <div class="text-xs text-dim" style="font-size:11px; color:var(--text-dim)">Linh Thạch Tiêu Hao</div>
                 <div style="font-size:14px; font-weight:700; color:${hasEnoughGold ? 'var(--gold, #facc15)' : 'var(--red, #f87171)'}">
-                  ${p.gold || 0} / ${goldCost} 💎
+                  ${p.gold || 0} / ${goldCost} Linh Thạch
                 </div>
               </div>
             </div>
 
             <!-- ENHANCE BUTTON -->
-            <button class="btn btn--gold btn--lg btn-enhance" style="width:100%; justify-content:center; font-size:16px; font-weight:800; padding:12px" data-item="${selectedItem.id}" ${canEnhance ? '' : 'disabled'}>
-              ${canEnhance ? `✨ TIẾN HÀNH CƯỜNG HÓA (+${nextLvl})` : (isMax ? 'ĐÃ ĐẠT CẤP TỐI ĐA' : '❌ KHÔNG ĐỦ NGUYÊN LIỆU')}
+            <button class="btn btn--gold btn--lg btn-enhance" style="width:100%; justify-content:center; font-size:15px; font-weight:700; padding:10px" data-item="${selectedItem.id}" ${canEnhance ? '' : 'disabled'}>
+              ${canEnhance ? `Tiến Hành Cường Hóa (+${nextLvl})` : (isMax ? 'Đã Đạt Cấp Tối Đa' : 'Chưa Đủ Nguyên Liệu')}
             </button>
           ` : ''}
 

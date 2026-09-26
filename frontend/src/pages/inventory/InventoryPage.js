@@ -38,9 +38,9 @@ export class InventoryPage extends Component {
       <div class="inventory-page">
         <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
           <h1 style="margin:0; font-size:20px; font-weight:700">
-            🎒 Túi Đồ <span style="font-size:14px; color:var(--text-dim); font-weight:400">(${currentCount} / ${capacity})</span>
+            Càn Khôn Túi <span style="font-size:14px; color:var(--text-dim); font-weight:400">(${currentCount} / ${capacity})</span>
           </h1>
-          <button class="btn btn--dark btn--sm" id="btnGen" title="Debug: Sinh đồ ngẫu nhiên">🎲 Sinh Mẫu</button>
+          <button class="btn btn--dark btn--sm" id="btnGen" title="Debug: Sinh đồ ngẫu nhiên">Sinh Mẫu (Debug)</button>
         </div>
         
         <div class="panel" style="background:var(--bg-surface, #151922); border-radius:10px; border:1px solid rgba(255,255,255,0.08); overflow:hidden">
@@ -106,13 +106,13 @@ export class InventoryPage extends Component {
     const matEntries = Object.entries(p.materials || {}).filter(([_, qty]) => (qty || 0) > 0)
 
     const tabDefinitions = [
-      { id: 'equipped', label: 'Ngự Khí', icon: '⚔️' },
-      { id: 'weapon', label: 'Vũ Khí', icon: '🗡️' },
-      { id: 'armor', label: 'Phòng Cụ', icon: '🥋' },
-      { id: 'accessory', label: 'Trang Sức', icon: '💍' },
-      { id: 'manual', label: 'Bí Tịch', icon: '📜' },
-      { id: 'medicine', label: 'Đan Dược', icon: '💊', badge: medCD > 0 ? `${medCD}s` : null },
-      { id: 'material', label: 'Kho Nguyên Liệu', icon: '⛏️', badge: matEntries.length > 0 ? matEntries.length : null },
+      { id: 'equipped', label: 'Ngự Khí' },
+      { id: 'weapon', label: 'Vũ Khí' },
+      { id: 'armor', label: 'Phòng Cụ' },
+      { id: 'accessory', label: 'Trang Sức' },
+      { id: 'manual', label: 'Bí Tịch' },
+      { id: 'medicine', label: 'Đan Dược', badge: medCD > 0 ? `${medCD}s` : null },
+      { id: 'material', label: 'Kho Nguyên Liệu', badge: matEntries.length > 0 ? `${matEntries.length}` : null },
     ]
 
     if (this._tabsComponent) {

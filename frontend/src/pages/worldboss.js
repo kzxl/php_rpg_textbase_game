@@ -20,33 +20,32 @@ export function pageWorldBoss(el, ctx) {
 
     el.innerHTML = `
       <div class="page-header">
-        <h2>🐉 Boss Thế Giới</h2>
+        <h2>Boss Thế Giới</h2>
         <p class="page-sub">Liên kết đánh Boss. Phần thưởng chia theo sát thương đóng góp. <strong>Không phạt tịnh dưỡng!</strong></p>
       </div>
 
       <div class="panel glass" style="margin-bottom:10px">
         <div class="panel-body" style="padding:16px;text-align:center">
-          <div style="font-size:36px;margin-bottom:8px">${alive ? '🐉' : '💀'}</div>
           <div style="font-size:18px;font-weight:700">${boss.name || 'Đang tải...'}</div>
           <div style="font-size:12px;opacity:0.5">Lv${boss.level || '?'} · ${alive ? 'ĐANG HOẠT ĐỘNG' : 'ĐÃ BỊ ĐÁNH BẠI'}</div>
           <div style="margin:12px auto;max-width:300px">
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
-              <span>❤️ HP</span><span>${(boss.current_hp || 0).toLocaleString()} / ${(boss.max_hp || 0).toLocaleString()}</span>
+              <span>Khí Huyết</span><span>${(boss.current_hp || 0).toLocaleString()} / ${(boss.max_hp || 0).toLocaleString()}</span>
             </div>
-            <div style="height:10px;background:rgba(255,0,0,0.1);border-radius:5px;overflow:hidden">
-              <div style="height:100%;width:${hpPct}%;background:${hpPct > 50 ? 'var(--red)' : hpPct > 20 ? 'var(--orange)' : 'var(--green)'};border-radius:5px;transition:width 0.3s"></div>
+            <div style="height:10px;background:rgba(255,0,0,0.1);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${hpPct}%;background:${hpPct > 50 ? 'var(--red)' : hpPct > 20 ? 'var(--orange)' : 'var(--green)'};border-radius:3px;transition:width 0.3s"></div>
             </div>
           </div>
-          ${alive ? `<button class="btn btn--red btn--lg" id="btnAttackBoss">⚔️ Tấn Công (5 Thể Lực)</button>` :
-            '<div style="color:var(--gold);margin-top:8px">🎉 Boss đã bị đánh bại! Phần thưởng đã phát.</div>'}
-          <div style="font-size:11px;opacity:0.4;margin-top:6px">Phần thưởng: 💎 ${rewards.gold || 0} · ✨ ${rewards.xp || 0} EXP (Top 3 x1.5)</div>
+          ${alive ? `<button class="btn btn--red btn--lg" id="btnAttackBoss">Tấn Công (5 Thể Lực)</button>` :
+            '<div style="color:var(--gold);margin-top:8px">Boss đã bị đánh bại! Phần thưởng đã phát.</div>'}
+          <div style="font-size:11px;opacity:0.4;margin-top:6px">Phần thưởng: ${rewards.gold || 0} Linh Thạch · ${rewards.xp || 0} EXP (Top 3 x1.5)</div>
         </div>
       </div>
 
       <div id="bossCombatResult"></div>
 
       <div class="panel">
-        <div class="panel-title">🏆 Top Đóng Góp</div>
+        <div class="panel-title">Bảng Đóng Góp</div>
         <div class="panel-body no-pad">
           ${top.length === 0 ? '<div style="padding:16px;opacity:0.3">Chưa ai đánh...</div>' :
             top.map((t, i) => `
@@ -134,7 +133,7 @@ export function pageWorldBoss(el, ctx) {
       } catch (e) {
         notify(e.message, 'error')
         btn.disabled = false
-        btn.textContent = '⚔️ Tấn Công'
+        btn.textContent = 'Tấn Công'
       }
     })
   }

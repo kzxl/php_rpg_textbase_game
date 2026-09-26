@@ -39,7 +39,7 @@ export class EquipmentView extends Component {
                 ${hasItem ? `
                   <div style="display:flex;gap:4px;justify-content:center;margin-top:6px">
                     <button class="btn btn--xs btn-unequip" data-unequip-slot="${s.key}" title="Tháo trang bị">Tháo</button>
-                    <button class="btn btn--xs btn-forge-shortcut" data-forge-jump="${item.id}" title="Đến Lò Tạo Hóa để cường hóa">⚒️</button>
+                    <button class="btn btn--xs btn-forge-shortcut" data-forge-jump="${item.id}" title="Đến Lò Tạo Hóa để cường hóa">Rèn</button>
                   </div>
                 ` : ''}
               </div>`
