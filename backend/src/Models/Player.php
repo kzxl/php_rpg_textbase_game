@@ -83,6 +83,10 @@ class Player
     public int $atlasBonus = 0; // IIQ bonus from atlas completion
     public array $activeAuras = []; // Array of active aura IDs reserving mana
     public array $tribulationRecords = []; // History of survived heavenly tribulations
+    public string $multiplayerStatus = 'normal'; // 'normal' | 'hospital' | 'jailed' | 'traveling'
+    public int $pendingEscrow = 0; // Unclaimed Linh Thạch in Merchant Escrow
+    public int $divineWardUntil = 0; // 90s Divine Protection Shield timestamp
+    public int $tamCanh = 100; // Tâm Cảnh (0-100)
 
     /**
      * Danh mục Tâm Pháp Hào Quang & Tỷ Lệ Khóa Linh Lực (Mana Reservation)
@@ -1093,6 +1097,11 @@ class Player
             'reservationPct' => min(100, array_sum(array_map(fn($a) => self::AURA_CONFIGS[$a]['reservationPct'] ?? 0, $this->activeAuras))),
             'tribulationRecords' => $this->tribulationRecords,
             'auraConfigs' => self::AURA_CONFIGS,
+            'multiplayerStatus' => $this->multiplayerStatus,
+            'pendingEscrow' => $this->pendingEscrow,
+            'divineWardUntil' => $this->divineWardUntil,
+            'divineWardRemaining' => max(0, $this->divineWardUntil - time()),
+            'tamCanh' => $this->tamCanh,
         ];
     }
 
@@ -1233,6 +1242,10 @@ class Player
         $player->lastHpRegen = $data['lastHpRegen'] ?? time();
         $player->maxStamina = (int)($data['maxStamina'] ?? $data['max_stamina'] ?? 100);
         $player->currentStamina = isset($data['currentStamina']) ? (int)$data['currentStamina'] : (isset($data['current_stamina']) ? (int)$data['current_stamina'] : $player->maxStamina);
+        $player->multiplayerStatus = $data['multiplayerStatus'] ?? $data['multiplayer_status'] ?? 'normal';
+        $player->pendingEscrow = (int)($data['pendingEscrow'] ?? $data['pending_escrow'] ?? 0);
+        $player->divineWardUntil = (int)($data['divineWardUntil'] ?? $data['divine_ward_until'] ?? 0);
+        $player->tamCanh = (int)($data['tamCanh'] ?? $data['tam_canh'] ?? 100);
 
         // Recalculate maxHp/maxEnergy after all realmTier, talents, auras, equipment, etc. are restored
         $player->recalcDerived();

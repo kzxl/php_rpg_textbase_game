@@ -85,6 +85,25 @@ class GameAPI {
     return this.request(`/player/${id}/heal`, { method: 'POST' })
   }
 
+  getMultiplayerState(id) {
+    return this.request(`/player/${id}/multiplayer-state`)
+  }
+
+  claimEscrow(id) {
+    return this.request(`/player/${id}/claim-escrow`, { method: 'POST' })
+  }
+
+  healTrauma(id, pillId = 'tieu_hoan_dan') {
+    return this.request(`/player/${id}/heal`, {
+      method: 'POST',
+      body: JSON.stringify({ pill_id: pillId }),
+    })
+  }
+
+  payBail(id) {
+    return this.request(`/player/${id}/bail`, { method: 'POST' })
+  }
+
   useMedicine(id, medicineId) {
     return this.request(`/player/${id}/use-medicine`, {
       method: 'POST',

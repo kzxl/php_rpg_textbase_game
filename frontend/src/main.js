@@ -214,8 +214,14 @@ function renderStatusEffects(p) {
   if (p.hospitalUntil && p.hospitalUntil > now) {
     effects.push({ icon: '🏥', label: 'Tịnh dưỡng', endTime: p.hospitalUntil, color: 'var(--red)' })
   }
+  if (p.jailUntil && p.jailUntil > now) {
+    effects.push({ icon: '⛓️', label: 'Huyết Lao (Phạt Diện Bích)', endTime: p.jailUntil, color: '#c084fc' })
+  }
   if (p.medCooldownUntil && p.medCooldownUntil > now) {
     effects.push({ icon: '💊', label: 'Đan độc', endTime: p.medCooldownUntil, color: 'var(--orange)' })
+  }
+  if (p.divineWardUntil && p.divineWardUntil > now) {
+    effects.push({ icon: '🛡️', label: 'Càn Khôn Hộ Thể (Miễn Đoạt Bảo)', endTime: p.divineWardUntil, color: '#38bdf8' })
   }
   if (p.travelArrivesAt && p.travelArrivesAt > now) {
     effects.push({ icon: '🚶', label: 'Di chuyển', endTime: p.travelArrivesAt, color: 'var(--blue)' })
@@ -238,6 +244,55 @@ function renderStatusEffects(p) {
     }).join('')}
   </div>`
 }
+
+function renderSidebarGold(p) {
+  const pending = p.pendingEscrow ?? 0
+  return `
+    <div class="sidebar-gold" style="padding-bottom:4px">
+      <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:${pending > 0 ? '6px' : '4px'}">💎 ${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
+      ${pending > 0 ? `
+        <div class="escrow-claim-card" style="background:linear-gradient(135deg, rgba(234,179,8,0.18), rgba(245,158,11,0.08));border:1px solid rgba(234,179,8,0.45);border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--gold)">📬 Hộp Thư Thương Hội</div>
+            <div style="font-size:12px;font-weight:bold;color:#fef08a">+${pending.toLocaleString()} Linh Thạch</div>
+          </div>
+          <button class="btn btn--primary btn--sm btn-claim-escrow" style="padding:4px 8px;font-size:11px;border-radius:4px;background:var(--gold);color:#000;font-weight:bold;cursor:pointer">Nhận</button>
+        </div>
+      ` : ''}
+    </div>
+  `
+}
+
+// Delegated Escrow Claim Handler
+let _escrowListenerBound = false
+function initEscrowHandler() {
+  if (_escrowListenerBound) return
+  _escrowListenerBound = true
+  document.addEventListener('click', async (e) => {
+    const claimBtn = e.target.closest('.btn-claim-escrow')
+    if (!claimBtn || !state.playerId) return
+    e.stopPropagation()
+    claimBtn.disabled = true
+    claimBtn.textContent = 'Đang nhận...'
+    try {
+      const res = await api.claimEscrow(state.playerId)
+      if (res.success) {
+        notify(res.message, 'success')
+        if (state.player) {
+          state.player.gold = res.current_gold
+          state.player.pendingEscrow = 0
+          state.player.divineWardUntil = res.divine_ward_until
+        }
+        updateHUD()
+      }
+    } catch (err) {
+      notify(err.message || 'Lỗi nhận Linh Thạch!', 'error')
+      claimBtn.disabled = false
+      claimBtn.textContent = 'Nhận'
+    }
+  })
+}
+initEscrowHandler()
 
 // Live countdown interval
 let _statusInterval = null
@@ -416,9 +471,7 @@ function renderGame() {
             </div>
             <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
           </div>
-          <div class="sidebar-gold" style="padding-bottom:4px">
-            <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:6px">💎 ${p.gold ?? 0} Linh Thạch</div>
-          </div>
+          ${renderSidebarGold(p)}
           <div class="sidebar-action-bar" style="display:flex;gap:4px;padding:0 0 8px">
             <button class="btn btn--dark nav-item ${state.currentPage === 'events' ? 'active' : ''}" data-page="events" style="flex:1;padding:6px;font-size:14px;position:relative;justify-content:center" title="Thông Báo">
               📜${(p.unreadEventsCount ?? 0) > 0 ? `<span class="badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);width:8px;height:8px;padding:0;border-radius:50%"></span>` : ''}
@@ -806,7 +859,7 @@ function updateSidebar() {
         </div>
         <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
       </div>
-      <div class="sidebar-gold">💎 ${p.gold ?? 0} Linh Thạch</div>`
+      ${renderSidebarGold(p)}`
   }
 
   const statNav = document.querySelector('.nav-item[data-page="stats"]')

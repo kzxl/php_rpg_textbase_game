@@ -266,6 +266,19 @@ class PlayerRepository
         // Phase 9: Load active quests
         $data['activeQuests'] = self::loadQuests($id);
 
+        // Sprint 1 Multiplayer: Load persistent player state (FSM, Escrow, Ward)
+        $stateStmt = $pdo->prepare("SELECT status, hospital_until, jail_until, divine_ward_until, pending_escrow, med_cooldown_until FROM player_states WHERE player_id = ?");
+        $stateStmt->execute([$id]);
+        if ($st = $stateStmt->fetch(\PDO::FETCH_ASSOC)) {
+            $data['multiplayerStatus'] = $st['status'];
+            $data['pendingEscrow'] = (int)$st['pending_escrow'];
+            $data['divineWardUntil'] = (int)$st['divine_ward_until'];
+            $data['tamCanh'] = 100;
+            if ((int)$st['hospital_until'] > 0) $data['hospitalUntil'] = (int)$st['hospital_until'];
+            if ((int)$st['jail_until'] > 0) $data['jailUntil'] = (int)$st['jail_until'];
+            if ((int)$st['med_cooldown_until'] > 0) $data['medCooldownUntil'] = (int)$st['med_cooldown_until'];
+        }
+
         return Player::fromArray($data);
     }
 
