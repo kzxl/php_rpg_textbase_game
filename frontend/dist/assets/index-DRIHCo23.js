@@ -3906,15 +3906,15 @@ Không ai có thể vượt qua.
         color:${a.color};white-space:nowrap;
       " title="${a.label}">${a.icon} <span class="cd-time">${r}</span></span>`}).join("")}
   </div>`}function ie(i){const t=i.pendingEscrow??0;return`
-    <div class="sidebar-gold" style="padding-bottom:4px">
-      <div style="font-size:16px; font-weight:bold; color:var(--gold); margin-bottom:${t>0?"6px":"4px"}">💎 ${(i.gold??0).toLocaleString()} Linh Thạch</div>
+    <div class="sidebar-gold" style="padding:2px 0 4px">
+      <div style="font-size:12.5px; font-weight:700; color:var(--gold); margin-bottom:${t>0?"4px":"2px"}">💎 ${(i.gold??0).toLocaleString()} Linh Thạch</div>
       ${t>0?`
-        <div class="escrow-claim-card" style="background:rgba(194, 159, 85, 0.08);border:1px solid rgba(194, 159, 85, 0.25);border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div class="escrow-claim-card" style="background:rgba(194, 159, 85, 0.08);border:1px solid rgba(194, 159, 85, 0.25);border-radius:4px;padding:4px 6px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between">
           <div>
-            <div style="font-size:11px;font-weight:600;color:var(--gold)">📬 Hộp Thư Thương Hội</div>
-            <div style="font-size:12px;font-weight:bold;color:#dfcfb2">+${t.toLocaleString()} Linh Thạch</div>
+            <div style="font-size:10px;font-weight:600;color:var(--gold)">📬 Hộp Thư Thương Hội</div>
+            <div style="font-size:11px;font-weight:bold;color:#dfcfb2">+${t.toLocaleString()} Linh Thạch</div>
           </div>
-          <button class="btn btn--sm btn--gold btn-claim-escrow" style="padding:4px 8px;font-size:11px;">Nhận</button>
+          <button class="btn btn--sm btn--gold btn-claim-escrow" style="padding:2px 6px;font-size:10px;">Nhận</button>
         </div>
       `:""}
     </div>
@@ -3925,74 +3925,74 @@ Không ai có thể vượt qua.
         <div class="sidebar-header">
           <div class="game-title">NGHỊCH THIÊN KÝ</div>
           <div class="game-sub">Tu Tiên RPG v2.0</div>
-          <div style="position:relative;margin-top:8px">
-            <input type="text" id="searchPlayerInput" placeholder="🔍 Tìm Người Chơi..." autocomplete="off" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.3);color:#fff;font-size:12px;outline:none">
-            <div id="searchResults" style="position:absolute;top:100%;left:0;right:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:100;display:none"></div>
+          <div style="position:relative;margin-top:4px">
+            <input type="text" id="searchPlayerInput" placeholder="🔍 Tìm Người Chơi..." autocomplete="off" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#fff;font-size:11px;outline:none">
+            <div id="searchResults" style="position:absolute;top:100%;left:0;right:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;z-index:100;display:none"></div>
           </div>
         </div>
 
         <div class="sidebar-player">
           <div class="player-name">${i.name}</div>
-          ${i.activeTitle?`<div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.5px;margin-top:1px">『${i.activeTitle}』</div>`:""}
+          ${i.activeTitle?`<div style="font-size:9.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;margin-top:1px">『${i.activeTitle}』</div>`:""}
           <div class="player-meta">Lv.${i.level} · ${((T=i.realmInfo)==null?void 0:T.fullName)||"?"}</div>
           ${ae(i)}
           ${se(i)}
-          <div class="sidebar-bar" style="margin-top:8px">
+          <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label">
               <span>❤️ Khí Huyết</span>
               <span>
                 ${e}/${t}
-                ${e<t?`<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${($=i.skills)!=null&&$.some(P=>P.id==="toa_thien")?"+1%/10s":"+0.5%/10s"}</span>`:""}
+                ${e<t?`<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">${($=i.skills)!=null&&$.some(P=>P.id==="toa_thien")?"+1%/10s":"+0.5%/10s"}</span>`:""}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${a}%" data-low="${a<30}"></div></div>
           </div>
-          <div class="sidebar-bar" style="margin-top:4px">
+          <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
               <span>🏃 Thể Lực (Thế Giới)</span>
               <span>
                 ${i.currentStamina??100}/${i.maxStamina??100}
-                ${(i.currentStamina??100)<(i.maxStamina??100)?`<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${((k=i.stats)==null?void 0:k.staminaRegen)??2}/10s</span>`:""}
+                ${(i.currentStamina??100)<(i.maxStamina??100)?`<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">+${((k=i.stats)==null?void 0:k.staminaRegen)??2}/10s</span>`:""}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill stamina" style="width:${n}%"></div></div>
           </div>
-          <div class="sidebar-bar" style="margin-top:4px">
+          <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
               <span>🔵 Linh Lực (Thực Chiến)</span>
               <span>
                 ${i.currentEnergy}/${o}
-                ${r>0?`<span style="font-size:10px; color:#f59e0b; margin-left:4px;" title="Khóa ${r}% bởi Tâm Pháp Hào Quang">(Khóa ${r}%)</span>`:""}
+                ${r>0?`<span style="font-size:9px; color:#f59e0b; margin-left:3px;" title="Khóa ${r}% bởi Tâm Pháp Hào Quang">(Khóa ${r}%)</span>`:""}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill energy" style="width:${c}%"></div></div>
           </div>
-          <div class="sidebar-bar" style="margin-top:4px">
+          <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
               <span>✨ Tu Vi (Cấp ${i.level})</span>
-              <span>${(i.xp??0).toLocaleString()}/${(i.xpToNext??100).toLocaleString()} <span style="font-size:10px; color:var(--text-dim); margin-left:2px;">(${m.toFixed(1)}%)</span></span>
+              <span>${(i.xp??0).toLocaleString()}/${(i.xpToNext??100).toLocaleString()} <span style="font-size:9px; color:var(--text-dim); margin-left:2px;">(${m.toFixed(1)}%)</span></span>
             </div>
             <div class="bar-track"><div class="bar-fill xp" style="width:${m}%"></div></div>
           </div>
           ${ie(i)}
-          <div class="sidebar-action-bar" style="display:flex;gap:4px;padding:0 0 8px">
-            <button class="btn btn--dark nav-item ${C.currentPage==="events"?"active":""}" data-page="events" style="flex:1;padding:6px;font-size:14px;position:relative;justify-content:center" title="Thông Báo">
-              📜${(i.unreadEventsCount??0)>0?'<span class="badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);width:8px;height:8px;padding:0;border-radius:50%"></span>':""}
+          <div class="sidebar-action-bar" style="display:flex;gap:3px;padding:2px 0 4px">
+            <button class="btn btn--dark nav-item ${C.currentPage==="events"?"active":""}" data-page="events" style="flex:1;padding:3px 2px;font-size:12px;position:relative;justify-content:center" title="Thông Báo">
+              📜${(i.unreadEventsCount??0)>0?'<span class="badge" style="position:absolute;top:-3px;right:-3px;background:var(--red);width:7px;height:7px;padding:0;border-radius:50%"></span>':""}
             </button>
-            <button class="btn btn--dark nav-item ${C.currentPage==="wiki"?"active":""}" data-page="wiki" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Bách Khoa">
+            <button class="btn btn--dark nav-item ${C.currentPage==="wiki"?"active":""}" data-page="wiki" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Bách Khoa">
               📖
             </button>
-            <button class="btn btn--dark nav-item ${C.currentPage==="leaderboard"?"active":""}" data-page="leaderboard" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xếp Hạng">
+            <button class="btn btn--dark nav-item ${C.currentPage==="leaderboard"?"active":""}" data-page="leaderboard" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Xếp Hạng">
               🏆
             </button>
-            <button class="btn btn--dark nav-item ${C.currentPage==="social"?"active":""}" data-page="social" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xã Hội">
+            <button class="btn btn--dark nav-item ${C.currentPage==="social"?"active":""}" data-page="social" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Xã Hội">
               💬
             </button>
-            <button class="btn btn--dark btn-open-settings" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Cài Đặt Hệ Thống">
+            <button class="btn btn--dark btn-open-settings" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Cài Đặt Hệ Thống">
               ⚙️
             </button>
           </div>
-          <div style="font-size:10px;color:var(--text-dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border)">
+          <div style="font-size:9.5px;color:var(--text-dim);text-align:center;padding:2px 0 4px;border-bottom:1px solid var(--border)">
             📍 ${x} ${i.hospitalRemaining>0?'<span style="color:var(--red)">🏥 Tịnh dưỡng</span>':i.travelRemaining>0?'<span style="color:var(--blue)">🚶 Di chuyển...</span>':""}
           </div>
         </div>
@@ -4104,10 +4104,10 @@ Không ai có thể vượt qua.
         </ul>
 
         <div class="sidebar-footer">
-          <button class="btn btn--sm btn--outline btn-open-settings" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px;" title="Cài Đặt Hệ Thống">
+          <button class="btn btn--sm btn--outline btn-open-settings" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; padding: 4px 6px;" title="Cài Đặt Hệ Thống">
             ⚙️ Cài Đặt
           </button>
-          <button class="btn btn--sm btn--red" id="btnSidebarLogout" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; padding: 6px 12px;" title="Đăng Xuất Tài Khoản">
+          <button class="btn btn--sm btn--red" id="btnSidebarLogout" style="display: flex; align-items: center; justify-content: center; gap: 3px; font-size: 11px; padding: 4px 8px;" title="Đăng Xuất Tài Khoản">
             🚪 Thoát
           </button>
         </div>
@@ -4244,4 +4244,4 @@ Không ai có thể vượt qua.
       </div>
     </div>
   `,document.body.appendChild(t);const s=()=>t.remove();(c=t.querySelector("#btnCloseSettingsModal"))==null||c.addEventListener("click",s),t.addEventListener("click",v=>{v.target===t&&s()});const o=v=>{v.key==="Escape"&&(s(),window.removeEventListener("keydown",o))};window.addEventListener("keydown",o),(m=t.querySelector("#chkSettingSound"))==null||m.addEventListener("change",v=>{localStorage.setItem("rpg_sound_enabled",v.target.checked),A(v.target.checked?"Đã bật hiệu ứng âm thanh":"Đã tắt hiệu ứng âm thanh","info")}),(y=t.querySelector("#chkSettingShake"))==null||y.addEventListener("change",v=>{localStorage.setItem("rpg_shake_enabled",v.target.checked),A(v.target.checked?"Đã bật rung màn hình":"Đã tắt rung màn hình","info")}),(x=t.querySelector("#chkSettingToast"))==null||x.addEventListener("change",v=>{localStorage.setItem("rpg_toast_enabled",v.target.checked)}),(l=t.querySelector("#btnModalLogout"))==null||l.addEventListener("click",()=>{s(),re()})}yn();
-//# sourceMappingURL=index-tFcOx4wh.js.map
+//# sourceMappingURL=index-DRIHCo23.js.map

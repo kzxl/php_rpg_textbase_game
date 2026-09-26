@@ -248,15 +248,15 @@ function renderStatusEffects(p) {
 function renderSidebarGold(p) {
   const pending = p.pendingEscrow ?? 0
   return `
-    <div class="sidebar-gold" style="padding-bottom:4px">
-      <div style="font-size:16px; font-weight:bold; color:var(--gold); margin-bottom:${pending > 0 ? '6px' : '4px'}">💎 ${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
+    <div class="sidebar-gold" style="padding:2px 0 4px">
+      <div style="font-size:12.5px; font-weight:700; color:var(--gold); margin-bottom:${pending > 0 ? '4px' : '2px'}">💎 ${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
       ${pending > 0 ? `
-        <div class="escrow-claim-card" style="background:rgba(194, 159, 85, 0.08);border:1px solid rgba(194, 159, 85, 0.25);border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div class="escrow-claim-card" style="background:rgba(194, 159, 85, 0.08);border:1px solid rgba(194, 159, 85, 0.25);border-radius:4px;padding:4px 6px;margin-bottom:4px;display:flex;align-items:center;justify-content:space-between">
           <div>
-            <div style="font-size:11px;font-weight:600;color:var(--gold)">📬 Hộp Thư Thương Hội</div>
-            <div style="font-size:12px;font-weight:bold;color:#dfcfb2">+${pending.toLocaleString()} Linh Thạch</div>
+            <div style="font-size:10px;font-weight:600;color:var(--gold)">📬 Hộp Thư Thương Hội</div>
+            <div style="font-size:11px;font-weight:bold;color:#dfcfb2">+${pending.toLocaleString()} Linh Thạch</div>
           </div>
-          <button class="btn btn--sm btn--gold btn-claim-escrow" style="padding:4px 8px;font-size:11px;">Nhận</button>
+          <button class="btn btn--sm btn--gold btn-claim-escrow" style="padding:2px 6px;font-size:10px;">Nhận</button>
         </div>
       ` : ''}
     </div>
@@ -422,74 +422,74 @@ function renderGame() {
         <div class="sidebar-header">
           <div class="game-title">NGHỊCH THIÊN KÝ</div>
           <div class="game-sub">Tu Tiên RPG v2.0</div>
-          <div style="position:relative;margin-top:8px">
-            <input type="text" id="searchPlayerInput" placeholder="🔍 Tìm Người Chơi..." autocomplete="off" style="width:100%;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.3);color:#fff;font-size:12px;outline:none">
-            <div id="searchResults" style="position:absolute;top:100%;left:0;right:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;z-index:100;display:none"></div>
+          <div style="position:relative;margin-top:4px">
+            <input type="text" id="searchPlayerInput" placeholder="🔍 Tìm Người Chơi..." autocomplete="off" style="width:100%;padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);color:#fff;font-size:11px;outline:none">
+            <div id="searchResults" style="position:absolute;top:100%;left:0;right:0;background:#1a1a2e;border:1px solid rgba(255,255,255,0.15);border-radius:0 0 4px 4px;max-height:180px;overflow-y:auto;z-index:100;display:none"></div>
           </div>
         </div>
 
         <div class="sidebar-player">
           <div class="player-name">${p.name}</div>
-          ${p.activeTitle ? `<div style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:0.5px;margin-top:1px">『${p.activeTitle}』</div>` : ''}
+          ${p.activeTitle ? `<div style="font-size:9.5px;color:var(--gold);font-weight:600;letter-spacing:0.5px;margin-top:1px">『${p.activeTitle}』</div>` : ''}
           <div class="player-meta">Lv.${p.level} · ${p.realmInfo?.fullName || '?'}</div>
           ${renderStatusEffects(p)}
           ${renderPlayerBuffs(p)}
-          <div class="sidebar-bar" style="margin-top:8px">
+          <div class="sidebar-bar" style="margin-top:4px">
             <div class="bar-label">
               <span>❤️ Khí Huyết</span>
               <span>
                 ${currentHp}/${maxHp}
-                ${currentHp < maxHp ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
+                ${currentHp < maxHp ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>
           </div>
-          <div class="sidebar-bar" style="margin-top:4px">
+          <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
               <span>🏃 Thể Lực (Thế Giới)</span>
               <span>
                 ${p.currentStamina ?? 100}/${p.maxStamina ?? 100}
-                ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:10px; color:var(--text-dim); margin-left:4px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
+                ${(p.currentStamina ?? 100) < (p.maxStamina ?? 100) ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">+${p.stats?.staminaRegen ?? 2}/10s</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill stamina" style="width:${stPct}%"></div></div>
           </div>
-          <div class="sidebar-bar" style="margin-top:4px">
+          <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
               <span>🔵 Linh Lực (Thực Chiến)</span>
               <span>
                 ${p.currentEnergy}/${usableEnergy}
-                ${resPct > 0 ? `<span style="font-size:10px; color:#f59e0b; margin-left:4px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
+                ${resPct > 0 ? `<span style="font-size:9px; color:#f59e0b; margin-left:3px;" title="Khóa ${resPct}% bởi Tâm Pháp Hào Quang">(Khóa ${resPct}%)</span>` : ''}
               </span>
             </div>
             <div class="bar-track"><div class="bar-fill energy" style="width:${enPct}%"></div></div>
           </div>
-          <div class="sidebar-bar" style="margin-top:4px">
+          <div class="sidebar-bar" style="margin-top:2px">
             <div class="bar-label">
               <span>✨ Tu Vi (Cấp ${p.level})</span>
-              <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:10px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
+              <span>${(p.xp ?? 0).toLocaleString()}/${(p.xpToNext ?? 100).toLocaleString()} <span style="font-size:9px; color:var(--text-dim); margin-left:2px;">(${xpPct.toFixed(1)}%)</span></span>
             </div>
             <div class="bar-track"><div class="bar-fill xp" style="width:${xpPct}%"></div></div>
           </div>
           ${renderSidebarGold(p)}
-          <div class="sidebar-action-bar" style="display:flex;gap:4px;padding:0 0 8px">
-            <button class="btn btn--dark nav-item ${state.currentPage === 'events' ? 'active' : ''}" data-page="events" style="flex:1;padding:6px;font-size:14px;position:relative;justify-content:center" title="Thông Báo">
-              📜${(p.unreadEventsCount ?? 0) > 0 ? `<span class="badge" style="position:absolute;top:-4px;right:-4px;background:var(--red);width:8px;height:8px;padding:0;border-radius:50%"></span>` : ''}
+          <div class="sidebar-action-bar" style="display:flex;gap:3px;padding:2px 0 4px">
+            <button class="btn btn--dark nav-item ${state.currentPage === 'events' ? 'active' : ''}" data-page="events" style="flex:1;padding:3px 2px;font-size:12px;position:relative;justify-content:center" title="Thông Báo">
+              📜${(p.unreadEventsCount ?? 0) > 0 ? `<span class="badge" style="position:absolute;top:-3px;right:-3px;background:var(--red);width:7px;height:7px;padding:0;border-radius:50%"></span>` : ''}
             </button>
-            <button class="btn btn--dark nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Bách Khoa">
+            <button class="btn btn--dark nav-item ${state.currentPage === 'wiki' ? 'active' : ''}" data-page="wiki" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Bách Khoa">
               📖
             </button>
-            <button class="btn btn--dark nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xếp Hạng">
+            <button class="btn btn--dark nav-item ${state.currentPage === 'leaderboard' ? 'active' : ''}" data-page="leaderboard" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Xếp Hạng">
               🏆
             </button>
-            <button class="btn btn--dark nav-item ${state.currentPage === 'social' ? 'active' : ''}" data-page="social" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Xã Hội">
+            <button class="btn btn--dark nav-item ${state.currentPage === 'social' ? 'active' : ''}" data-page="social" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Xã Hội">
               💬
             </button>
-            <button class="btn btn--dark btn-open-settings" style="flex:1;padding:6px;font-size:14px;justify-content:center" title="Cài Đặt Hệ Thống">
+            <button class="btn btn--dark btn-open-settings" style="flex:1;padding:3px 2px;font-size:12px;justify-content:center" title="Cài Đặt Hệ Thống">
               ⚙️
             </button>
           </div>
-          <div style="font-size:10px;color:var(--text-dim);text-align:center;padding-bottom:6px;border-bottom:1px solid var(--border)">
+          <div style="font-size:9.5px;color:var(--text-dim);text-align:center;padding:2px 0 4px;border-bottom:1px solid var(--border)">
             📍 ${areaName} ${p.hospitalRemaining > 0 ? '<span style="color:var(--red)">🏥 Tịnh dưỡng</span>' : (p.travelRemaining > 0 ? '<span style="color:var(--blue)">🚶 Di chuyển...</span>' : '')}
           </div>
         </div>
@@ -601,10 +601,10 @@ function renderGame() {
         </ul>
 
         <div class="sidebar-footer">
-          <button class="btn btn--sm btn--outline btn-open-settings" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px;" title="Cài Đặt Hệ Thống">
+          <button class="btn btn--sm btn--outline btn-open-settings" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; padding: 4px 6px;" title="Cài Đặt Hệ Thống">
             ⚙️ Cài Đặt
           </button>
-          <button class="btn btn--sm btn--red" id="btnSidebarLogout" style="display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; padding: 6px 12px;" title="Đăng Xuất Tài Khoản">
+          <button class="btn btn--sm btn--red" id="btnSidebarLogout" style="display: flex; align-items: center; justify-content: center; gap: 3px; font-size: 11px; padding: 4px 8px;" title="Đăng Xuất Tài Khoản">
             🚪 Thoát
           </button>
         </div>
