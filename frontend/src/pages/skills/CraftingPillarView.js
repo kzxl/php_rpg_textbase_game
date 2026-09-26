@@ -20,7 +20,7 @@ export class CraftingPillarView extends Component {
     return `
       <div class="crafting-pillar-view">
         <!-- HERO BANNER -->
-        <div class="crafting-hero" style="background:linear-gradient(135deg, rgba(245,158,11,0.08), rgba(0,0,0,0.4)); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:18px; margin-bottom:14px">
+        <div class="crafting-hero" style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:8px; padding:18px; margin-bottom:14px">
           <div class="crafting-hero-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
             <div class="crafting-hero-title" style="font-weight:700; font-size:16px; color:var(--gold, #facc15); display:flex; align-items:center; gap:8px">
               <span>🔥</span>
@@ -35,8 +35,8 @@ export class CraftingPillarView extends Component {
             <span>Kinh Nghiệm Luyện Chế: <b>${craftingXp || 0} / ${xpToNext || 100} XP</b></span>
             <span style="color: var(--gold, #facc15); font-weight:700">${progressPercent || 0}%</span>
           </div>
-          <div class="bar-track" style="height: 8px; background:rgba(0,0,0,0.4); border-radius:4px; overflow:hidden; margin-bottom: 12px;">
-            <div class="bar-fill" style="width: ${progressPercent || 0}%; height:100%; background: linear-gradient(90deg, #f59e0b, #ef4444);"></div>
+          <div class="bar-track" style="height: 6px; background:rgba(0,0,0,0.4); border-radius:3px; overflow:hidden; margin-bottom: 12px;">
+            <div class="bar-fill" style="width: ${progressPercent || 0}%; height:100%; background: #9c773a;"></div>
           </div>
           <div class="text-dim text-xs" style="font-size:11px; color:var(--text-dim)">Mỗi lần luyện chế thành công hoặc thất bại đều tích lũy đan đạo chi lực, tôi luyện trình độ đan sư.</div>
 

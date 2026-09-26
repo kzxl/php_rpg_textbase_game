@@ -157,13 +157,13 @@ async function loadTravelMap(container, ctx) {
 
     container.innerHTML = `
       ${traveling ? `
-        <div class="panel glass" style="border-color:var(--gold); box-shadow:0 0 20px rgba(255,215,0,0.15); margin-bottom:16px">
+        <div class="panel glass" style="border-color:var(--gold); margin-bottom:16px">
           <div class="panel-body" style="text-align:center; padding: 24px">
             <div style="font-size:36px; margin-bottom:10px; animation:bounce 1s infinite">🚶💨</div>
             <strong style="font-size:16px; color:var(--text-bright)">Đang phi hành tới: <span style="color:var(--gold)">${travelDestination}</span></strong>
-            <div id="travelTimer" style="font-size:26px; font-weight:bold; color:var(--gold); margin:12px 0; text-shadow:0 0 12px rgba(255,215,0,0.4)">⏳ ${travelRemaining}s</div>
-            <div class="bar-track" style="margin-top:12px; height:10px; background:rgba(0,0,0,0.5); border-radius:5px; overflow:hidden">
-              <div class="bar-fill energy" id="travelBar" style="width:100%; height:100%; background:linear-gradient(90deg, #f59e0b, #fbbf24); transition: width 1s linear"></div>
+            <div id="travelTimer" style="font-size:24px; font-weight:bold; color:var(--gold); margin:12px 0">⏳ ${travelRemaining}s</div>
+            <div class="bar-track" style="margin-top:12px; height:8px; background:rgba(0,0,0,0.5); border-radius:4px; overflow:hidden">
+              <div class="bar-fill energy" id="travelBar" style="width:100%; height:100%; background:#9c773a; transition: width 1s linear"></div>
             </div>
             <div class="text-xs text-dim" style="margin-top:8px">Đang vượt qua kết giới... Xin kiên nhẫn chờ đến nơi.</div>
           </div>
@@ -207,7 +207,7 @@ async function loadTravelMap(container, ctx) {
           <span>🗺️ Thiên Địa Giới Đồ (2D Bát Hoang Tinh Đồ)</span>
           <span class="text-xs text-dim">${sortedAreas.length} Khu vực</span>
         </div>
-        <div class="panel-body" style="background:linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(10,15,28,0.95) 100%); padding:12px">
+        <div class="panel-body" style="background:rgba(0,0,0,0.2); padding:12px">
           <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:12px">
             ${sortedAreas.map((a, idx) => {
               const exploArea = exploConfig[a.id]

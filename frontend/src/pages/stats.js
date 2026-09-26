@@ -104,7 +104,7 @@ export function pageStats(el, ctx) {
       <div class="flex justify-between items-center mb-md" style="flex-wrap:wrap;gap:10px">
         <div>
           <div class="text-xs text-dim mb-xs">Cảnh Giới Hiện Tại & Đột Phá</div>
-          <div class="text-xl text-gold bold" style="text-shadow:0 0 10px rgba(255,215,0,0.3)">
+          <div class="text-xl text-gold bold">
             🌟 ${p.realmInfo?.fullName || 'Phàm Nhân'}
           </div>
         </div>
@@ -113,7 +113,7 @@ export function pageStats(el, ctx) {
             ${canBreakthrough ? '⚡ SẴN SÀNG ĐỘT PHÁ' : '🔒 ĐIỀU KIỆN CHƯA ĐỦ'}
           </span>
           ${canBreakthrough 
-            ? `<button class="btn btn--gold btn--md shadow-glow btn-breakthrough" style="animation:pulse 2s infinite">⚡ Đột Phá Cảnh Giới!</button>` 
+            ? `<button class="btn btn--gold btn--md btn-breakthrough">⚡ Đột Phá Cảnh Giới!</button>` 
             : `<button class="btn btn--dark btn--md btn-breakthrough" disabled title="Chưa đủ điều kiện đột phá">⚡ Đột Phá</button>`}
         </div>
       </div>

@@ -249,14 +249,14 @@ function renderSidebarGold(p) {
   const pending = p.pendingEscrow ?? 0
   return `
     <div class="sidebar-gold" style="padding-bottom:4px">
-      <div style="font-size:16px; font-weight:bold; color:var(--gold); text-shadow:0 0 10px rgba(255,215,0,0.3); margin-bottom:${pending > 0 ? '6px' : '4px'}">💎 ${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
+      <div style="font-size:16px; font-weight:bold; color:var(--gold); margin-bottom:${pending > 0 ? '6px' : '4px'}">💎 ${(p.gold ?? 0).toLocaleString()} Linh Thạch</div>
       ${pending > 0 ? `
-        <div class="escrow-claim-card" style="background:linear-gradient(135deg, rgba(234,179,8,0.18), rgba(245,158,11,0.08));border:1px solid rgba(234,179,8,0.45);border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div class="escrow-claim-card" style="background:rgba(194, 159, 85, 0.08);border:1px solid rgba(194, 159, 85, 0.25);border-radius:6px;padding:6px 8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
           <div>
             <div style="font-size:11px;font-weight:600;color:var(--gold)">📬 Hộp Thư Thương Hội</div>
-            <div style="font-size:12px;font-weight:bold;color:#fef08a">+${pending.toLocaleString()} Linh Thạch</div>
+            <div style="font-size:12px;font-weight:bold;color:#dfcfb2">+${pending.toLocaleString()} Linh Thạch</div>
           </div>
-          <button class="btn btn--primary btn--sm btn-claim-escrow" style="padding:4px 8px;font-size:11px;border-radius:4px;background:var(--gold);color:#000;font-weight:bold;cursor:pointer">Nhận</button>
+          <button class="btn btn--sm btn--gold btn-claim-escrow" style="padding:4px 8px;font-size:11px;">Nhận</button>
         </div>
       ` : ''}
     </div>
@@ -503,15 +503,15 @@ function renderGame() {
           <div class="nav-group ${collapsedNav.hanhtrinh ? 'collapsed' : ''}" id="sec-hanhtrinh">
             <li class="nav-item nav-item--hero ${state.currentPage === 'combat' ? 'active' : ''}" data-page="combat">
               <span class="icon">🔍</span> Khám Phá (${areaName})
-              <span class="badge" style="background: linear-gradient(135deg, #e8a43a, #f0c030); color: #1a1a2e; font-weight: 800; font-size: 9px; padding: 2px 6px;">CHÍNH</span>
+              <span class="badge" style="background:rgba(194,159,85,0.15); color:#dfcfb2; border:1px solid rgba(194,159,85,0.3); font-weight:600; font-size:9px; padding:1px 5px;">CHÍNH</span>
             </li>
             <li class="nav-item ${['travel', 'dungeon', 'tiencanh'].includes(state.currentPage) ? 'active' : ''}" data-page="travel">
               <span class="icon">🗺️</span> Ngao Du Bát Hoang
-              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--blue)">⏳</span>` : ''}
+              ${(p.travelRemaining ?? 0) > 0 ? `<span class="badge" style="background:rgba(83,123,180,0.15); color:#82a4d4; border:1px solid rgba(83,123,180,0.3)">⏳</span>` : ''}
             </li>
             <li class="nav-item ${['quests', 'dailyquest'].includes(state.currentPage) ? 'active' : ''}" data-page="quests">
               <span class="icon">📜</span> Thiên Cơ Nhiệm Vụ
-              ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:var(--purple)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
+              ${(p.activeQuests || []).filter(q => q.status === 'active').length > 0 ? `<span class="badge" style="background:rgba(134,104,170,0.15); color:#a992c7; border:1px solid rgba(134,104,170,0.3)">${(p.activeQuests || []).filter(q => q.status === 'active').length}</span>` : ''}
             </li>
           </div>
 
@@ -523,15 +523,15 @@ function renderGame() {
           <div class="nav-group ${collapsedNav.tuchan ? 'collapsed' : ''}" id="sec-tuchan">
             <li class="nav-item ${state.currentPage === 'stats' ? 'active' : ''}" data-page="stats">
               <span class="icon">🧘</span> Tu Luyện & Cảnh Giới
-              ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:var(--gold);animation:pulse 1.5s infinite" title="Có thể đột phá!">!</span>' : ''}
+              ${state.player?.realmInfo?.canBreakthrough ? '<span class="badge" style="background:rgba(194,159,85,0.2); color:var(--gold); border:1px solid rgba(194,159,85,0.4)" title="Có thể đột phá!">!</span>' : ''}
             </li>
             <li class="nav-item ${['skills', 'education', 'library', 'glitch'].includes(state.currentPage) ? 'active' : ''}" data-page="skills">
               <span class="icon">⚡</span> Kỹ Năng & Lĩnh Ngộ
-              ${(p.glitchInsight || 0) > 0 ? `<span class="badge" style="background: #a855f7;" title="Điểm Thấu Triệt">${p.glitchInsight}</span>` : ''}
+              ${(p.glitchInsight || 0) > 0 ? `<span class="badge" style="background:rgba(134,104,170,0.15); color:#a992c7; border:1px solid rgba(134,104,170,0.3)" title="Điểm Thấu Triệt">${p.glitchInsight}</span>` : ''}
             </li>
             <li class="nav-item ${state.currentPage === 'inventory' ? 'active' : ''}" data-page="inventory">
               <span class="icon">🎒</span> Càn Khôn Túi
-              ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:var(--orange)" title="Đan độc">⏳</span>` : ''}
+              ${(p.medCooldownRemaining ?? 0) > 0 ? `<span class="badge" style="background:rgba(209,159,96,0.15); color:#d19f60; border:1px solid rgba(209,159,96,0.3)" title="Đan độc">⏳</span>` : ''}
             </li>
           </div>
 
@@ -549,7 +549,7 @@ function renderGame() {
             </li>
             <li class="nav-item ${state.currentPage === 'worldboss' ? 'active' : ''}" data-page="worldboss">
               <span class="icon">🐉</span> Ma Thú Xâm Lăng
-              <span class="badge" style="background:var(--red); font-size:9px">Boss</span>
+              <span class="badge" style="background:rgba(184,74,74,0.15); color:#d67a7a; border:1px solid rgba(184,74,74,0.3); font-size:9px">Boss</span>
             </li>
           </div>
 
@@ -935,7 +935,7 @@ function showSettingsModal(p) {
   const toastVal = localStorage.getItem('rpg_toast_enabled') !== 'false'
 
   overlay.innerHTML = `
-    <div style="background: #111422; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; max-width: 480px; width: 100%; box-shadow: 0 16px 40px rgba(0,0,0,0.9), 0 0 25px rgba(255,215,0,0.1); color: #fff; overflow: hidden; animation: scaleUp 0.2s ease;">
+    <div style="background: #111422; border: 1px solid var(--border); border-radius: 8px; max-width: 480px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.7); color: #fff; overflow: hidden; animation: scaleUp 0.2s ease;">
       <!-- Header -->
       <div style="padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02);">
         <div style="font-weight: 700; font-size: 15px; color: var(--gold); display: flex; align-items: center; gap: 8px;">

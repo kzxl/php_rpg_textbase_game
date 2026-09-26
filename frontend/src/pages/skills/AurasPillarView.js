@@ -35,7 +35,7 @@ export class AurasPillarView extends Component {
     return `
       <div class="auras-pillar-view">
         <!-- MANA RESERVATION HERO BANNER -->
-        <div class="card" style="margin-bottom: 16px; border: 1px solid rgba(234, 179, 8, 0.3); background: linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(0, 0, 0, 0.4)); padding: 18px; border-radius:10px">
+        <div class="card" style="margin-bottom: 16px; border: 1px solid var(--border); background: var(--bg-panel-alt); padding: 18px; border-radius:8px">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
             <div>
               <div style="font-weight: 700; font-size: 16px; color: var(--gold, #facc15); display: flex; align-items: center; gap: 8px;">
@@ -47,23 +47,23 @@ export class AurasPillarView extends Component {
             </div>
             <div style="text-align: right;">
               <div style="font-size: 13px; font-weight: 600;">
-                Linh Lực Khả Dụng: <span style="color: #38bdf8; font-size: 16px; font-weight: 700;">${usableEnergy}</span> / ${player.maxEnergy || 100}
+                Linh Lực Khả Dụng: <span style="color: #82a4d4; font-size: 16px; font-weight: 700;">${usableEnergy}</span> / ${player.maxEnergy || 100}
               </div>
-              <div style="font-size: 12px; color: #f59e0b; margin-top: 2px;">
+              <div style="font-size: 12px; color: #dfcfb2; margin-top: 2px;">
                 Đã khóa: <b>${reservedEnergy}</b> LL (${reservationPct}% / 85% tối đa)
               </div>
             </div>
           </div>
 
           <!-- SPLIT RESERVATION BAR -->
-          <div style="position: relative; height: 16px; background: rgba(0, 0, 0, 0.5); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); display: flex; margin-bottom: 12px;">
-            <div style="width: ${usablePct}%; background: linear-gradient(90deg, #0284c7, #38bdf8); transition: width 0.4s ease;" title="Linh Lực Khả Dụng: ${usableEnergy}"></div>
-            <div style="width: ${reservationPct}%; background: linear-gradient(90deg, #d97706, #fbbf24); transition: width 0.4s ease;" title="Linh Lực Bị Khóa: ${reservedEnergy} (${reservationPct}%)"></div>
+          <div style="position: relative; height: 12px; background: rgba(0, 0, 0, 0.5); border-radius: 4px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); display: flex; margin-bottom: 12px;">
+            <div style="width: ${usablePct}%; background: #4a6c96; transition: width 0.4s ease;" title="Linh Lực Khả Dụng: ${usableEnergy}"></div>
+            <div style="width: ${reservationPct}%; background: #9c773a; transition: width 0.4s ease;" title="Linh Lực Bị Khóa: ${reservedEnergy} (${reservationPct}%)"></div>
           </div>
 
           <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim);">
-            <span style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #38bdf8;"></span> Linh Lực Khả Dụng (Dùng cho Chiêu Thức)</span>
-            <span style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #fbbf24;"></span> Linh Lực Bị Khóa (Duy Trì Hào Quang)</span>
+            <span style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4a6c96;"></span> Linh Lực Khả Dụng (Dùng cho Chiêu Thức)</span>
+            <span style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #9c773a;"></span> Linh Lực Bị Khóa (Duy Trì Hào Quang)</span>
           </div>
         </div>
 

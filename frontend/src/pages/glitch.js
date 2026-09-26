@@ -104,7 +104,7 @@ function renderGlitchUnlocked(wrapper, status, player, ctx) {
         </div>
         <div style="text-align: right;">
           <div style="font-size: 0.75rem; color: #aaa; text-transform: uppercase;">Điểm Thấu Triệt</div>
-          <div style="font-size: 1.5rem; font-weight: bold; color: #fbbf24; text-shadow: 0 0 10px rgba(251,191,36,0.4);" id="glitchInsightVal">
+          <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold);" id="glitchInsightVal">
             ${status.glitchInsight || 0}
           </div>
         </div>

@@ -243,7 +243,7 @@ export function pageArena(el, ctx) {
       <!-- RANK CARD -->
       <div class="panel glass" style="margin-bottom:14px; border-left:4px solid ${myRank.color || '#666'}">
         <div class="panel-body" style="display:flex; align-items:center; gap:16px; padding:16px">
-          <div style="font-size:44px; text-shadow:0 0 16px ${myRank.color || '#666'}">${myRank.icon || '🛡️'}</div>
+          <div style="font-size:38px">${myRank.icon || '🛡️'}</div>
           <div style="flex:1">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:6px">
               <div>

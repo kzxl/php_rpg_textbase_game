@@ -49,8 +49,8 @@ export class CombatArenaView extends Component {
 
             <!-- VS Badge -->
             <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: 900; color: var(--gold, #facc15); text-shadow: 0 0 10px rgba(251,191,36,0.5); letter-spacing: 2px;">VS</div>
-              <div style="font-size: 11px; color: #a855f7; font-weight: bold; margin-top: 4px;">+${r.glitchEvents?.length ? r.glitchEvents.length * 5 : 0} Thấu Triệt</div>
+              <div style="font-size: 22px; font-weight: 800; color: var(--gold); letter-spacing: 2px;">VS</div>
+              <div style="font-size: 11px; color: #a992c7; font-weight: 600; margin-top: 4px;">+${r.glitchEvents?.length ? r.glitchEvents.length * 5 : 0} Thấu Triệt</div>
             </div>
 
             <!-- Monster Card -->

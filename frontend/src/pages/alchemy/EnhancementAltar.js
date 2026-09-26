@@ -83,11 +83,11 @@ export class EnhancementAltar extends Component {
 
     const curTierStyle = getEnhanceStyle(curLvl)
     const nextTierStyle = getEnhanceStyle(nextLvl)
-    const curGlow = curTierStyle ? `box-shadow: 0 0 10px ${curTierStyle.glow}` : ''
-    const nextGlow = nextTierStyle ? `box-shadow: 0 0 10px ${nextTierStyle.glow}` : ''
+    const curGlow = ''
+    const nextGlow = ''
 
     return `
-      <div class="panel" style="border:1px solid rgba(255,215,0,0.2); box-shadow:0 0 20px rgba(0,0,0,0.4); background:var(--bg-surface, #151922); border-radius:10px">
+      <div class="panel" style="border:1px solid var(--border); background:var(--bg-surface, #151922); border-radius:8px">
         <div class="panel-body text-center" style="padding:20px 16px; text-align:center">
           
           <!-- ITEM HEADER -->

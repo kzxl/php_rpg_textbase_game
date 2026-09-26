@@ -23,7 +23,7 @@ export function getEnhanceStyle(level = 0) {
 export function renderEnhanceBadge(level = 0) {
   if (!level || level <= 0) return ''
   const tier = getEnhanceStyle(level)
-  return `<span class="badge" style="background:${tier.color}22; color:${tier.color}; border:1px solid ${tier.border}; font-weight:700; box-shadow:0 0 6px ${tier.glow}; padding:1px 5px; font-size:11px; border-radius:3px">+${level}</span>`
+  return `<span class="badge" style="background:${tier.color}22; color:${tier.color}; border:1px solid ${tier.border}; font-weight:700; padding:1px 5px; font-size:11px; border-radius:3px">+${level}</span>`
 }
 
 /**
@@ -50,7 +50,7 @@ export class ItemCard extends Component {
     const enhanceBadge = renderEnhanceBadge(enhanceLevel)
     const enhanceStyle = getEnhanceStyle(enhanceLevel)
     const rarityClass = item.rarity ? `item--${item.rarity}` : ''
-    const borderGlow = enhanceStyle ? `border-color: ${enhanceStyle.border}; box-shadow: 0 0 8px ${enhanceStyle.glow}` : ''
+    const borderGlow = enhanceStyle ? `border-color: ${enhanceStyle.border};` : ''
 
     const affixesHtml = (item.affixes || []).map(aff => {
       const isPositive = (aff.value || 0) >= 0

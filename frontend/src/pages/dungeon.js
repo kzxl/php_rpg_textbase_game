@@ -120,23 +120,23 @@ export function pageDungeon(el, ctx) {
     const diffMult = (r.difficultyMult || 1.0).toFixed(2)
 
     return `
-      <div class="panel ${isExtreme ? 'realm-card--permanent' : ''}" style="border-color:${isExtreme ? 'var(--red)' : 'var(--gold)'};margin-bottom:16px;box-shadow: 0 0 15px rgba(${isExtreme ? '239, 68, 68' : '234, 179, 8'}, 0.25)">
-        <div class="panel-title" style="color:${isExtreme ? 'var(--red)' : 'var(--gold)'};display:flex;justify-content:space-between;align-items:center">
+      <div class="panel ${isExtreme ? 'realm-card--permanent' : ''}" style="border-color:${isExtreme ? '#572c30' : '#735f37'};margin-bottom:16px">
+        <div class="panel-title" style="color:${isExtreme ? '#d67a7a' : 'var(--gold)'};display:flex;justify-content:space-between;align-items:center">
           <span>⚡ Đang Trong Bí Cảnh</span>
-          ${isExtreme ? `<span class="badge-danger-apex">⚠️ Quái Cuồng Bạo x${diffMult}</span>` : `<span class="badge" style="background:rgba(234,179,8,0.2);color:var(--gold);border:1px solid var(--gold);font-size:11px">Độ Khó x${diffMult}</span>`}
+          ${isExtreme ? `<span class="badge-danger-apex">⚠️ Quái Cuồng Bạo x${diffMult}</span>` : `<span class="badge" style="background:rgba(194,159,85,0.15);color:#dfcfb2;border:1px solid rgba(194,159,85,0.3);font-size:11px">Độ Khó x${diffMult}</span>`}
         </div>
         <div class="panel-body" style="padding:14px 16px">
           <div style="font-size:17px;font-weight:700;margin-bottom:8px;color:var(--text-bright)">${r.dungeonName || r.dungeonId}</div>
 
           <!-- Highlight Banner -->
           ${isBoss ? `
-            <div style="background:linear-gradient(90deg, rgba(239,68,68,0.25) 0%, rgba(185,28,28,0.15) 100%);border:1px solid #ef4444;border-radius:6px;padding:8px 12px;margin-bottom:12px;text-align:center">
-              <span style="font-size:13px;font-weight:800;color:#fca5a5;letter-spacing:0.5px">
+            <div style="background:rgba(184,74,74,0.12);border:1px solid rgba(184,74,74,0.35);border-radius:6px;padding:8px 12px;margin-bottom:12px;text-align:center">
+              <span style="font-size:13px;font-weight:700;color:#d67a7a;letter-spacing:0.5px">
                 🔥 TẦNG CUỐI CÙNG — TRÙM BÍ CẢNH TRẤN THỦ! 🔥
               </span>
             </div>
           ` : `
-            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:6px 12px;margin-bottom:12px">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;padding:6px 12px;margin-bottom:12px">
               <span style="font-size:12px;opacity:0.85">
                 ⚔️ Đang vượt ải: <strong>Tầng ${r.currentWave} / ${r.totalWaves}</strong>
               </span>
@@ -147,10 +147,10 @@ export function pageDungeon(el, ctx) {
           <div style="margin-bottom:14px">
             <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:600;margin-bottom:6px">
               <span style="color:var(--text-dim)">Tiến Độ Ải:</span>
-              <span style="color:${isBoss ? '#fca5a5' : 'var(--gold)'};font-weight:700">Tầng ${r.currentWave} / ${r.totalWaves} (${progress}%)</span>
+              <span style="color:${isBoss ? '#d67a7a' : 'var(--gold)'};font-weight:700">Tầng ${r.currentWave} / ${r.totalWaves} (${progress}%)</span>
             </div>
-            <div style="background:rgba(255,255,255,0.06);border-radius:6px;height:12px;overflow:hidden;padding:1px;border:1px solid rgba(255,255,255,0.1)">
-              <div style="width:${progress}%;height:100%;background:linear-gradient(90deg, var(--blue), ${isExtreme ? '#ef4444' : 'var(--gold)'});border-radius:4px;transition:width 0.3s"></div>
+            <div style="background:rgba(255,255,255,0.06);border-radius:4px;height:8px;overflow:hidden;padding:1px;border:1px solid rgba(255,255,255,0.1)">
+              <div style="width:${progress}%;height:100%;background:${isExtreme ? '#8c4242' : '#82a4d4'};border-radius:3px;transition:width 0.3s"></div>
             </div>
           </div>
 
@@ -350,12 +350,12 @@ export function pageDungeon(el, ctx) {
     return d.mapItems.map(m => {
       const dg = m.dungeon
       return `
-        <div class="list-item" style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.4) 100%);border-left:3px solid #10b981;border-radius:4px;margin:8px 12px;display:flex;align-items:center;gap:12px">
+        <div class="list-item" style="padding:14px 16px;border:1px solid var(--border);border-left:3px solid #4a7858;border-radius:4px;margin:8px 12px;display:flex;align-items:center;gap:12px;background:var(--bg-panel-alt)">
           <div style="font-size:26px;width:36px;text-align:center">📜</div>
           <div class="item-info" style="flex:1">
-            <div class="item-name" style="font-size:14px;font-weight:700;color:#6ee7b7;display:flex;align-items:center;gap:8px">
+            <div class="item-name" style="font-size:14px;font-weight:700;color:var(--text-bright);display:flex;align-items:center;gap:8px">
               <span>${m.item.icon || '📜'} ${m.item.name}</span>
-              <span class="badge" style="background:rgba(16,185,129,0.2);color:#a7f3d0;font-size:11px">x${m.quantity} Mảnh</span>
+              <span class="badge" style="background:rgba(74,120,88,0.15);color:#7cb387;border:1px solid rgba(74,120,88,0.3);font-size:11px">x${m.quantity} Mảnh</span>
             </div>
             ${dg ? `
               <div class="item-meta" style="font-size:12px;opacity:0.8;margin-top:4px">

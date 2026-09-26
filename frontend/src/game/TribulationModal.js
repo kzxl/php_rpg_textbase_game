@@ -23,9 +23,9 @@ export async function openTribulationModal(ctx) {
   }
 
   overlay.innerHTML = `
-    <div style="background: #121420; border: 2px solid #eab308; border-radius: 14px; max-width: 580px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 30px rgba(234, 179, 8, 0.2); padding: 24px; text-align: center; color: #fff;">
+    <div style="background: #121420; border: 1px solid var(--border); border-radius: 8px; max-width: 580px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.8); padding: 24px; text-align: center; color: #fff;">
       <div style="font-size: 32px; animation: pulse 1.5s infinite;">⚡</div>
-      <div style="font-size: 16px; font-weight: 700; color: #eab308; margin-top: 8px;">Đang dò xét Thiên Khí & Thăm Dò Thiên Kiếp...</div>
+      <div style="font-size: 16px; font-weight: 700; color: var(--gold); margin-top: 8px;">Đang dò xét Thiên Khí & Thăm Dò Thiên Kiếp...</div>
     </div>
   `
 
@@ -45,9 +45,9 @@ function renderPreview(overlay, preview, ctx) {
   const color = tri.color || '#eab308'
 
   overlay.innerHTML = `
-    <div style="background: #111422; border: 2px solid ${color}; border-radius: 14px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 12px 50px rgba(0,0,0,0.95), 0 0 35px ${color}44; color: #fff; animation: scaleUp 0.25s ease;">
+    <div style="background: #111422; border: 1px solid var(--border); border-radius: 8px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.8); color: #fff; animation: scaleUp 0.25s ease;">
       <!-- HEADER -->
-      <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, ${color}22, rgba(0,0,0,0.6)); text-align: center; position: relative;">
+      <div style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.25); text-align: center; position: relative;">
         <span style="position: absolute; top: 16px; right: 20px; font-size: 20px; cursor: pointer; color: var(--text-dim);" id="btn-close-tribulation">✕</span>
         <div style="font-size: 28px; line-height: 1;">🌩️</div>
         <div style="font-size: 20px; font-weight: 800; color: ${color}; margin-top: 6px; letter-spacing: 0.5px;">
@@ -142,9 +142,9 @@ async function runTribulationExperience(overlay, ctx, triConfig) {
 
   // Show battle arena in modal
   overlay.innerHTML = `
-    <div style="background: #0d0f1a; border: 2px solid ${color}; border-radius: 14px; max-width: 620px; width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 15px 60px rgba(0,0,0,0.98), 0 0 45px ${color}66; color: #fff;">
+    <div style="background: #0d0f1a; border: 1px solid var(--border); border-radius: 8px; max-width: 620px; width: 100%; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,0.8); color: #fff;">
       <!-- ARENA TOP -->
-      <div style="padding: 16px 20px; background: linear-gradient(180deg, ${color}22, rgba(0,0,0,0.8)); border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; position: relative;" id="tribulation-arena-header">
+      <div style="padding: 16px 20px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); text-align: center; position: relative;" id="tribulation-arena-header">
         <div style="font-size: 14px; font-weight: 700; color: ${color}; letter-spacing: 1px;">
           ⚡ ${triConfig.name || 'THIÊN LÔI GIÁNG TRẦN'}
         </div>

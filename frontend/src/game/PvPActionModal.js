@@ -16,8 +16,8 @@ export function showPvPActionModal({ data, pid, state, api, notify, updateSideba
   let leaseSeconds = data.action_expires_in || 60
 
   overlay.innerHTML = `
-    <div class="pvp-modal-content" style="background:#151824;border:1px solid rgba(234,179,8,0.4);border-radius:12px;width:100%;max-width:480px;box-shadow:0 0 25px rgba(234,179,8,0.25);overflow:hidden;animation:fadeIn 0.2s ease">
-      <div style="background:linear-gradient(135deg, rgba(234,179,8,0.25), rgba(0,0,0,0.4));padding:16px;border-bottom:1px solid rgba(234,179,8,0.3);display:flex;align-items:center;justify-content:space-between">
+    <div class="pvp-modal-content" style="background:#151824;border:1px solid var(--border);border-radius:8px;width:100%;max-width:480px;box-shadow:0 8px 24px rgba(0,0,0,0.5);overflow:hidden;animation:fadeIn 0.2s ease">
+      <div style="background:rgba(0,0,0,0.25);padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:24px">⚔️</span>
           <div>
