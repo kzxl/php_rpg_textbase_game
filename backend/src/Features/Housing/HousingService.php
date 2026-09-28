@@ -228,7 +228,7 @@ class HousingService
 
         $targetTier = $existing ? ((int)$existing['tier'] + 1) : 1;
         if (!isset(HousingConstants::TIERS[$targetTier])) {
-            throw new RuntimeException('Động Phủ đã đạt cấp bậc cảnh giới tối đa (Thiên Cung)!');
+            throw new RuntimeException('Động Phủ đã đạt cảnh giới tối cao (Hỗn Độn Tiên Cung — Đại Viên Mãn)!');
         }
 
         $tierInfo = HousingConstants::TIERS[$targetTier];
@@ -649,6 +649,7 @@ class HousingService
         $energyRegenBonus = 0;
         $staminaMaxBonus = 0;
         $gardenSpeedBonus = 0.0;
+        $cultivationBonus = 0;
 
         if ($formationsDisplay !== null) {
             foreach ($formationsDisplay as $fId => $f) {
@@ -662,6 +663,8 @@ class HousingService
                         $staminaMaxBonus += ($f['bonusPerLevel']['staminaMaxBonus'] ?? 0) * $lvl;
                     } elseif ($fId === 'linh_dien_tran') {
                         $gardenSpeedBonus += ($f['bonusPerLevel']['gardenSpeedBonus'] ?? 0) * $lvl;
+                    } elseif ($fId === 'quy_nguyen_tran') {
+                        $cultivationBonus += ($f['bonusPerLevel']['cultivationBonus'] ?? 0) * $lvl;
                     }
                 }
             }
@@ -682,6 +685,8 @@ class HousingService
                         $staminaMaxBonus += ($fDef['bonusPerLevel']['staminaMaxBonus'] ?? 0) * $lvl;
                     } elseif ($fId === 'linh_dien_tran') {
                         $gardenSpeedBonus += ($fDef['bonusPerLevel']['gardenSpeedBonus'] ?? 0) * $lvl;
+                    } elseif ($fId === 'quy_nguyen_tran') {
+                        $cultivationBonus += ($fDef['bonusPerLevel']['cultivationBonus'] ?? 0) * $lvl;
                     }
                 }
             }
@@ -692,6 +697,7 @@ class HousingService
             'energyRegenBonus' => $energyRegenBonus,
             'staminaMaxBonus' => $staminaMaxBonus,
             'gardenSpeedBonus' => $gardenSpeedBonus,
+            'cultivationBonus' => $cultivationBonus,
             'breakthroughBonus' => $btBonus,
         ];
     }
@@ -701,7 +707,9 @@ class HousingService
         $stmt = $this->pdo->prepare("SELECT level FROM housing_formations WHERE player_id = ? AND formation_id = 'linh_dien_tran' AND active = 1");
         $stmt->execute([$playerId]);
         $lvl = (int)($stmt->fetchColumn() ?: 0);
-        return $lvl * 0.15;
+        $fDef = HousingConstants::FORMATIONS['linh_dien_tran'] ?? null;
+        $bonus = $fDef['bonusPerLevel']['gardenSpeedBonus'] ?? 0.10;
+        return $lvl * $bonus;
     }
 
     private function syncDailyUpkeep(string $playerId): void

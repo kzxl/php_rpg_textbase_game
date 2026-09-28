@@ -158,6 +158,15 @@ export class AbodeOverview extends Component {
                 +${passives.breakthroughBonus || tierInfo.breakthroughBonus}%
               </div>
             </div>
+
+            ${passives.cultivationBonus > 0 ? `
+              <div style="background:var(--bg-main); border:1px solid var(--border); border-radius:3px; padding:10px;">
+                <div style="font-size:11px; color:var(--text-dim);">Tăng Trưởng Tu Vi</div>
+                <div style="font-size:14px; font-weight:700; color:var(--gold); margin-top:2px;">
+                  +${passives.cultivationBonus}%
+                </div>
+              </div>
+            ` : ''}
           </div>
         </div>
 
@@ -202,7 +211,7 @@ export class AbodeOverview extends Component {
             </div>
           ` : `
             <div style="background:var(--bg-main); border:1px solid var(--border); border-radius:3px; padding:14px; text-align:center; color:var(--gold); font-size:13px; font-weight:600;">
-              Động Phủ Đã Đạt Cảnh Giới Tối Cao (Thiên Cung — Đại Viên Mãn)
+              Động Phủ Đã Đạt Cảnh Giới Tối Cao (${tierInfo.name} — Đại Viên Mãn)
             </div>
           `}
         </div>

@@ -77,11 +77,14 @@ export class FormationView extends Component {
               currentBonusText = curLvl > 0 ? `+${curLvl * 5} HP / 10s` : 'Chưa kích hoạt'
               nextBonusText = `+${(curLvl + 1) * 5} HP / 10s`
             } else if (fId === 'linh_dien_tran') {
-              currentBonusText = curLvl > 0 ? `+${Math.round(curLvl * 15)}% tốc độ` : 'Chưa kích hoạt'
-              nextBonusText = `+${Math.round((curLvl + 1) * 15)}% tốc độ`
+              currentBonusText = curLvl > 0 ? `+${Math.round(curLvl * 10)}% tốc độ` : 'Chưa kích hoạt'
+              nextBonusText = `+${Math.round((curLvl + 1) * 10)}% tốc độ`
             } else if (fId === 'thu_linh_tran') {
               currentBonusText = curLvl > 0 ? `+${curLvl * 15} Thể lực tối đa` : 'Chưa kích hoạt'
               nextBonusText = `+${(curLvl + 1) * 15} Thể lực tối đa`
+            } else if (fId === 'quy_nguyen_tran') {
+              currentBonusText = curLvl > 0 ? `+${curLvl * 5}% tu vi nhận được` : 'Chưa kích hoạt'
+              nextBonusText = `+${(curLvl + 1) * 5}% tu vi nhận được`
             }
 
             return `

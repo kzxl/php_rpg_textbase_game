@@ -1,6 +1,7 @@
 /**
  * Housing System Constants & Helper Utilities
  * Conforms to Anti-AI-Slop & High-Density Torn UI Standards.
+ * Extended with 10 Tiers, Supreme Herbs, and Advanced Formations.
  */
 
 export const HOUSING_TIERS = {
@@ -54,6 +55,56 @@ export const HOUSING_TIERS = {
     description: 'Cung điện bồng bềnh trong mây, phong cảnh tuyệt thế vô song.',
     badgeClass: 'badge--legendary',
   },
+  6: {
+    tier: 6,
+    name: 'Tử Tiêu Điện',
+    cost: 500000,
+    hpRegen: 75,
+    gardenSlots: 6,
+    breakthroughBonus: 13,
+    description: 'Điện ngọc đúc từ Tử Tiêu Linh Thạch, tử khí ngút ngàn, đạo vận tường hòa.',
+    badgeClass: 'badge--purple',
+  },
+  7: {
+    tier: 7,
+    name: 'Huyền Đô Tiên Đảo',
+    cost: 1800000,
+    hpRegen: 120,
+    gardenSlots: 7,
+    breakthroughBonus: 16,
+    description: 'Phù không tiên đảo ngự chín tầng mây, thông thấu thiên địa, linh vụ lượn lờ.',
+    badgeClass: 'badge--cyan',
+  },
+  8: {
+    tier: 8,
+    name: 'Thần Tiêu Động Thiên',
+    cost: 6000000,
+    hpRegen: 200,
+    gardenSlots: 8,
+    breakthroughBonus: 20,
+    description: 'Độc lập tiểu thế giới nội hàm càn khôn, linh khí nồng đặc kết tinh thành hà lưu.',
+    badgeClass: 'badge--blue',
+  },
+  9: {
+    tier: 9,
+    name: 'Thái Hư Tiên Phủ',
+    cost: 20000000,
+    hpRegen: 350,
+    gardenSlots: 9,
+    breakthroughBonus: 25,
+    description: 'Tiên phủ ngự tại khe nứt Thái Hư cổ xưa, hấp thu hỗn độn nguyên khí bất tận.',
+    badgeClass: 'badge--gold',
+  },
+  10: {
+    tier: 10,
+    name: 'Hỗn Độn Tiên Cung',
+    cost: 60000000,
+    hpRegen: 600,
+    gardenSlots: 10,
+    breakthroughBonus: 30,
+    description: 'Vô thượng thánh địa ngưng tụ từ Hỗn Độn Sơ Khí, siêu thoát ngũ hành luân hồi, duy ngã độc tôn.',
+    badgeClass: 'badge--legendary',
+  },
 }
 
 export const HERB_DEFS = {
@@ -97,6 +148,22 @@ export const HERB_DEFS = {
     qty: [1, 2],
     description: 'Tuyệt phẩm thảo mộc, tụ tập tinh hoa đại đạo vũ trụ.',
   },
+  ngo_dao_tra: {
+    id: 'ngo_dao_tra',
+    name: 'Ngộ Đạo Trà',
+    tier: 5,
+    growthTime: 3600,
+    qty: [1, 2],
+    description: 'Lá trà hái từ Ngộ Đạo Cổ Thụ, ngưng thần tĩnh khí, trợ giúp đột phá.',
+  },
+  hon_don_linh_chi: {
+    id: 'hon_don_linh_chi',
+    name: 'Hỗn Độn Linh Chi',
+    tier: 6,
+    growthTime: 7200,
+    qty: [1, 1],
+    description: 'Thần chi hấp thụ Hỗn Độn Sơ Khí từ thuở khai thiên, bảo vật nghịch thiên cải mệnh.',
+  },
 }
 
 export const FORMATION_DEFS = {
@@ -107,7 +174,7 @@ export const FORMATION_DEFS = {
     statLabel: 'Hồi Linh Lực',
     unit: '/ 10s',
     requiredTier: 2,
-    maxLevel: 5,
+    maxLevel: 10,
   },
   ho_the_tran: {
     id: 'ho_the_tran',
@@ -116,7 +183,7 @@ export const FORMATION_DEFS = {
     statLabel: 'Hồi Khí Huyết',
     unit: '/ 10s',
     requiredTier: 2,
-    maxLevel: 5,
+    maxLevel: 10,
   },
   linh_dien_tran: {
     id: 'linh_dien_tran',
@@ -125,7 +192,7 @@ export const FORMATION_DEFS = {
     statLabel: 'Gia Tốc Vườn',
     unit: '%',
     requiredTier: 3,
-    maxLevel: 3,
+    maxLevel: 5,
   },
   thu_linh_tran: {
     id: 'thu_linh_tran',
@@ -134,7 +201,16 @@ export const FORMATION_DEFS = {
     statLabel: 'Thể Lực Tối Đa',
     unit: 'điểm',
     requiredTier: 3,
-    maxLevel: 3,
+    maxLevel: 5,
+  },
+  quy_nguyen_tran: {
+    id: 'quy_nguyen_tran',
+    name: 'Quy Nguyên Trận',
+    description: 'Trận pháp ngưng tụ hỗn nguyên bản khí, gia tăng tốc độ tích lũy tu vi đại đạo.',
+    statLabel: 'Tăng Tu Vi',
+    unit: '%',
+    requiredTier: 6,
+    maxLevel: 5,
   },
 }
 
