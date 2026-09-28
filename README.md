@@ -1,214 +1,163 @@
 # 🏯 Nghịch Thiên Ký — Tu Tiên RPG Engine
 
-> Text-based MMORPG lấy cảm hứng từ Torn City, theme tu tiên (cultivation). PHP backend + Vanilla JS frontend.
+> A high-performance, persistent text-based multiplayer RPG engine inspired by Torn City mechanics and eastern cultivation (Tu Tiên) mythology. Powered by a modular PHP backend and a reactive Vanilla JS + Vite frontend.
 
 ![PHP](https://img.shields.io/badge/PHP-8.1+-blue)
-![Vite](https://img.shields.io/badge/Vite-5-purple)
+![Vite](https://img.shields.io/badge/Vite-6-purple)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-orange)
 ![License](https://img.shields.io/badge/License-Private-red)
 
 ---
 
-## 📋 Tổng Quan
+## 📋 Overview
 
-Nghịch Thiên Ký là một text-based RPG multiplayer với hệ thống tu luyện sâu, chiến đấu theo lượt, khám phá thế giới mở, và kinh tế người chơi. Game chạy trên trình duyệt, thiết kế theo phong cách dark premium.
+**Nghịch Thiên Ký** (Defiance of Fate) is a persistent browser-based multiplayer online role-playing game (PBBG). The engine combines eastern cultivation progression with gritty, persistent economics, turn-based tactical combat, territory warfare, and high-density user interfaces designed according to dark slate aesthetic standards.
 
-### 🎮 Gameplay Core
-- **Tu Luyện** — Train 4 stats (STR/SPD/DEX/DEF) tại Rèn Luyện
-- **Chiến Đấu** — Hệ thống turn-based với body part targeting, dodge, crit
-- **Khám Phá** — Ngao du vùng đất, gặp quái/NPC/Boss/người chơi
-- **Cảnh Giới** — 7 realm tiers với breakthrough trials
-- **Kỹ Năng** — 4 nhánh: Chiến Đấu, Sinh Hoạt, Nội Công, Công Pháp
+### 🎮 Core Gameplay Pillars
+
+- **Cultivation & Breakthroughs**: Progress across 7 major Realm Tiers (from *Luyện Khí* to *Đại Thừa*), facing heavenly tribulations with tangible stat growth upon each breakthrough.
+- **Turn-Based Tactical Combat**: Features bodily injury mechanics, Glitch Weakpoint strikes, 4 distinct martial stances (*Phá Quy, Du Long, Huyễn Ảnh, Kim Cương*), floating visual feedback, and color-coded combat round logs.
+- **Inventory & Capacity Governance (Càn Khôn Túi)**:
+  - Enforced max inventory capacity with ring storage scaling.
+  - Safe loot overflow management: When the pouch is full, new drops become **Pending Loot** on the ground, allowing players to either swap an existing item out or leave the drop behind.
+  - Item discarding with instant confirmation directly from the inventory.
+  - Up to 4 talisman affixes (Phù Văn) per item, with tier badges and localized stat breakdowns.
+- **Lò Tạo Hóa (Forging & Alchemy)**:
+  - *Luyện Đan*: Concoct spiritual pills and healing elixirs.
+  - *Đúc Khí*: Forge weapons, armors, boots, and storage rings from raw ores and beast parts.
+  - *Cường Hóa (+1 to +12)*: Upgrade gear with glowing tier auras and dynamic combat scaling.
+  - *Khắc Ấn Phù Văn*: PoE-inspired currency talisman modifications (*Tẩy Tủy Phù, Hỗn Chú Phù, Thiên Mệnh Phù, Thăng Cấp Phù*) with an interactive 4-slot preview panel.
+- **Động Phủ (Immortal Abode & Housing)**: 5 distinct dwelling tiers with an interactive Spiritual Garden (*Dược Viên*) for herb planting/harvesting, defensive array formations (*Trận Pháp*), and property leasing.
+- **Skill Pillars & Auras**: 6 skill branches including Active Combat Skills, Sustained Auras (*Hào Quang* with toggle locks and spirit drain), Life Skills, Mind Methods, and Glitch Insights.
+- **Secret Realms & Exploration**: Distinguishes timed countdown rifts (⏳ *Huyễn Cảnh*) from permanent apex danger zones (🔱 *Thượng Cổ Cấm Địa*). Features an automated scanner (*Auto-Battle*) equipped with stamina and full-bag safeguards.
+- **Luận Đạo Đấu Trường (PvP Arena)**: Card-style matchmaking displaying opponent ranks, ELO ratings, level deltas, win streaks, and recent duel replays.
 
 ---
 
-## 🛠️ Cài Đặt
+## 🛠️ Installation & Setup
 
-### Yêu cầu
-- PHP 8.1+ với extensions: `pdo_mysql`, `json`, `mbstring`
-- MySQL 8.0+
-- Node.js 18+ (build frontend)
-- Composer (PHP dependencies)
+### Prerequisites
+- **PHP**: 8.1 or higher (extensions: `pdo_mysql`, `json`, `mbstring`)
+- **MySQL**: 8.0 or higher
+- **Node.js**: 18.0 or higher (with npm)
+- **Composer**: PHP package dependency manager
 
-### Backend Setup
+### 1. Backend Configuration
 ```bash
 cd backend
 composer install
-cp .env.example .env  # Cấu hình DB
+cp .env.example .env  # Configure DB_HOST, DB_NAME, DB_USER, DB_PASS
+# Run database migrations in sequence
 php migrations/run_001_init.php
-# ... chạy tất cả migrations theo thứ tự
+# ... execute all migrations up to run_031
 php migrations/run_031_housing_boss_safety.php
 ```
 
-### Frontend Setup
+### 2. Frontend Build
 ```bash
 cd frontend
 npm install
-npm run dev      # Dev server (hot reload)
-npm run build    # Production build → dist/
+npm run build    # Produces production-ready bundle in frontend/dist/
 ```
 
-### Chạy Server
+### 3. Running Dev Servers
 ```bash
-# Backend API
+# Terminal 1 - Backend API (port 8080)
 cd backend
 php -S localhost:8080 -t public
 
-# Frontend (dev)
+# Terminal 2 - Frontend Dev Server (port 3000)
 cd frontend
 npm run dev
 ```
 
+Open your browser at `http://localhost:3000/`.
+
 ---
 
-## 🏗️ Kiến Trúc
+## 🏗️ Architecture & Project Structure
 
 ```
 rpg-engine/
 ├── backend/
-│   ├── public/           # Entry point (index.php)
+│   ├── public/           # Public entry point (index.php)
 │   ├── src/
-│   │   ├── Core/         # Database, CombatEngine, Router
-│   │   ├── Models/       # Player, Monster
-│   │   ├── Systems/      # ItemSystem
-│   │   └── Features/     # 34 feature modules (folder-per-feature)
-│   ├── data/             # JSON data (skills, exploration, items...)
-│   └── migrations/       # DB migrations (run_001 → run_031)
+│   │   ├── Core/         # Database, CombatEngine, PlayerRepository
+│   │   ├── Models/       # Player, Monster, Item
+│   │   ├── Systems/      # ItemSystem, SkillSystem, MonsterSystem
+│   │   ├── Services/     # PvPCombatService, ForgingService, BazaarService
+│   │   └── Features/     # 34 modular feature domains
+│   │       ├── Arena/        # PvP Arena routes & matchmaking
+│   │       ├── Combat/       # Full combat simulation & loot resolution
+│   │       ├── Crafting/     # Equipment and pill recipes
+│   │       ├── CurrencyCrafting/ # Talisman modifications & affix rerolling
+│   │       ├── Exploration/  # World exploration & random encounters
+│   │       ├── Housing/      # Dwelling, herb gardens, formation arrays
+│   │       ├── Inventory/    # Equipment, unequip, discard, medicine usage
+│   │       └── ...
+│   ├── data/             # Static game definitions (skills, materials, dungeons)
+│   └── migrations/       # Incremental MySQL DDL and seed migrations
 │
 ├── frontend/
 │   ├── src/
-│   │   ├── main.js       # App shell, navigation, sidebar
-│   │   ├── style.css     # Complete design system
-│   │   ├── pages/        # Page components (20+ pages)
-│   │   └── services/     # API client
-│   └── dist/             # Built output
+│   │   ├── core/         # Component base class, event emitter, UI primitives
+│   │   ├── game/         # 3D/2D canvas visual engines
+│   │   ├── pages/        # Modular page coordinators & views
+│   │   │   ├── combat/   # CombatPage, CombatArenaView, AutoBattleRunner
+│   │   │   ├── inventory/# InventoryPage, EquipmentView, constants
+│   │   │   ├── alchemy/  # AlchemyPage, TalismanInscriber, EnhancementAltar
+│   │   │   ├── housing/  # HousingPage, GardenTab, FormationsTab
+│   │   │   ├── stats/    # StatsPage, TrainingTab, RealmTab, MechanicsTab
+│   │   │   └── helpers.js# Shared itemRow, fmtAffix, and stat calculation helpers
+│   │   ├── services/     # API client singleton
+│   │   ├── main.js       # App shell, routing, state, and modal manager
+│   │   └── style.css     # Dark slate design system and animations
+│   ├── dist/             # Production distribution
+│   └── vite.config.js    # Vite bundler configuration
 │
-├── story.md              # World lore & backstory
-└── next_work.md          # TODO & roadmap
-```
-
-### Backend — Folder-per-Feature
-Mỗi feature là một folder độc lập trong `src/Features/`:
-```
-Features/
-├── Arena/        ⚔️ PvP Đấu Trường
-├── Combat/       🗡️ PvE Combat
-├── Crafting/     ⚒️ Chế Tác
-├── Crime/        🔪 Ác Nghiệp
-├── Dungeon/      🏰 Bí Cảnh
-├── Education/    📖 Công Pháp (Education Tree)
-├── Exploration/  🗺️ Khám Phá
-├── Guild/        🏯 Bảng Hội
-├── Housing/      🏠 Động Phủ
-├── Leaderboard/  🏆 Bảng Xếp Hạng
-├── Market/       🏪 Giao Dịch
-├── Mugging/      💀 Cướp Bóc (PvP)
-├── NpcShop/      🧓 Thương Nhân
-├── Realm/        🌟 Cảnh Giới
-├── Skill/        ⚡ Kỹ Năng
-├── Tower/        🗼 Thiên Phần Tháp
-├── WorldBoss/    🐉 World Boss
-└── ...           (34 modules total)
+├── docs/                 # Production-grade architecture & gameplay specifications
+└── tests/                # Automated integration, adversarial, & visual screenshot tests
 ```
 
 ---
 
-## ⚡ Tính Năng Chính
+## ⚡ Feature Summary Matrix
 
-| Feature | Mô tả |
-|---------|-------|
-| 🏋️ **Rèn Luyện** | Train 4 stats, Gym cooldown, bonus từ Căn Cốt |
-| ⚔️ **Chiến Đấu** | Turn-based, body part targeting, 5 outcomes/turn |
-| 🗺️ **Ngao Du** | Khám phá, di chuyển, bí cảnh, tiên cảnh |
-| 🐉 **World Boss** | Gặp qua khám phá → solo hoặc phát động rally |
-| 🗼 **Thiên Phần Tháp** | Infinite tower, mùa monthly, milestones |
-| 🌟 **Cảnh Giới** | 7 tiers, breakthrough trials, realm bonuses |
-| ⚡ **Kỹ Năng** | 4 tab: Chiến Đấu / Sinh Hoạt / Nội Công / Công Pháp |
-| 🏠 **Động Phủ** | Nhà ở, Dược Viên, Trận Pháp, cho thuê |
-| ⚗️ **Luyện Đan** | Thu thập nguyên liệu → craft đan dược/vũ khí |
-| 🔪 **Ác Nghiệp** | Crime system, nerve-based, jail risk |
-| 💀 **Cướp Bóc** | PvP mugging 2-phase: tấn công → hành động |
-| 🏪 **Giao Dịch** | Player marketplace + đấu giá |
-| 🧓 **Thương Nhân** | NPC shops, daily stock, rarity tiers |
-| 🏯 **Bảng Hội** | Guild system, treasury, permissions |
-| 🏆 **Bảng Xếp Hạng** | Level, Gold, PvP ELO, Guild ranking |
-| 📜 **Sự Kiện** | Event timeline, 24 event types |
-| 📖 **Wiki** | In-game guide, 13 tabs |
+| Domain | Feature Highlights |
+| :--- | :--- |
+| ⚔️ **Combat Engine** | Turn-based resolution, body part targeting, Glitch Weakpoint triggers (2.5x damage), 4 active stances, combat log history. |
+| 🎒 **Càn Khôn Túi** | Capacity checking, Pending Loot decision card (`Swap Item` / `Leave Behind`), direct discard action, affix tier badges. |
+| ⚗️ **Lò Tạo Hóa** | Equipment forging, pill concoction, +1..+12 enhancement altar with aura glows, 4-slot talisman rune inscription. |
+| 🌟 **Cảnh Giới** | 7 realm tiers, heavenly tribulation trials, dynamic realm stat multipliers, physical armor mitigation curves. |
+| ⚡ **Kỹ Năng & Hào Quang**| Active combat arts, toggleable auras with spirit lock, life skills, cultivation mind techniques. |
+| 🏠 **Động Phủ** | 5 housing tiers, herbal medicine garden with growth cycles, defensive formation arrays, lease agreements. |
+| 🗺️ **Ngao Du & Bí Cảnh** | 2D exploration grid, timed *Huyễn Cảnh* rifts, permanent *Thượng Cổ Cấm Địa* apex monster zones. |
+| 🏆 **Đấu Trường (PvP)** | Card-style opponent matchups, ELO delta calculation, win streak fire badges, turn-by-turn duel replays. |
+| 🤖 **Auto-Battle** | Continuous monster scanning with automated stamina exhaustion and full-bag pause safeguards. |
 
 ---
 
-## 🎨 Design System
+## 💾 Database & Migrations
 
-- **Theme**: Dark premium (#0a0e17 background)
-- **Colors**: Custom CSS variables (gold, blue, green, red, orange)
-- **Components**: Panel/Glass cards, skill tabs, stat bars
-- **Typography**: System fonts, Vietnamese full support
-- **Layout**: Sidebar + main content, responsive grid
-
----
-
-## 💾 Database
-
-MySQL với 20+ tables. Migrations tự động:
+The engine operates on MySQL 8.0 with automatic migration scripts:
 
 ```bash
-# Chạy tất cả migrations
-for f in backend/migrations/run_*.php; do php "$f"; done
+# Execute migrations from project root
+cd backend
+php migrations/run_001_init.php
+# ...
+php migrations/run_031_housing_boss_safety.php
 ```
 
-Key tables: `players`, `player_inventory`, `player_housing`, `tower_runs`, `world_bosses`, `guilds`, `pvp_arena`, `market_listings`...
+Key tables: `players`, `player_items`, `player_housing`, `player_tracked_monsters`, `tower_runs`, `pvp_arena`, `bazaar_listings`, `factions`.
 
 ---
 
-## 📖 Wiki In-Game
+## 🎨 UI & Design Principles
 
-Game có hệ thống **Wiki hướng dẫn** tích hợp sẵn (truy cập từ action bar hoặc nav). Gồm 13 tab:
-
-| Tab | Nội dung |
-|-----|----------|
-| 📖 Lore | Biên niên sử, vùng đất, thế giới quan |
-| 🌟 Cảnh Giới | Bảng cảnh giới, độ kiếp, level range |
-| ⚔️ Chiến Đấu | Cơ chế combat, HP regen, 4 chỉ số |
-| ⚡ Kỹ Năng | 4 tab kỹ năng, mastery, công pháp đặc biệt |
-| 🗺️ Khám Phá | Tỷ lệ gặp, World Boss rally, NPC quest |
-| 🗼 Thiên Phần Tháp | Stamina cost, sự kiện tầng, mốc thưởng |
-| 🏰 Bí Cảnh | Ngọc Giản, dungeon tiers, boss drops |
-| 🏠 Động Phủ | Housing tiers, dược viên, trận pháp |
-| 🧬 Căn Cốt | Talent system, tẩy tủy/hoán cốt đan |
-| ⚗️ Luyện Đan | Craft system, phù văn (PoE-style currency) |
-| 🔪 Phạm Tội | Crime system, cướp bóc PvP |
-| 🏪 Thương Mại | NPC shop, P2P market, thuế |
-| 💡 Mẹo | Tips cho người mới, kiếm tiền, endgame |
-
----
-
-## 📝 Roadmap
-
-Xem chi tiết tại [next_work.md](next_work.md)
-
-**Ưu tiên cao:**
-- World Boss discovery UI (frontend flow)
-- Công Pháp special skills
-- Achievement system
-- Equipment enhancement
-
-**QoL:**
-- Visual world map
-- 7-day login calendar
-- Mobile responsive
-- Combat history
-
----
-
-## 🧑‍💻 Tech Stack
-
-| Layer | Tech |
-|-------|------|
-| Backend | PHP 8.1, Slim Framework, PDO MySQL |
-| Frontend | Vanilla JS, Vite 5, CSS3 |
-| Database | MySQL 8.0 |
-| Build | Vite (ESM bundler) |
-| VCS | Git → GitHub |
+- **Palette**: Dark slate aesthetic (`#0a0e17` base, `#151922` surface cards, gold/blue/red accent badges).
+- **Anti-AI-Slop Standard**: Clean rectangular chips, high information density, crisp 1px borders, zero generic gradient clutter.
+- **Full Localization**: English technical codebase with authentic eastern cultivation (Tiên Hiệp) Vietnamese UI nomenclature.
 
 ---
 
