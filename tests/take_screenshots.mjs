@@ -16,6 +16,7 @@ const pagesToCapture = [
   { name: 'ui_dungeon', url: 'http://localhost:3000/?page=dungeon', desc: 'Bí Cảnh Huyễn Cảnh & Thượng Cổ Cấm Địa' },
   { name: 'ui_travel', url: 'http://localhost:3000/?page=travel', desc: 'Ngao Du Bát Hoang 2D Map' },
   { name: 'ui_alchemy', url: 'http://localhost:3000/?page=alchemy', desc: 'Lò Tạo Hóa & Luyện Đan Đúc Khí' },
+  { name: 'ui_housing', url: 'http://localhost:3000/?page=housing', desc: 'Động Phủ Tu Tiên & Dược Viên' },
 ];
 
 async function capture() {
@@ -92,6 +93,33 @@ async function capture() {
         console.log(`Saved screenshot to: ${enhPath}`);
       } catch (e) {
         console.log('Could not capture enhance tab:', e.message);
+      }
+    }
+
+    // If housing, also click "Dược Viên" and "Hộ Phủ Trận Pháp" tabs and capture
+    if (item.name === 'ui_housing') {
+      try {
+        await page.evaluate(() => {
+          const btn = Array.from(document.querySelectorAll('#housingTabsNav button, .tab-btn'))
+            .find(b => b.textContent.toLowerCase().includes('dược viên'));
+          if (btn) btn.click();
+        });
+        await new Promise(r => setTimeout(r, 1200));
+        const gardenPath = path.join(artifactDir, 'ui_housing_garden.png');
+        await page.screenshot({ path: gardenPath, fullPage: false });
+        console.log(`Saved screenshot to: ${gardenPath}`);
+
+        await page.evaluate(() => {
+          const btn = Array.from(document.querySelectorAll('#housingTabsNav button, .tab-btn'))
+            .find(b => b.textContent.toLowerCase().includes('trận pháp'));
+          if (btn) btn.click();
+        });
+        await new Promise(r => setTimeout(r, 1200));
+        const formPath = path.join(artifactDir, 'ui_housing_formations.png');
+        await page.screenshot({ path: formPath, fullPage: false });
+        console.log(`Saved screenshot to: ${formPath}`);
+      } catch (e) {
+        console.log('Could not capture housing subtabs:', e.message);
       }
     }
   }

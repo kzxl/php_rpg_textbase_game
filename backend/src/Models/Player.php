@@ -890,19 +890,36 @@ class Player
         $stats = $this->getFinalStats();
         $changed = false;
 
-        // HP Regen — Base 0.5%/10s, Tọa Thiền doubles to 1%/10s
+        // Housing passive bonuses
+        $housingHpBonus = 0;
+        $housingEnergyBonus = 0;
+        $housingStaminaBonus = 0;
+        try {
+            if (!empty($this->id)) {
+                $hService = new \App\Features\Housing\HousingService();
+                $hData = $hService->getHousingDetails($this->id);
+                $hBonuses = $hData['passiveBonuses'] ?? [];
+                $housingHpBonus = (int)($hBonuses['hpRegenBonus'] ?? 0);
+                $housingEnergyBonus = (int)($hBonuses['energyRegenBonus'] ?? 0);
+                $housingStaminaBonus = (int)($hBonuses['staminaMaxBonus'] ?? 0);
+            }
+        } catch (\Throwable) {
+            // Gracefully ignore if housing db is unreachable
+        }
+
+        // HP Regen — Base 0.5%/10s, Tọa Thiền doubles to 1%/10s + Housing passive
         if ($this->currentHp < $this->maxHp) {
             $hasMeditation = in_array('toa_thien', array_column($this->skills, 'id'));
             $regenRate = $hasMeditation ? 0.01 : 0.005; // 1% vs 0.5%
-            $healPerTick = max(1, (int) round($this->maxHp * $regenRate));
+            $healPerTick = max(1, (int) round($this->maxHp * $regenRate)) + $housingHpBonus;
             $this->currentHp = min($this->maxHp, $this->currentHp + $healPerTick * $ticks);
             $changed = true;
         }
 
-        // Energy Regen (tính theo Linh Lực khả dụng sau khi trừ bảo lưu)
+        // Energy Regen (tính theo Linh Lực khả dụng sau khi trừ bảo lưu) + Tụ Linh Trận bonus
         $usableEnergy = $this->getUsableEnergy();
         if ($this->currentEnergy < $usableEnergy) {
-            $energyRegenStat = $stats['energyRegen'] ?? 5; 
+            $energyRegenStat = ($stats['energyRegen'] ?? 5) + $housingEnergyBonus; 
             $this->currentEnergy = min($usableEnergy, $this->currentEnergy + $energyRegenStat * $ticks);
             $changed = true;
         } elseif ($this->currentEnergy > $usableEnergy) {
@@ -910,10 +927,11 @@ class Player
             $changed = true;
         }
 
-        // Stamina Regen
-        if ($this->currentStamina < $this->maxStamina) {
+        // Stamina Regen + Thủ Linh Trận max stamina bonus
+        $effectiveMaxStamina = $this->maxStamina + $housingStaminaBonus;
+        if ($this->currentStamina < $effectiveMaxStamina) {
             $staminaRegenStat = $stats['staminaRegen'] ?? 2;
-            $this->currentStamina = min($this->maxStamina, $this->currentStamina + $staminaRegenStat * $ticks);
+            $this->currentStamina = min($effectiveMaxStamina, $this->currentStamina + $staminaRegenStat * $ticks);
             $changed = true;
         }
 
