@@ -75,6 +75,33 @@ async function capture() {
       }
     }
 
+    // If stats, also click "Cảnh Giới & Đột Phá" and "Cơ Chế & Căn Cốt" tabs and capture
+    if (item.name === 'ui_stats') {
+      try {
+        await page.evaluate(() => {
+          const btn = Array.from(document.querySelectorAll('#statsTabsNav button, .tab-btn'))
+            .find(b => b.textContent.toLowerCase().includes('cảnh giới'));
+          if (btn) btn.click();
+        });
+        await new Promise(r => setTimeout(r, 1200));
+        const realmPath = path.join(artifactDir, 'ui_stats_realm.png');
+        await page.screenshot({ path: realmPath, fullPage: false });
+        console.log(`Saved screenshot to: ${realmPath}`);
+
+        await page.evaluate(() => {
+          const btn = Array.from(document.querySelectorAll('#statsTabsNav button, .tab-btn'))
+            .find(b => b.textContent.toLowerCase().includes('cơ chế'));
+          if (btn) btn.click();
+        });
+        await new Promise(r => setTimeout(r, 1200));
+        const mechPath = path.join(artifactDir, 'ui_stats_mechanics.png');
+        await page.screenshot({ path: mechPath, fullPage: false });
+        console.log(`Saved screenshot to: ${mechPath}`);
+      } catch (e) {
+        console.log('Could not capture stats subtabs:', e.message);
+      }
+    }
+
     // If alchemy, also click "Cường Hóa" tab and capture
     if (item.name === 'ui_alchemy') {
       try {
