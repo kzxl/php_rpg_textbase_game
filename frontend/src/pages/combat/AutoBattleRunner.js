@@ -103,6 +103,22 @@ export class AutoBattleRunner extends Component {
 
           const isWin = cr.outcome === 'win'
           if (isWin) {
+            if (cr.pendingLoot) {
+              const nextWins = this.state.victoryCount + 1
+              const nextXp = this.state.totalXp + (cr.rewards?.xp || 0)
+              const nextGold = this.state.totalGold + (cr.rewards?.gold || 0)
+              this.setState({
+                victoryCount: nextWins,
+                totalXp: nextXp,
+                totalGold: nextGold,
+                statusMessage: `⚠️ Càn Khôn Túi đã đầy! Tự động dừng rà soát để người chơi xử lý chiến lợi phẩm [${cr.pendingLoot.name || 'Pháp bảo'}].`,
+                statusIcon: '⚠️',
+                statusClass: 'text-orange',
+                isRunning: false,
+              })
+              break
+            }
+
             const nextWins = this.state.victoryCount + 1
             const nextXp = this.state.totalXp + (cr.rewards?.xp || 0)
             const nextGold = this.state.totalGold + (cr.rewards?.gold || 0)
@@ -126,6 +142,19 @@ export class AutoBattleRunner extends Component {
         } else if (dUrl.event && dUrl.event.type === 'monster_ambush' && dUrl.event.combatResult) {
           const cr = dUrl.event.combatResult
           if (cr.outcome === 'win') {
+            if (cr.pendingLoot) {
+              this.setState({
+                victoryCount: this.state.victoryCount + 1,
+                totalXp: this.state.totalXp + (cr.rewards?.xp || 0),
+                totalGold: this.state.totalGold + (cr.rewards?.gold || 0),
+                statusMessage: '⚠️ Càn Khôn Túi đã đầy! Tự động dừng rà soát để xử lý chiến lợi phẩm rơi.',
+                statusIcon: '⚠️',
+                statusClass: 'text-orange',
+                isRunning: false,
+              })
+              break
+            }
+
             this.setState({
               victoryCount: this.state.victoryCount + 1,
               totalXp: this.state.totalXp + (cr.rewards?.xp || 0),

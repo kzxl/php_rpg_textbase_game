@@ -494,15 +494,31 @@ return function ($app) {
                     if (!empty($manuals)) {
                         $chosen = $manuals[array_rand($manuals)];
                         $item = $itemSys->createItem($chosen['id']);
-                        $player->inventory[] = $item;
-                        $eventResult = ['type' => 'item', 'message' => "Tuyệt vời! Tìm được một cuốn yếu quyết phủ bụi: {$item->name} ({$rarity}). Vui lòng xem ở Túi Đồ.", 'itemId' => $item->id];
                     }
                 }
 
                 if (!$item) {
                     $item = $itemSys->generateRandomItem($rarity);
+                }
+
+                $maxInv = $player->getMaxInventorySize();
+                $curInv = count($player->inventory);
+                if ($curInv >= $maxInv) {
+                    $player->pendingLoot = $item->toArray();
+                    $eventResult = [
+                        'type' => 'item_pending',
+                        'message' => "Khám phá thấy [{$item->name}] ({$rarity}), nhưng Càn Khôn Túi đã đầy ({$curInv}/{$maxInv})! Món đồ đang rơi trên mặt đất.",
+                        'itemId' => $item->id,
+                        'pendingLoot' => $item->toArray(),
+                        'isInventoryFull' => true
+                    ];
+                } else {
                     $player->inventory[] = $item;
-                    $eventResult = ['type' => 'item', 'message' => "Khám phá bí địa thấy một pháp bảo lấp lánh: {$item->name} ({$rarity}).", 'itemId' => $item->id];
+                    $eventResult = [
+                        'type' => 'item',
+                        'message' => "Khám phá bí địa thu được pháp bảo: {$item->name} ({$rarity}). Đã cất vào Càn Khôn Túi.",
+                        'itemId' => $item->id
+                    ];
                 }
 
             } elseif ($type === 'npc') {

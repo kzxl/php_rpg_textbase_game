@@ -94,6 +94,85 @@ return function ($app) {
         return jsonResponse($response, $result);
     });
 
+    $app->post('/api/combat/resolve-loot', function (Request $request, Response $response) {
+        $body = (array)($request->getParsedBody() ?: json_decode((string)$request->getBody(), true) ?: []);
+        $playerId = $body['playerId'] ?? '';
+        $action = $body['action'] ?? ''; // 'swap', 'claim', 'discard_loot'
+        $discardItemId = $body['discardItemId'] ?? null;
+        $pendingItemData = $body['pendingItem'] ?? null;
+
+        $player = loadPlayer($playerId);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        if (!$pendingItemData && !empty($player->pendingLoot)) {
+            $pendingItemData = $player->pendingLoot;
+        }
+
+        if ($action === 'discard_loot') {
+            $player->pendingLoot = null;
+            savePlayer($playerId, $player);
+            return jsonResponse($response, [
+                'success' => true,
+                'message' => 'Đã bỏ qua chiến lợi phẩm rơi trên mặt đất.',
+                'player' => $player->toArray(),
+            ]);
+        }
+
+        if (!$pendingItemData || empty($pendingItemData['name'])) {
+            return jsonResponse($response, ['error' => 'Không tìm thấy chiến lợi phẩm cần xử lý!'], 400);
+        }
+
+        $newItem = \App\Models\Item::fromArray($pendingItemData);
+
+        if ($action === 'claim') {
+            if (count($player->inventory) >= $player->getMaxInventorySize()) {
+                return jsonResponse($response, ['error' => 'Túi đồ vẫn đầy, không thể thu nạp trực tiếp! Hãy hoán đổi hoặc bỏ bớt đồ.'], 400);
+            }
+            $player->inventory[] = $newItem;
+            $player->pendingLoot = null;
+            savePlayer($playerId, $player);
+            return jsonResponse($response, [
+                'success' => true,
+                'message' => "Đã thu nạp {$newItem->name} vào Càn Khôn Túi!",
+                'player' => $player->toArray(),
+            ]);
+        }
+
+        if ($action === 'swap') {
+            if (!$discardItemId) {
+                return jsonResponse($response, ['error' => 'Vui lòng chọn vật phẩm trong túi để vứt bỏ!'], 400);
+            }
+
+            $foundIdx = -1;
+            $discardedName = '';
+            foreach ($player->inventory as $idx => $invItem) {
+                if ($invItem->id === $discardItemId) {
+                    $foundIdx = $idx;
+                    $discardedName = $invItem->name;
+                    break;
+                }
+            }
+
+            if ($foundIdx === -1) {
+                return jsonResponse($response, ['error' => 'Vật phẩm chọn để vứt không tìm thấy trong túi!'], 404);
+            }
+
+            // Remove selected item and push new item
+            array_splice($player->inventory, $foundIdx, 1);
+            $player->inventory[] = $newItem;
+            $player->pendingLoot = null;
+
+            savePlayer($playerId, $player);
+            return jsonResponse($response, [
+                'success' => true,
+                'message' => "Đã vứt bỏ [{$discardedName}] và thu nạp [{$newItem->name}] thành công!",
+                'player' => $player->toArray(),
+            ]);
+        }
+
+        return jsonResponse($response, ['error' => 'Hành động không hợp lệ'], 400);
+    });
+
     $app->get('/api/data/monsters', function (Request $request, Response $response) {
         return jsonResponse($response, ['monsters' => (new MonsterSystem())->getAll()]);
     });

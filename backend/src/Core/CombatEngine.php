@@ -712,8 +712,6 @@ class CombatEngine
                         $item = $itemSys->generateRandomItem($dropRarity, null, max(1, $monster->level));
                     }
 
-                    $player->inventory[] = $item;
-
                     $rarityColors = [
                         'legendary' => '#f59e0b',
                         'epic'      => '#a855f7',
@@ -722,19 +720,34 @@ class CombatEngine
                         'common'    => '#94a3b8'
                     ];
                     $rColor = $rarityColors[$dropRarity] ?? '#94a3b8';
+
+                    $maxInv = $player->getMaxInventorySize();
+                    $curInv = count($player->inventory);
+                    $isFull = ($curInv >= $maxInv);
+
+                    if ($isFull) {
+                        $pendingItemArr = $item->toArray();
+                        $rewards['pendingLoot'] = $pendingItemArr;
+                        $player->pendingLoot = $pendingItemArr;
+                        $allLogs[] = "⚠️ [CÀN KHÔN TÚI ĐÃ ĐẦY ({$curInv}/{$maxInv})] Không thể tự động nhặt {$item->name}! Chiến lợi phẩm rơi trên mặt đất.";
+                    } else {
+                        $player->inventory[] = $item;
+                        if ($dropRarity === 'legendary' || $dropRarity === 'epic') {
+                            $allLogs[] = "🌟 [CHIẾN LỢI PHẨM CỰC PHẨM] Nhận được {$item->name} ({$dropRarity})!";
+                        } else {
+                            $allLogs[] = "⚔️ Nhận trang bị: {$item->name} ({$dropRarity})";
+                        }
+                    }
+
                     $lootItems[] = [
                         'name' => $item->name,
                         'type' => 'equipment',
                         'rarity' => $dropRarity,
                         'color' => $rColor,
-                        'icon' => ($dropRarity === 'legendary' || $dropRarity === 'epic') ? '🌟' : '⚔️'
+                        'icon' => ($dropRarity === 'legendary' || $dropRarity === 'epic') ? '🌟' : '⚔️',
+                        'isPending' => $isFull,
+                        'itemData' => $item->toArray()
                     ];
-
-                    if ($dropRarity === 'legendary' || $dropRarity === 'epic') {
-                        $allLogs[] = "🌟 [CHIẾN LỢI PHẨM CỰC PHẨM] Nhận được {$item->name} ({$dropRarity})!";
-                    } else {
-                        $allLogs[] = "⚔️ Nhận trang bị: {$item->name} ({$dropRarity})";
-                    }
                 }
 
                 // 4. Medicine Drops (Hồi Huyết & Đan Dược Thăng Cấp)
@@ -834,6 +847,8 @@ class CombatEngine
             'glitchEvents' => $this->glitchEvents,
             'glitchInsight' => $player->glitchInsight,
             'activeStance' => $player->activeStance,
+            'pendingLoot' => $rewards['pendingLoot'] ?? $player->pendingLoot ?? null,
+            'isInventoryFull' => count($player->inventory) >= $player->getMaxInventorySize(),
         ];
     }
 

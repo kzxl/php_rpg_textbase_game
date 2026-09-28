@@ -57,6 +57,7 @@ const ctx = {
   renderGame,
   updateSidebar,
 }
+window.__gameCtx = ctx;
 
 // ===== RENDER =====
 async function render() {

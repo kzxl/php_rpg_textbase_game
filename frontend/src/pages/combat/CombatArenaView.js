@@ -1,14 +1,17 @@
 import { Component } from '../../core/Component.js'
 import { OUTCOME_MAP, getStance, spawnFloatingDamage, renderCombatLogLines } from './constants.js'
+import { fmtAffix } from '../helpers.js'
 
 /**
  * CombatArenaView Component: 2D Visual Turn-Based Arena with Fighter Cards, HP bars & Loot panel.
  */
 export class CombatArenaView extends Component {
   template() {
-    const { combatData = {}, player = {} } = this.props
+    const { combatData = {}, player = {}, ctx = null } = this.props
     const r = combatData
     const m = r.monster || {}
+    const p = ctx?.state?.player || player
+    const pendingItem = r.pendingLoot || p.pendingLoot
 
     const pHp = Math.max(0, ((player.currentHp || 0) / (player.maxHp || 1)) * 100)
     const mHp = Math.max(0, ((m.currentHp || 0) / (m.maxHp || 1)) * 100)
@@ -89,12 +92,95 @@ export class CombatArenaView extends Component {
                     <div style="font-weight: 700; font-size: 13px; color: ${item.color || 'var(--text-bright)'}; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">
                       ${item.name} ${item.quantity > 1 ? `<span style="opacity:0.8">x${item.quantity}</span>` : ''}
                     </div>
-                    <div style="font-size: 10px; opacity: 0.6; text-transform: uppercase;">
-                      ${item.rarity || item.type}
+                    <div style="font-size: 10px; opacity: 0.8; text-transform: uppercase;">
+                      ${item.isPending ? '<span style="color:#f87171; font-weight:700">⚠️ Rơi xuống đất (Túi đầy)</span>' : (item.rarity || item.type)}
                     </div>
                   </div>
                 </div>
               `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- PENDING LOOT DECISION CARD (Khi túi đồ đầy) -->
+        ${pendingItem ? `
+          <div class="pending-loot-panel" style="background: rgba(30, 27, 75, 0.45); border-top: 1px solid rgba(239, 68, 68, 0.4); border-bottom: 1px solid rgba(239, 68, 68, 0.4); padding: 14px 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px">
+              <div style="display:flex; align-items:center; gap:8px">
+                <span style="font-size:22px">⚠️</span>
+                <div>
+                  <div style="font-weight:700; color:#f87171; font-size:13.5px">
+                    CÀN KHÔN TÚI ĐÃ ĐẦY (${(p.inventory || []).length}/${p.maxInventorySize || 20})!
+                  </div>
+                  <div style="font-size:11px; color:var(--text-dim)">
+                    Pháp bảo rơi trên đất. Bạn có thể hoán đổi với một món đồ trong túi hoặc bỏ qua.
+                  </div>
+                </div>
+              </div>
+              <span class="badge" style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.3); font-size:10.5px">
+                Cần Xử Lý
+              </span>
+            </div>
+
+            <!-- Pending Item Info -->
+            <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px">
+              <div style="display:flex; align-items:center; gap:10px">
+                <div style="font-size:28px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); border-radius:6px">
+                  ${pendingItem.category === 'manual' ? '📜' : (pendingItem.slot === 'weapon' ? '⚔️' : (pendingItem.slot === 'feet' ? '👢' : (pendingItem.slot === 'ring' ? '💍' : '🛡️')))}
+                </div>
+                <div>
+                  <div style="font-size:13.5px; font-weight:700" class="rarity-${pendingItem.rarity || 'common'}">
+                    ${pendingItem.name} <span style="font-size:10.5px; opacity:0.8">[${(pendingItem.rarity || 'common').toUpperCase()}]</span>
+                  </div>
+                  <div style="font-size:11px; color:var(--text-dim)">
+                    Cấp: Lv.${pendingItem.itemLevel || 1} · Loại: ${pendingItem.baseType || pendingItem.slot || 'Pháp bảo'}
+                  </div>
+                  ${(pendingItem.affixes || []).length > 0 ? `
+                    <div style="font-size:11px; color:#60a5fa; margin-top:2px">
+                      📜 ${pendingItem.affixes.map(a => fmtAffix(a)).join(' · ')}
+                    </div>
+                  ` : ''}
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap">
+                ${(p.inventory || []).length < (p.maxInventorySize || 20) ? `
+                  <button class="btn btn--green btn--sm btn-claim-pending">
+                    📥 Thu Nạp
+                  </button>
+                ` : ''}
+                <button class="btn btn--gold btn--sm btn-toggle-swap">
+                  🔄 Bỏ Đồ Trong Túi Để Chứa
+                </button>
+                <button class="btn btn--danger btn--sm btn-discard-loot">
+                  🚪 Bỏ Qua Món Này
+                </button>
+              </div>
+            </div>
+
+            <!-- Expandable Inventory Swap Picker -->
+            <div id="swapItemPicker" style="display:none; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.12); border-radius:8px; padding:12px; margin-top:8px">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
+                <span style="font-size:11.5px; font-weight:700; color:var(--gold, #facc15)">
+                  📦 Nhấp chọn món đồ trong túi bạn muốn vứt bỏ:
+                </span>
+                <span style="font-size:10.5px; color:var(--text-dim)">${(p.inventory || []).length} món trong túi</span>
+              </div>
+              <div style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; padding-right:4px">
+                ${(p.inventory || []).map((invItem) => `
+                  <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:6px 10px; font-size:11.5px">
+                    <div>
+                      <span class="rarity-${invItem.rarity || 'common'}" style="font-weight:600">${invItem.name}</span>
+                      <span style="font-size:10px; opacity:0.5; margin-left:6px">[Lv.${invItem.itemLevel || 1} ${(invItem.rarity || 'common').toUpperCase()}]</span>
+                      ${(invItem.affixes || []).length > 0 ? `<span style="font-size:10px; color:#60a5fa; margin-left:6px">(${invItem.affixes.length} phù văn)</span>` : ''}
+                    </div>
+                    <button class="btn btn--xs btn--danger btn-confirm-swap" data-swap-id="${invItem.id}" data-item-name="${invItem.name}" style="padding:2px 8px; font-size:10.5px">
+                      Vứt Món Này & Nhặt Mới
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
             </div>
           </div>
         ` : ''}
@@ -110,6 +196,90 @@ export class CombatArenaView extends Component {
         </div>
       </div>
     `
+  }
+
+  bindEvents() {
+    this.on('click', '.btn-toggle-swap', () => {
+      const picker = this.container.querySelector('#swapItemPicker')
+      if (picker) {
+        picker.style.display = picker.style.display === 'none' ? 'block' : 'none'
+      }
+    })
+
+    this.on('click', '.btn-confirm-swap', async (e, target) => {
+      const discardId = target.dataset.swapId
+      const itemName = target.dataset.itemName || 'vật phẩm này'
+      const { ctx, combatData = {} } = this.props
+      if (!ctx) return
+      const p = ctx.state?.player || this.props.player
+      const pendingItem = combatData.pendingLoot || p?.pendingLoot
+
+      if (!confirm(`Bạn có chắc chắn muốn vứt bỏ [${itemName}] để nhặt [${pendingItem?.name}] không?`)) {
+        return
+      }
+
+      target.disabled = true
+      target.textContent = '⏳...'
+
+      try {
+        const res = await ctx.api.resolveLoot(ctx.state.playerId, 'swap', discardId, pendingItem)
+        ctx.notify(res.message, 'success')
+        ctx.state.player = res.player
+        combatData.pendingLoot = null
+        if (ctx.updateSidebar) ctx.updateSidebar()
+        this.update()
+      } catch (err) {
+        ctx.notify(err.message || 'Lỗi hoán đổi vật phẩm', 'error')
+        target.disabled = false
+        target.textContent = 'Vứt Món Này & Nhặt Mới'
+      }
+    })
+
+    this.on('click', '.btn-discard-loot', async (e, target) => {
+      const { ctx, combatData = {} } = this.props
+      if (!ctx) return
+      if (!confirm('Bạn có chắc chắn muốn bỏ qua chiến lợi phẩm này không? Nó sẽ biến mất vĩnh viễn.')) {
+        return
+      }
+      target.disabled = true
+      target.textContent = '⏳...'
+
+      try {
+        const res = await ctx.api.resolveLoot(ctx.state.playerId, 'discard_loot')
+        ctx.notify(res.message, 'info')
+        ctx.state.player = res.player
+        combatData.pendingLoot = null
+        if (ctx.updateSidebar) ctx.updateSidebar()
+        this.update()
+      } catch (err) {
+        ctx.notify(err.message || 'Lỗi bỏ qua chiến lợi phẩm', 'error')
+        target.disabled = false
+        target.textContent = '🚪 Bỏ Qua Món Này'
+      }
+    })
+
+    this.on('click', '.btn-claim-pending', async (e, target) => {
+      const { ctx, combatData = {} } = this.props
+      if (!ctx) return
+      const p = ctx.state?.player || this.props.player
+      const pendingItem = combatData.pendingLoot || p?.pendingLoot
+
+      target.disabled = true
+      target.textContent = '⏳...'
+
+      try {
+        const res = await ctx.api.resolveLoot(ctx.state.playerId, 'claim', null, pendingItem)
+        ctx.notify(res.message, 'success')
+        ctx.state.player = res.player
+        combatData.pendingLoot = null
+        if (ctx.updateSidebar) ctx.updateSidebar()
+        this.update()
+      } catch (err) {
+        ctx.notify(err.message || 'Lỗi thu nạp vật phẩm', 'error')
+        target.disabled = false
+        target.textContent = '📥 Thu Nạp'
+      }
+    })
   }
 
   onMounted() {

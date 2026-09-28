@@ -141,6 +141,16 @@ class GameAPI {
       method: 'POST', body: JSON.stringify({ itemId })
     })
   }
+  discardItem(id, itemId) {
+    return this.request(`/player/${id}/discard-item`, {
+      method: 'POST', body: JSON.stringify({ itemId })
+    })
+  }
+  resolveLoot(playerId, action, discardItemId = null, pendingItem = null) {
+    return this.request('/combat/resolve-loot', {
+      method: 'POST', body: JSON.stringify({ playerId, action, discardItemId, pendingItem })
+    })
+  }
   useItem(id, itemId) {
     return this.request(`/player/${id}/use`, {
       method: 'POST', body: JSON.stringify({ itemId })

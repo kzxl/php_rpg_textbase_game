@@ -59,6 +59,38 @@ return function ($app) {
         }
     });
 
+    // === DISCARD ITEM (VỨT BỎ ĐỒ TRONG TÚI) ===
+    $app->post('/api/player/{id}/discard-item', function (Request $request, Response $response, array $args) {
+        $id = $args['id'];
+        $player = loadPlayer($id);
+        if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
+
+        $body = (array)($request->getParsedBody() ?: json_decode((string)$request->getBody(), true) ?: []);
+        $itemId = $body['itemId'] ?? '';
+
+        $invIndex = -1;
+        $itemName = '';
+        foreach ($player->inventory as $i => $inv) {
+            if ($inv->id === $itemId) {
+                $invIndex = $i;
+                $itemName = $inv->name;
+                break;
+            }
+        }
+        if ($invIndex === -1) {
+            return jsonResponse($response, ['error' => 'Không tìm thấy trang bị trong túi'], 404);
+        }
+
+        array_splice($player->inventory, $invIndex, 1);
+        savePlayer($id, $player);
+
+        return jsonResponse($response, [
+            'success' => true,
+            'message' => "Đã vứt bỏ [{$itemName}] khỏi Càn Khôn Túi.",
+            'player' => $player->toArray(),
+        ]);
+    });
+
     // === USE ITEM (MANUALS, CONSUMABLES) ===
     $app->post('/api/player/{id}/use', function (Request $request, Response $response, array $args) {
         $id = $args['id'];

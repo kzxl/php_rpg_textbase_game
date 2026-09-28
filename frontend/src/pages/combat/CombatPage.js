@@ -139,6 +139,19 @@ export class CombatPage extends Component {
             <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''} style="padding:8px 14px">🔍 Dò Tiếp</button>
           </div>
         `
+      } else if (ev.type === 'item_pending') {
+        html += `
+          <div style="font-size: 40px; margin-bottom: 8px;">⚠️</div>
+          <div class="text-lg text-bright bold mb-sm" style="font-size:15px; font-weight:700; color:#f87171; margin-bottom:8px">${ev.message}</div>
+          <div style="font-size:12px; color:var(--text-dim); margin-bottom:12px">
+            Pháp bảo rơi trên đất. Bạn có thể vào Càn Khôn Túi để dọn dẹp hoặc tiếp tục dò thám.
+          </div>
+          <div class="flex gap-2 justify-center mt-md" style="display:flex; justify-content:center; gap:8px; margin-top:12px">
+            <button class="btn btn--blue" id="btnGoInventory" style="padding:8px 14px">🎒 Xem Càn Khôn Túi</button>
+            <button class="btn btn--gold flex-1" id="btnExploreAgain" ${!hasEnoughStamina ? 'disabled' : ''} style="padding:8px 14px">🔍 Dò Tiếp</button>
+            <button class="btn btn--dark" id="btnExploreContinue" style="padding:8px 14px">Đóng</button>
+          </div>
+        `
       } else {
         html += `
           <div style="font-size: 40px; margin-bottom: 8px;">💎</div>
@@ -159,6 +172,15 @@ export class CombatPage extends Component {
         btnCombat.addEventListener('click', (e) => {
           rEl.innerHTML = ''
           this.handleCombat(e.target.dataset.mid, null)
+        })
+      }
+
+      const btnInv = rEl.querySelector('#btnGoInventory')
+      if (btnInv) {
+        btnInv.addEventListener('click', () => {
+          ctx.state.currentPage = 'inventory'
+          ctx.state.page = 'inventory'
+          ctx.renderGame()
         })
       }
 
@@ -232,6 +254,7 @@ export class CombatPage extends Component {
       }
 
       this._arenaView = new CombatArenaView({
+        ctx,
         combatData: res,
         player: res.player
       })

@@ -285,6 +285,11 @@ export function itemRow(item, showEquip, options = {}) {
     buttons.push(`<button class="btn btn--sm btn-forge-shortcut" data-forge-jump="${item.id}" title="Chuyển đến Lò Tạo Hóa để cường hóa">Cường Hóa</button>`);
   }
 
+  // Discard action for unequipped items
+  if (!options.isEquipped) {
+    buttons.push(`<button class="btn btn--sm btn-discard-item" data-discard-id="${item.id}" data-item-name="${item.name}" style="color:#ef4444; border-color:rgba(239,68,68,0.3)" title="Vứt bỏ vật phẩm này khỏi túi">Vứt Bỏ</button>`);
+  }
+
   const btnHtml = buttons.join(' ');
 
   const enhanceDesc = enh > 0 ? getEnhanceDescription(item) : '';
@@ -386,6 +391,26 @@ export function bindItemActions(container, ctx) {
         renderGame();
       } catch (err) {
         notify(err.message || 'Lỗi khi tháo trang bị', 'error');
+      }
+    });
+  });
+
+  // 3. Discard Item Button
+  container.querySelectorAll('[data-discard-id]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const itemId = btn.dataset.discardId;
+      const itemName = btn.dataset.itemName || 'vật phẩm này';
+      if (!confirm(`Bạn có chắc chắn muốn vứt bỏ [${itemName}] khỏi Càn Khôn Túi không?`)) {
+        return;
+      }
+      try {
+        const res = await api.discardItem(state.playerId, itemId);
+        state.player = res.player;
+        notify(res.message || `Đã vứt bỏ ${itemName}`, 'info');
+        renderGame();
+      } catch (err) {
+        notify(err.message || 'Lỗi khi vứt bỏ vật phẩm', 'error');
       }
     });
   });

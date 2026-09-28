@@ -160,6 +160,9 @@ class Player
     /** @var Item[] Inventory */
     public array $inventory = [];
 
+    /** @var ?array Pending loot waiting to be claimed or discarded when bag is full */
+    public ?array $pendingLoot = null;
+
     /** @var array Stash for stackable materials (id => amount) */
     public array $materials = [];
 
@@ -446,11 +449,19 @@ class Player
     public function getMaxInventorySize(): int
     {
         $cap = 20;
-        foreach (['ring1', 'ring2'] as $slot) {
+        foreach (['ring1', 'ring2', 'ring'] as $slot) {
             $r = $this->equipment[$slot] ?? null;
-            if ($r && (strpos($r->baseType, 'tru_vat') !== false || $r->id === 'tui_tru_vat')) {
-                // capacity is stored in the 1st mod's value
-                $cap += (int)($r->getModifiers()[0]->value ?? 10);
+            if ($r) {
+                if (strpos($r->baseType ?? '', 'tru_vat') !== false || ($r->id ?? '') === 'tui_tru_vat') {
+                    // capacity is stored in the 1st mod's value
+                    $cap += (int)($r->getModifiers()[0]->value ?? 10);
+                }
+                foreach ($r->affixes ?? [] as $affix) {
+                    $st = $affix['stat'] ?? '';
+                    if ($st === 'capacity' || $st === 'inventory_slots') {
+                        $cap += (int)($affix['value'] ?? 0);
+                    }
+                }
             }
         }
         return $cap;
@@ -1054,6 +1065,8 @@ class Player
             'allocatedStats' => $this->allocatedStats,
             'equipment' => array_map(fn($i) => $i->toArray(), $this->equipment),
             'inventory' => array_map(fn($i) => $i->toArray(), $this->inventory),
+            'maxInventorySize' => $this->getMaxInventorySize(),
+            'pendingLoot' => $this->pendingLoot,
             'materials' => $this->materials,
             'medicines' => $this->medicines,
             'skills' => array_values($this->skills),
@@ -1192,6 +1205,9 @@ class Player
                 }
             }
         }
+
+        // Restore pending loot
+        $player->pendingLoot = $data['pendingLoot'] ?? null;
 
         // Restore materials
         $player->materials = $data['materials'] ?? [];
