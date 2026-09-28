@@ -148,9 +148,15 @@ export class SkillsPage extends Component {
     }
 
     if (activePillar === 'combat') {
-      this._currentPillarView = new CombatPillarView({ ctx })
+      this._currentPillarView = new CombatPillarView({
+        ctx,
+        onSkillEquipped: () => this.updatePillarTabLabels()
+      })
     } else if (activePillar === 'auras') {
-      this._currentPillarView = new AurasPillarView({ ctx })
+      this._currentPillarView = new AurasPillarView({
+        ctx,
+        onAuraToggled: () => this.updatePillarTabLabels()
+      })
     } else if (activePillar === 'monsters') {
       this._currentPillarView = new MonstersPillarView({
         ctx,
@@ -180,6 +186,31 @@ export class SkillsPage extends Component {
 
     if (this._currentPillarView) {
       this._currentPillarView.mount(container)
+    }
+  }
+
+  updatePillarTabLabels() {
+    const { ctx } = this.props
+    const player = ctx?.state?.player || {}
+    const pSkills = player.skills || []
+    const allSkills = ctx?.state?.skills || []
+    const maxSlots = getMaxSkillSlots(player.realmTier || 1)
+
+    const learned = pSkills.map(ps => {
+      const id = typeof ps === 'string' ? ps : ps.id
+      const master = allSkills.find(s => s.id === id) || { id, type: 'active' }
+      return { ...master, equipped: ps.equipped || ps.isEquipped || false }
+    })
+    const activeSkills = learned.filter(s => s.type !== 'passive')
+    const equippedSkills = activeSkills.filter(s => s.equipped)
+
+    const combatSub = this.container?.querySelector('[data-pillar="combat"] .pillar-sub')
+    if (combatSub) {
+      combatSub.textContent = `${activeSkills.length} chiêu • ${equippedSkills.length}/${maxSlots} ô xuất`
+    }
+    const auraSub = this.container?.querySelector('[data-pillar="auras"] .pillar-sub')
+    if (auraSub) {
+      auraSub.textContent = `Khóa ${player.reservationPct || 0}% LL • ${(player.activeAuras || []).length} Hào quang`
     }
   }
 

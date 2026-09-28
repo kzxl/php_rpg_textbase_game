@@ -131,16 +131,17 @@ export class CombatPillarView extends Component {
 
   async toggleEquip(skillId, shouldEquip) {
     const { ctx } = this.props
-    if (!ctx) return
+    const pid = ctx?.state?.playerId || ctx?.state?.player?.id
+    if (!ctx || !pid) return
 
     try {
-      const res = await ctx.api.request(`/player/${ctx.state.playerId}/equip-skill`, {
-        method: 'POST',
-        body: JSON.stringify({ skillId, equipped: shouldEquip })
-      })
+      const res = await ctx.api.equipSkill(pid, skillId, shouldEquip)
       ctx.state.player = res.player
       ctx.notify(res.message, 'success')
       if (ctx.updateSidebar) ctx.updateSidebar()
+      if (this.props.onSkillEquipped) {
+        this.props.onSkillEquipped(res)
+      }
       this.update()
     } catch (err) {
       ctx.notify(err.message || 'Lỗi trang bị chiêu thức', 'error')

@@ -909,7 +909,7 @@ class Player
 
         // HP Regen — Base 0.5%/10s, Tọa Thiền doubles to 1%/10s + Housing passive
         if ($this->currentHp < $this->maxHp) {
-            $hasMeditation = in_array('toa_thien', array_column($this->skills, 'id'));
+            $hasMeditation = in_array('toa_thien', $this->activeAuras, true) || in_array('toa_thien', array_column($this->skills, 'id'));
             $regenRate = $hasMeditation ? 0.01 : 0.005; // 1% vs 0.5%
             $healPerTick = max(1, (int) round($this->maxHp * $regenRate)) + $housingHpBonus;
             $this->currentHp = min($this->maxHp, $this->currentHp + $healPerTick * $ticks);

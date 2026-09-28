@@ -50,9 +50,9 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        $body = $request->getParsedBody();
+        $body = json_decode($request->getBody()->getContents(), true) ?: $request->getParsedBody() ?: [];
         $skillId = $body['skillId'] ?? '';
-        $equip = (bool)($body['equip'] ?? true);
+        $equip = isset($body['equip']) ? (bool)$body['equip'] : (isset($body['equipped']) ? (bool)$body['equipped'] : true);
 
         $skillSystem = new SkillSystem();
         $allSkills = $skillSystem->getAll();
@@ -163,12 +163,12 @@ return function ($app) {
     });
 
     // Bật / Tắt Tâm Pháp Hào Quang chiếm dụng Linh Lực (Mana Reservation)
-    $app->post('/api/player/{id}/skills/toggle-aura', function (Request $request, Response $response, array $args) {
+    $auraToggleHandler = function (Request $request, Response $response, array $args) {
         $id = $args['id'];
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        $body = json_decode($request->getBody()->getContents(), true) ?: $request->getParsedBody();
+        $body = json_decode($request->getBody()->getContents(), true) ?: $request->getParsedBody() ?: [];
         $auraId = $body['auraId'] ?? '';
 
         if (!isset(\App\Models\Player::AURA_CONFIGS[$auraId])) {
@@ -195,7 +195,11 @@ return function ($app) {
             $msg = "Đã kích hoạt hào quang [{$auraConfig['name']}], khóa {$auraConfig['reservationPct']}% Linh Lực bảo lưu!";
         }
 
+        // Tái tính toán toàn bộ chỉ số gia trì từ hào quang (defense, maxHp, speed, dexterity, strength, etc.)
+        $player->recalcDerived();
+
         $player->currentEnergy = min($player->currentEnergy, $player->getUsableEnergy());
+        $player->currentHp = min($player->currentHp, $player->maxHp);
         savePlayer($id, $player);
 
         return jsonResponse($response, [
@@ -206,7 +210,10 @@ return function ($app) {
             'usableEnergy' => $player->getUsableEnergy(),
             'player' => $player->toArray()
         ]);
-    });
+    };
+
+    $app->post('/api/player/{id}/skills/toggle-aura', $auraToggleHandler);
+    $app->post('/api/player/{id}/toggle-aura', $auraToggleHandler);
 
     $app->get('/api/data/skills', function (Request $request, Response $response) {
         return jsonResponse($response, ['skills' => (new SkillSystem())->getAll()]);

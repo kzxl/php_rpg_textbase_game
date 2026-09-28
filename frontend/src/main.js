@@ -828,7 +828,7 @@ function updateSidebar() {
           <span>Khí Huyết</span>
           <span>
             ${currentHp}/${maxHp}
-            ${currentHp < maxHp ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">${p.skills?.some(s => s.id === 'toa_thien') ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
+            ${currentHp < maxHp ? `<span style="font-size:9px; color:var(--text-dim); margin-left:3px;">${(p.activeAuras?.includes('toa_thien') || p.skills?.some(s => s.id === 'toa_thien')) ? '+1%/10s' : '+0.5%/10s'}</span>` : ''}
           </span>
         </div>
         <div class="bar-track"><div class="bar-fill hp" style="width:${hpPct}%" data-low="${hpPct < 30}"></div></div>

@@ -2,6 +2,17 @@ import { Component } from '../../core/Component.js'
 import { AURA_CONFIGS } from './constants.js'
 import { SkillCard } from './SkillCard.js'
 
+const STAT_NAMES = {
+  defense: 'Phòng Ngự',
+  maxHp: 'Khí Huyết',
+  speed: 'Tốc Độ',
+  dexterity: 'Thân Pháp',
+  strength: 'Lực Đạo',
+  critChance: '% Bạo Kích',
+  hpRegen: 'Hồi Máu/10s',
+  staminaRegen: 'Hồi Thể Lực/10s'
+}
+
 /**
  * AurasPillarView Component: Manages Passive Mind Methods & Mana Reservation Auras.
  */
@@ -80,28 +91,28 @@ export class AurasPillarView extends Component {
               const wouldExceed = !isActive && (reservationPct + aura.reservationPct > 85)
 
               return `
-                <div class="skill-card ${isActive ? 'equipped' : ''}" style="background:var(--bg-card, #1a1e29); border:1px solid ${isActive ? 'rgba(234, 179, 8, 0.6)' : 'rgba(255,255,255,0.08)'}; border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; ${isActive ? 'box-shadow: 0 0 12px rgba(234, 179, 8, 0.15);' : ''}">
+                <div class="skill-card ${isActive ? 'equipped' : ''}" style="background:var(--bg-card, #161a23); border:1px solid ${isActive ? 'rgba(234, 179, 8, 0.5)' : 'rgba(255,255,255,0.08)'}; border-radius:6px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; ${isActive ? 'box-shadow: 0 0 10px rgba(234, 179, 8, 0.12);' : ''}">
                   <div>
-                    <div class="skill-card-header" style="display:flex; justify-content:space-between; align-items:flex-start">
+                    <div class="skill-card-header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px">
                       <div>
-                        <div class="skill-card-name" style="font-size: 14px; font-weight:700; color:var(--text-bright); display: flex; align-items: center; gap: 6px;">
+                        <div class="skill-card-name" style="font-size: 13px; font-weight:700; color:var(--text-bright); display: flex; align-items: center; gap: 6px;">
                           <span>${aura.icon}</span>
                           <span>${aura.name}</span>
                         </div>
-                        <div class="skill-card-tier" style="color: #f59e0b; font-size:11px">Khóa ${aura.reservationPct}% Linh Lực (${Math.floor((player.maxEnergy || 100) * (aura.reservationPct / 100))} LL)</div>
+                        <div class="skill-card-tier" style="color: #f59e0b; font-size:11px; margin-top:2px">Khóa ${aura.reservationPct}% Linh Lực (${Math.floor((player.maxEnergy || 100) * (aura.reservationPct / 100))} LL)</div>
                       </div>
                       <div class="skill-card-action">
-                        <button class="btn btn--sm ${isActive ? 'btn--gold' : 'btn--outline'} btn-toggle-aura" data-aura="${aura.id}" ${wouldExceed ? 'disabled title="Vượt quá 85% Linh Lực khóa tối đa!"' : ''} style="padding:4px 10px; font-size:11px">
-                          ${isActive ? '✅ Đang Duy Trì' : '🔘 Bật Hào Quang'}
+                        <button class="btn btn--sm ${isActive ? 'btn--gold' : 'btn--outline'} btn-toggle-aura" data-aura="${aura.id}" ${wouldExceed ? 'disabled title="Vượt quá 85% Linh Lực khóa tối đa!"' : ''} style="padding:3px 10px; font-size:11px; min-width:85px">
+                          ${isActive ? 'Đang Duy Trì' : 'Kích Hoạt'}
                         </button>
                       </div>
                     </div>
-                    <div class="skill-card-desc" style="margin-top: 6px; font-size:12px; color:var(--text-dim); line-height:1.4">${aura.desc}</div>
+                    <div class="skill-card-desc" style="margin-top: 6px; font-size:11.5px; color:var(--text-dim); line-height:1.4">${aura.desc}</div>
                   </div>
                   <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
                     ${Object.entries(aura.statBonuses || {}).map(([stat, val]) => `
-                      <span class="req-tag" style="background: rgba(234, 179, 8, 0.12); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.2); padding:2px 6px; border-radius:4px; font-size:11px">
-                        +${val} ${stat}
+                      <span class="req-tag" style="background: rgba(234, 179, 8, 0.08); color: #fde047; border: 1px solid rgba(234, 179, 8, 0.2); padding:2px 6px; border-radius:3px; font-size:10.5px">
+                        +${val} ${STAT_NAMES[stat] || stat}
                       </span>
                     `).join('')}
                   </div>
@@ -175,21 +186,29 @@ export class AurasPillarView extends Component {
 
   bindEvents() {
     this.on('click', '.btn-toggle-aura', async (e, target) => {
+      if (target.disabled) return
       const auraId = target.dataset.aura
       const { ctx } = this.props
-      if (!ctx || !auraId) return
+      const pid = ctx?.state?.playerId || ctx?.state?.player?.id
+      if (!ctx || !pid || !auraId) return
+
+      const prevText = target.textContent
+      target.disabled = true
+      target.textContent = 'Đang xử lý...'
 
       try {
-        const res = await ctx.api.request(`/player/${ctx.state.playerId}/toggle-aura`, {
-          method: 'POST',
-          body: JSON.stringify({ auraId })
-        })
+        const res = await ctx.api.toggleAura(pid, auraId)
         ctx.state.player = res.player
         ctx.notify(res.message, 'success')
         if (ctx.updateSidebar) ctx.updateSidebar()
+        if (this.props.onAuraToggled) {
+          this.props.onAuraToggled(res)
+        }
         this.update()
       } catch (err) {
         ctx.notify(err.message || 'Lỗi bật/tắt hào quang', 'error')
+        target.disabled = false
+        target.textContent = prevText
       }
     })
   }
