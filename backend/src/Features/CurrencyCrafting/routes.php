@@ -43,7 +43,7 @@ return function ($app) {
         $player = loadPlayer($id);
         if (!$player) return jsonResponse($response, ['error' => 'Player not found'], 404);
 
-        $body = $request->getParsedBody();
+        $body = json_decode($request->getBody()->getContents(), true) ?: $request->getParsedBody() ?: [];
         $currencyId = $body['currencyId'] ?? '';
         $itemId = $body['itemId'] ?? '';
         $lockAffixIndex = isset($body['lockAffixIndex']) ? (int)$body['lockAffixIndex'] : -1;
@@ -74,45 +74,47 @@ return function ($app) {
         $action = $currency['action'];
         $currentAffixes = $targetItem->getAffixes();
         $message = '';
+        $ilvl = max(1, $targetItem->getItemLevel());
 
         switch ($action) {
             case 'reroll':
-                $newAffixes = $itemSystem->generateAffixes($targetItem->getRarity(), $targetItem->getSlot());
+                $newAffixes = $itemSystem->generateAffixes($targetItem->getRarity(), $targetItem->getSlot(), $ilvl);
                 $targetItem->setAffixes($newAffixes);
-                $message = "🔄 Đã reroll toàn bộ affix!";
+                $message = "🔄 Đã tẩy tủy, khắc lại toàn bộ phù văn!";
                 break;
             case 'add_affix':
                 if (count($currentAffixes) >= 4) {
-                    return jsonResponse($response, ['error' => 'Đã có tối đa 4 affix!'], 400);
+                    return jsonResponse($response, ['error' => 'Trang bị đã đạt tối đa 4 dòng phù văn khắc ấn!'], 400);
                 }
-                $newAffix = $itemSystem->generateSingleAffix($targetItem->getSlot(), $currentAffixes);
+                $newAffix = $itemSystem->generateSingleAffix($targetItem->getSlot(), $currentAffixes, $ilvl);
                 $currentAffixes[] = $newAffix;
                 $targetItem->setAffixes($currentAffixes);
-                $affName = $newAffix['name'] ?? 'Unknown';
-                $message = "➕ Thêm affix [{$affName}]!";
+                $affName = $newAffix['name'] ?? 'Phù Văn';
+                $message = "➕ Đã khắc thêm phù văn [{$affName}]!";
                 break;
             case 'lock_reroll':
                 if ($lockAffixIndex < 0 || $lockAffixIndex >= count($currentAffixes)) {
-                    return jsonResponse($response, ['error' => 'Chỉ mục affix khóa không hợp lệ!'], 400);
+                    return jsonResponse($response, ['error' => 'Chỉ mục phù văn khóa không hợp lệ!'], 400);
                 }
                 $locked = $currentAffixes[$lockAffixIndex];
-                $newAffixes = $itemSystem->generateAffixes($targetItem->getRarity(), $targetItem->getSlot());
+                $newAffixes = $itemSystem->generateAffixes($targetItem->getRarity(), $targetItem->getSlot(), $ilvl);
                 if (!empty($newAffixes)) { $newAffixes[0] = $locked; } else { $newAffixes = [$locked]; }
                 $targetItem->setAffixes($newAffixes);
-                $lockName = $locked['name'] ?? 'Unknown';
-                $message = "🔒 Khóa [{$lockName}], reroll phần còn lại!";
+                $lockName = $locked['name'] ?? 'Phù Văn';
+                $message = "🔒 Đã khóa phù văn [{$lockName}], tẩy luyện các dòng còn lại!";
                 break;
             case 'upgrade_ilvl':
-                $ilvl = $targetItem->getItemLevel();
                 $targetItem->setItemLevel($ilvl + 1);
-                $message = "⬆️ Item level {$ilvl} → " . ($ilvl + 1) . "!";
+                $message = "⬆️ Đã thăng cấp trang bị: Lv.{$ilvl} → Lv." . ($ilvl + 1) . "!";
                 break;
         }
 
         $player->gold -= $currency['goldCost'];
+        $player->recalcDerived();
         savePlayer($id, $player);
 
         return jsonResponse($response, [
+            'success' => true,
             'message' => $message,
             'item' => $targetItem->toArray(),
             'player' => $player->toArray(),

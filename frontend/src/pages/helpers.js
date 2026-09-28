@@ -1,6 +1,82 @@
 /**
  * Shared helpers for page modules
  */
+export const STAT_NAMES_VI = {
+  strength: 'Lực Đạo (Công)',
+  defense: 'Hộ Thể (Thủ)',
+  speed: 'Thân Pháp (Tốc)',
+  dexterity: 'Mẫn Tiệp (Né/Xác)',
+  hp: 'Khí Huyết (HP)',
+  maxHp: 'Khí Huyết Tối Đa',
+  critRate: 'Tỷ Lệ Bạo Kích',
+  critMultiplier: 'Sát Thương Bạo Kích',
+  damageReduction: 'Giảm Sát Thương',
+  dodge: 'Né Tránh',
+  capacity: 'Không Gian Trữ Vật',
+};
+
+export const STAT_SHORT_VI = {
+  strength: 'Công',
+  defense: 'Thủ',
+  speed: 'Tốc',
+  dexterity: 'Thân Pháp',
+  hp: 'HP',
+  maxHp: 'HP',
+  critRate: 'Bạo Kích',
+  critMultiplier: 'ST Bạo',
+  damageReduction: 'Giảm Thương',
+  dodge: 'Né',
+  capacity: 'Trữ Vật',
+};
+
+export function getEnhanceDescription(item) {
+  const enh = parseInt(item.enhanceLevel, 10) || 0;
+  if (enh <= 0) return '';
+  const ilvl = parseInt(item.itemLevel, 10) || 1;
+  const ilvlScale = Math.max(1, Math.floor(ilvl / 3));
+
+  if (item.slot === 'weapon') {
+    const bonusStr = Math.max(4 * enh, Math.round(enh * 4 * ilvlScale));
+    return `+${bonusStr} Lực Đạo (Công)`;
+  }
+  if (item.slot === 'body' || item.slot === 'shield' || item.slot === 'head') {
+    const bonusDef = Math.max(3 * enh, Math.round(enh * 3 * ilvlScale));
+    const bonusHp = enh * 30 * ilvlScale;
+    return `+${bonusDef} Hộ Thể & +${bonusHp} Khí Huyết`;
+  }
+  if (item.slot === 'feet') {
+    const bonusSpd = Math.max(2 * enh, Math.round(enh * 3 * ilvlScale));
+    const bonusDex = Math.max(1 * enh, Math.round(bonusSpd * 0.6));
+    return `+${bonusSpd} Thân Pháp & +${bonusDex} Mẫn Tiệp`;
+  }
+  if (['ring', 'ring1', 'ring2', 'accessory'].includes(item.slot)) {
+    const bonus = Math.max(2 * enh, Math.round(enh * 2 * ilvlScale));
+    return `+${bonus} Lực Đạo & +${bonus} Mẫn Tiệp`;
+  }
+  return `Cấp Cường Hóa +${enh}`;
+}
+
+export function renderAffixBadges(affixes = []) {
+  if (!affixes || affixes.length === 0) {
+    return `<div style="font-size:11px; color:var(--text-dim); padding:4px 0;">Chưa có phù văn khắc ấn. Dùng Hỗn Chú Phù tại Lò Tạo Hóa để khắc ấn thuộc tính!</div>`;
+  }
+  return affixes.map((a, idx) => {
+    const tierBadge = a.tier ? `<span style="font-size:9.5px; background:rgba(234, 179, 8, 0.12); color:#facc15; border:1px solid rgba(234, 179, 8, 0.3); padding:1px 5px; border-radius:3px; font-weight:700">Tầng ${a.tier}</span>` : '';
+    const nameStr = `<span style="color:var(--gold, #facc15); font-weight:700; font-size:12px">${a.name ? `[${a.name}]` : `[Phù Văn ${idx + 1}]`}</span>`;
+    const statFormatted = fmtAffix(a, true);
+    return `
+      <div class="affix-line" style="display:flex; justify-content:space-between; align-items:center; gap:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:4px; padding:4px 10px; margin-bottom:4px; font-size:11.5px">
+        <div style="display:flex; align-items:center; gap:6px">
+          <span>📜</span>
+          ${nameStr}
+          ${tierBadge}
+        </div>
+        <span style="color:#60a5fa; font-weight:600">${statFormatted}</span>
+      </div>
+    `;
+  }).join('');
+}
+
 function getIconForSlot(slot, category) {
   if (category === 'manual') return '📜';
   if (slot === 'weapon') return '⚔️';
@@ -211,19 +287,22 @@ export function itemRow(item, showEquip, options = {}) {
 
   const btnHtml = buttons.join(' ');
 
+  const enhanceDesc = enh > 0 ? getEnhanceDescription(item) : '';
+
   return `
     <div class="list-item ${glowClass}" style="flex-direction:column; align-items:stretch; padding:10px">
       <!-- Header Row -->
       <div class="w-100 flex items-center justify-between pointer" style="gap:10px" onclick="const b = this.nextElementSibling; b.style.display = b.style.display === 'none' ? 'flex' : 'none'">
-        <div class="flex items-center gap-2" style="flex:1">
+        <div class="flex items-center gap-2" style="flex:1; flex-wrap:wrap">
           <span class="rarity-dot ${item.rarity}"></span>
-          <span class="item-name rarity-${item.rarity}" style="font-size:14px">${item.name}</span>
+          <span class="item-name rarity-${item.rarity}" style="font-size:14px; font-weight:600">${item.name}</span>
           ${enhBadge}
           ${headerDeltaBadge}
+          ${(item.affixes || []).length > 0 ? `<span class="badge" style="font-size:10px; background:rgba(96,165,250,0.12); color:#60a5fa; border:1px solid rgba(96,165,250,0.25); padding:1px 5px; border-radius:3px">📜 ${item.affixes.length} Phù Văn</span>` : ''}
         </div>
         <div class="text-sm text-dim flex gap-3 items-center">
-          ${mainStat ? `<span style="color:var(--text-light)">${mainStat}</span>` : ''}
-          ${subStat ? `<span style="color:var(--text-light)">${subStat}</span>` : ''}
+          ${mainStat ? `<span style="color:var(--text-light); font-weight:600">${mainStat}</span>` : ''}
+          ${subStat ? `<span style="color:var(--text-dim); font-size:11px">${subStat}</span>` : ''}
           <span style="font-size:10px; opacity:0.5; margin-left:8px">▼</span>
         </div>
       </div>
@@ -236,17 +315,36 @@ export function itemRow(item, showEquip, options = {}) {
           </div>
           <div class="item-details" style="flex:1">
             <div class="text-sm mb-2" style="color:var(--text-light); line-height:1.4"><strong>${item.name}</strong> ${enhBadge} là loại ${item.baseType}. ${desc}</div>
-            <div class="text-xs text-dim flex gap-4 mb-2" style="opacity:0.8">
+            <div class="text-xs text-dim flex gap-4 mb-2" style="opacity:0.8; flex-wrap:wrap">
               <div><strong>Cấp độ:</strong> Lv.${item.itemLevel || 1}</div>
-              <div><strong>Thuộc tính:</strong> <span class="rarity-${item.rarity}">${(item.rarity || 'common').toUpperCase()}</span></div>
+              <div><strong>Phẩm chất:</strong> <span class="rarity-${item.rarity}">${(item.rarity || 'common').toUpperCase()}</span></div>
               ${enh > 0 ? `<div><strong>Cường Hóa:</strong> <span class="badge-enhance tier-${tier} lvl-${enh}">+${enh}</span></div>` : ''}
-            </div>
-            <div class="text-xs mb-2">
-              ${affixStr || '<span class="text-dim">Không có dòng mài mòn nào.</span>'}
+              <div><strong>Khắc Ấn:</strong> <span style="color:#60a5fa">${(item.affixes || []).length}/4 dòng</span></div>
             </div>
             ${crafted}
           </div>
         </div>
+
+        <!-- PHÙ VĂN KHẮC ẤN PANEL -->
+        <div style="background:rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:8px 10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px">
+            <span style="font-weight:700; color:var(--gold, #facc15); font-size:11.5px; display:flex; align-items:center; gap:4px">
+              <span>📜 Phù Văn Khắc Ấn</span>
+              <span style="color:var(--text-dim); font-weight:normal; font-size:10.5px">(${(item.affixes || []).length}/4 dòng tối đa)</span>
+            </span>
+            ${(item.affixes || []).length < 4 && isEquipment ? `<span style="font-size:10px; color:#38bdf8;">+ Khắc thêm tại Lò Tạo Hóa</span>` : ''}
+          </div>
+          <div class="affixes-container">
+            ${renderAffixBadges(item.affixes)}
+          </div>
+        </div>
+
+        ${enh > 0 ? `
+          <div style="background:rgba(234,179,8,0.05); border:1px solid rgba(234,179,8,0.18); border-radius:6px; padding:6px 10px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center">
+            <span style="color:#fde047; font-weight:600">✨ Uy Lực Cường Hóa (+${enh}):</span>
+            <span style="color:var(--text-bright); font-weight:600">${enhanceDesc}</span>
+          </div>
+        ` : ''}
 
         ${compareHtml}
 
@@ -293,12 +391,11 @@ export function bindItemActions(container, ctx) {
   });
 }
 
-export function fmtAffix(a) {
-  const names = { strength:'STR', speed:'SPD', dexterity:'DEX', defense:'DEF', critMultiplier:'CRIT MUL' };
-  const n = names[a.stat] || a.stat;
-  const s = a.value >= 0 ? '+' : '';
-  if (a.type === 'flat') return `${s}${a.value} ${n}`;
-  if (a.type === 'increase') return `${s}${a.value}% ${n}`;
-  if (a.type === 'more') return `×${s}${a.value}% ${n}`;
-  return `${s}${a.value} ${n}`;
+export function fmtAffix(a, full = false) {
+  if (!a) return '';
+  const statName = (full ? STAT_NAMES_VI[a.stat] : STAT_SHORT_VI[a.stat]) || a.stat || '';
+  const s = (a.value || 0) >= 0 ? '+' : '';
+  const valStr = a.type === 'increase' ? `${s}${a.value}%` : (a.type === 'more' ? `×${s}${a.value}%` : `${s}${a.value}`);
+  const affixName = a.name ? `[${a.name}] ` : '';
+  return `${affixName}${valStr} ${statName}`;
 }

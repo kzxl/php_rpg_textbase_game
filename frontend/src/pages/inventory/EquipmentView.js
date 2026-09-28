@@ -1,5 +1,5 @@
 import { Component } from '../../core/Component.js'
-import { itemRow, getEnhanceTier, bindItemActions } from '../helpers.js'
+import { itemRow, getEnhanceTier, bindItemActions, STAT_SHORT_VI } from '../helpers.js'
 import { EQUIPMENT_SLOTS } from './constants.js'
 
 /**
@@ -18,7 +18,8 @@ export class EquipmentView extends Component {
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 14px">
           ${EQUIPMENT_SLOTS.map(s => {
-            const item = eq[s.key]
+            const item = eq[s.key] || (s.key === 'ring1' && !eq.ring1 ? eq.ring : null)
+            const actualSlot = (s.key === 'ring1' && !eq.ring1 && eq.ring) ? 'ring' : s.key
             const hasItem = item && item.id
             const rarityClass = hasItem ? `rarity-${item.rarity}` : ''
             const enh = hasItem ? (parseInt(item.enhanceLevel, 10) || 0) : 0
@@ -26,19 +27,27 @@ export class EquipmentView extends Component {
             const enhBadge = enh > 0 ? `<span class="badge-enhance tier-${tier} lvl-${enh}">+${enh}</span>` : ''
             const glowClass = tier > 0 ? `enhance-glow-tier${tier}` : ''
 
+            const affixList = hasItem ? (item.affixes || []) : []
+            const affixBadge = affixList.length > 0 
+              ? `<div style="font-size:9.5px;color:#60a5fa;font-weight:600;margin-top:2px">📜 ${affixList.length} Phù Văn</div>`
+              : ''
+            const affixTooltip = affixList.map(a => `${a.name ? `[${a.name}] ` : ''}+${a.value} ${(STAT_SHORT_VI[a.stat] || a.stat)}`).join('\n')
+            const tooltipAttr = hasItem ? `title="${item.name} (${item.rarity || 'common'})\nCường Hóa: +${enh}${affixTooltip ? '\n\n📜 Phù Văn:\n' + affixTooltip : ''}"` : ''
+
             return `
-              <div class="${glowClass}" style="background:${hasItem ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)'};border:1px solid ${hasItem ? (enh > 0 ? 'rgba(245,158,11,0.45)' : 'rgba(255,215,0,0.15)') : 'rgba(255,255,255,0.05)'};border-radius:8px;padding:10px;text-align:center;min-height:92px;display:flex;flex-direction:column;justify-content:space-between">
+              <div class="${glowClass}" ${tooltipAttr} style="background:${hasItem ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)'};border:1px solid ${hasItem ? (enh > 0 ? 'rgba(245,158,11,0.45)' : 'rgba(255,215,0,0.15)') : 'rgba(255,255,255,0.05)'};border-radius:8px;padding:10px;text-align:center;min-height:92px;display:flex;flex-direction:column;justify-content:space-between">
                 <div>
                   <div style="font-size:20px;margin-bottom:4px">${s.icon}</div>
                   <div style="font-size:10px;opacity:0.4;margin-bottom:2px">${s.name}</div>
                   ${hasItem
                     ? `<div style="font-size:11px;font-weight:600" class="${rarityClass}">${item.name} ${enhBadge}</div>
-                       <div style="font-size:9px;opacity:0.4">[${item.rarity}] Lv${item.itemLevel || '?'}</div>`
+                       <div style="font-size:9px;opacity:0.4">[${item.rarity || 'common'}] Lv${item.itemLevel || 1}</div>
+                       ${affixBadge}`
                     : `<div style="font-size:11px;opacity:0.2">— Trống —</div>`}
                 </div>
                 ${hasItem ? `
                   <div style="display:flex;gap:4px;justify-content:center;margin-top:6px">
-                    <button class="btn btn--xs btn-unequip" data-unequip-slot="${s.key}" title="Tháo trang bị">Tháo</button>
+                    <button class="btn btn--xs btn-unequip" data-unequip-slot="${actualSlot}" title="Tháo trang bị">Tháo</button>
                     <button class="btn btn--xs btn-forge-shortcut" data-forge-jump="${item.id}" title="Đến Lò Tạo Hóa để cường hóa">Rèn</button>
                   </div>
                 ` : ''}
@@ -47,7 +56,11 @@ export class EquipmentView extends Component {
         </div>
         ${equipList.length > 0 ? `
           <div style="padding:0 14px 10px;font-size:11px;color:var(--text-dim);border-top:1px solid rgba(255,255,255,0.05);padding-top:8px">Chi tiết pháp bảo trang bị:</div>
-          ${EQUIPMENT_SLOTS.filter(s => eq[s.key] && eq[s.key].id).map(s => itemRow(eq[s.key], false, { isEquipped: true, slotKey: s.key })).join('')}
+          ${EQUIPMENT_SLOTS.map(s => {
+            const item = eq[s.key] || (s.key === 'ring1' && !eq.ring1 ? eq.ring : null)
+            const actualSlot = (s.key === 'ring1' && !eq.ring1 && eq.ring) ? 'ring' : s.key
+            return item && item.id ? itemRow(item, false, { isEquipped: true, slotKey: actualSlot }) : ''
+          }).join('')}
         ` : ''}
       </div>
     `
